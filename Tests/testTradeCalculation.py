@@ -1,6 +1,7 @@
 import unittest
 
 from PyRoute.Calculation.TradeCalculation import TradeCalculation
+from PyRoute.TradeCodes import TradeCodes
 
 from PyRoute.AreaItems.Galaxy import Galaxy
 from PyRoute.AreaItems.Sector import Sector
@@ -168,6 +169,150 @@ class testTradeCalculation(unittest.TestCase):
             with self.subTest(msg="WTN " + str(wtn)):
                 act_dist = tradecalc._max_dist(wtn, wtn)
                 self.assertEqual(exp_dist, act_dist)
+
+    def test_max_range_equal_wtn_nothing_fancy(self):
+        parmlist = [(6, 0), (7, 2), (8, 9), (9, 29), (10, 99), (11, 299), (12, 999), (13, float('inf'))]
+        for wtn, expected in parmlist:
+            with self.subTest(wtn=wtn, expected=expected):
+                galaxy = Galaxy(0)
+                sector = Sector('# Core', '# 0, 0')
+                galaxy.sectors[sector.name] = sector
+
+                star1 = self.make_imperial_star1()
+                star1.wtn = wtn
+
+                star2 = self.make_imperial_star_2()
+                star2.wtn = wtn
+
+                self.assertEqual(2 * wtn, TradeCalculation.get_btn(star1, star2, 0))
+                tradecalc = TradeCalculation(galaxy)
+                actual = tradecalc.max_route_length(star1, star2)
+                self.assertEqual(expected, actual)
+
+    def test_max_range_double_wtn_nothing_fancy(self):
+        parmlist = [(6, 29), (7, 199), (8, 999), (9, float('inf')), (10, float('inf'))]
+
+        for wtn, expected in parmlist:
+            with self.subTest(wtn=wtn, expected=expected):
+                galaxy = Galaxy(0)
+                sector = Sector('# Core', '# 0, 0')
+                galaxy.sectors[sector.name] = sector
+
+                star1 = self.make_imperial_star1()
+                star1.wtn = wtn
+
+                star2 = self.make_imperial_star_2()
+                star2.wtn = 2 * wtn
+
+                self.assertEqual(2 * wtn + 1, TradeCalculation.get_btn(star1, star2, 0))
+                tradecalc = TradeCalculation(galaxy)
+                actual = tradecalc.max_route_length(star1, star2)
+                self.assertEqual(expected, actual)
+
+    def test_max_range_at_min_btn_cap(self):
+        parmlist = [(7, 1), (8, 2), (9, 5), (10, 9), (11, 19), (12, 29), (13, 59), (14, 99), (15, 199), (16, 299), (17, 599), (18, 999), (19, float('inf'))]
+
+        for wtn, expected in parmlist:
+            with self.subTest(wtn=wtn, expected=expected):
+                galaxy = Galaxy(0)
+                sector = Sector('# Core', '# 0, 0')
+                galaxy.sectors[sector.name] = sector
+
+                star1 = self.make_imperial_star1()
+                star1.wtn = 6
+
+                star2 = self.make_imperial_star_2()
+                star2.wtn = wtn
+
+                self.assertEqual(13, TradeCalculation.get_btn(star1, star2, 0))
+                tradecalc = TradeCalculation(galaxy)
+                actual = tradecalc.max_route_length(star1, star2)
+                self.assertEqual(expected, actual)
+
+    def test_equal_wtn_with_more_reasons_to_trade(self):
+        parmlist = [(6, 2), (7, 9), (8, 29), (9, 99), (10, 299), (11, 999), (12, float('inf')), (13, float('inf'))]
+        for wtn, expected in parmlist:
+            with self.subTest(wtn=wtn, expected=expected):
+                galaxy = Galaxy(0)
+                sector = Sector('# Core', '# 0, 0')
+                galaxy.sectors[sector.name] = sector
+
+                star1 = self.make_imperial_star1()
+                star1.wtn = wtn
+                star1.tradeCode = TradeCodes("Ag Ni")
+
+                star2 = self.make_imperial_star_2()
+                star2.wtn = wtn
+                star2.tradeCode = TradeCodes("In Na")
+
+                self.assertEqual(2 * wtn + 1, TradeCalculation.get_btn(star1, star2, 0))
+                tradecalc = TradeCalculation(galaxy)
+                actual = tradecalc.max_route_length(star1, star2)
+                self.assertEqual(expected, actual)
+                actual = tradecalc.max_route_length(star2, star1)
+                self.assertEqual(expected, actual)
+
+    def test_equal_wtn_with_one_side_wild(self):
+        parmlist = [(6, 0), (7, 0), (8, 2), (9, 9), (10, 29), (11, 99), (12, 299), (13, 999), (14, float('inf'))]
+        for wtn, expected in parmlist:
+            with self.subTest(wtn=wtn, expected=expected):
+                galaxy = Galaxy(0)
+                sector = Sector('# Core', '# 0, 0')
+                galaxy.sectors[sector.name] = sector
+
+                star1 = self.make_imperial_star1()
+                star1.wtn = wtn
+
+                star2 = self.make_imperial_star_2()
+                star2.wtn = wtn
+                star2.alg_code = "Wild"
+
+                self.assertEqual(2 * wtn - 2, TradeCalculation.get_btn(star1, star2, 0))
+                tradecalc = TradeCalculation(galaxy)
+                actual = tradecalc.max_route_length(star1, star2)
+                self.assertEqual(expected, actual)
+                actual = tradecalc.max_route_length(star2, star1)
+                self.assertEqual(expected, actual)
+
+    def test_equal_wtn_with_differing_allegiance(self):
+        parmlist = [(6, 0), (7, 1), (8, 5), (9, 19), (10, 59), (11, 199), (12, 599), (13, float('inf')), (14, float('inf'))]
+        for wtn, expected in parmlist:
+            with self.subTest(wtn=wtn, expected=expected):
+                galaxy = Galaxy(0)
+                sector = Sector('# Core', '# 0, 0')
+                galaxy.sectors[sector.name] = sector
+
+                star1 = self.make_imperial_star1()
+                star1.wtn = wtn
+
+                star2 = self.make_imperial_star_2()
+                star2.wtn = wtn
+                star2.alg_code = "So"
+
+                self.assertEqual(2 * wtn - 1, TradeCalculation.get_btn(star1, star2, 0))
+                tradecalc = TradeCalculation(galaxy)
+                actual = tradecalc.max_route_length(star1, star2)
+                self.assertEqual(expected, actual)
+                actual = tradecalc.max_route_length(star2, star1)
+                self.assertEqual(expected, actual)
+
+    @staticmethod
+    def make_imperial_star1():
+        star1 = Star()
+        star1.tradeCode = TradeCodes("")
+        star1.alg_code = "Im"
+        star1.position = "1009"
+        star1.set_location(10, 9)
+        return star1
+
+    @staticmethod
+    def make_imperial_star_2():
+        star2 = Star()
+        star2.tradeCode = TradeCodes("")
+        star2.alg_code = "Im"
+        star2.position = "1010"
+        star2.set_location(10, 10)
+        return star2
 
 
 if __name__ == '__main__':
