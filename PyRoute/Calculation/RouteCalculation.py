@@ -32,8 +32,8 @@ class RouteCalculation(object):
     # BTN modifier for range. If the hex distance between two worlds
     # or between two numbers in the jump range array, take jump modifier
     # to the right. E.g distance 4 would be a btn modifier of -3.
-    btn_jump_range = [1, 2, 5, 9, 19, 29, 59, 99, 199, 299]
-    btn_jump_mod = [0, -1, -2, -3, -4, -5, -6, -7, -8, -9, -10]
+    btn_jump_range = [1, 2, 5, 9, 19, 29, 59, 99, 199, 299, 599, 999, float('+inf')]
+    btn_jump_mod = [0, -1, -2, -3, -4, -5, -6, -7, -8, -9, -10, -11, -12]
 
     def __init__(self, galaxy):
         from PyRoute.AreaItems.Galaxy import Galaxy
@@ -285,3 +285,38 @@ class RouteCalculation(object):
 
     def cross_check_totals(self) -> None:
         pass
+
+    def max_route_length(self, star1, star2):
+        base_btn = RouteCalculation.get_btn(star1, star2, 0)
+        delta = base_btn - self.min_btn
+        if 0 > delta:
+            return 0
+        if delta > -1 * min(self.btn_jump_mod):
+            return float('inf')
+
+        index = self.btn_jump_mod.index(-delta)
+        num_range = len(self.btn_jump_range)
+        dist = self.btn_jump_range[index]
+        if base_btn == self.min_btn:
+            while RouteCalculation.get_btn(star1, star2, dist) == self.min_btn:
+                index += 1
+                if index >= num_range + 1:
+                    return float('inf')
+                elif index == num_range:
+                    dist = float('inf')
+                else:
+                    dist = self.btn_jump_range[index]
+
+            index -= 1
+            if index >= num_range:
+                return float('inf')
+            return self.btn_jump_range[index]
+
+        # break out from under BTN cap
+        while RouteCalculation.get_btn(star1, star2, dist) > self.min_btn:
+            index += 1
+            if index >= num_range:
+                return float('inf')
+            dist = self.btn_jump_range[index]
+
+        return dist
