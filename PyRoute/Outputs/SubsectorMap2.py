@@ -537,7 +537,6 @@ class GraphicSubsectorMap(GraphicMap):
 
         # pdf.set_font(def_font)
 
-
 if __name__ == '__main__':
     # route.set_logging('DEBUG')
     galaxy = Galaxy(15, 4, 8)
