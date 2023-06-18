@@ -219,7 +219,12 @@ class GraphicSubsectorMap(GraphicMap):
 
                 name = "{0:02d}{1:02d}".format(location[0], location[1])
                 point.y_plus(-self.ym + 1)
+<<<<<<< HEAD:PyRoute/Outputs/SubsectorMap2.py
                 size = self.get_text_size(self.hexFont, name)
+=======
+                # size = self.hexFont.getsize(name)
+                size = GraphicSubsectorMap._get_text_size(self.hexFont, name)
+>>>>>>> 837e51d7 (Cache more font-text-size lookups):PyRoute/SubsectorMap.py
                 pos = (point.x - size[0] / 2, point.y)
 
                 doc.text(pos, name, font=self.hexFont, fill=self.fillWhite)
@@ -324,7 +329,8 @@ class GraphicSubsectorMap(GraphicMap):
                         outline=color)
 
         # Write Port code
-        size = self.get_text_size(self.worldFont, star.port)
+        # size = self.worldFont.getsize(star.port)
+        size = GraphicSubsectorMap._get_text_size(self.worldFont, star.port)
         pos = (point.x - (size[0] / 2) + 1, point.y - (2 * size[1]) + 1)
         doc.text(pos, star.port, font=self.worldFont, fill=self.textFill)
 
@@ -395,7 +401,12 @@ class GraphicSubsectorMap(GraphicMap):
         return self._world_point(row_out, col_out)
 
     def print_base_char(self, baseCharacter, font, point, multiplier, doc, fill=GraphicMap.fillWhite):
+<<<<<<< HEAD:PyRoute/Outputs/SubsectorMap2.py
         size = self.get_text_size(self.worldFont, baseCharacter)
+=======
+        # size = font.getsize(baseCharacter)
+        size = GraphicSubsectorMap._get_text_size(font, baseCharacter)
+>>>>>>> 837e51d7 (Cache more font-text-size lookups):PyRoute/SubsectorMap.py
         pos = (point.x + (multiplier[0] * size[0]), point.y + (multiplier[1] * size[1]))
         doc.text(pos, baseCharacter, font=font, fill=fill)
 
