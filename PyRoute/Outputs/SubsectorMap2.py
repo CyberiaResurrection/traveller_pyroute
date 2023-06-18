@@ -324,6 +324,7 @@ class GraphicSubsectorMap(GraphicMap):
                         outline=color)
 
         # Write Port code
+        # size = self.worldFont.getsize(star.port)
         size = self.get_text_size(self.worldFont, star.port)
         pos = (point.x - (size[0] / 2) + 1, point.y - (2 * size[1]) + 1)
         doc.text(pos, star.port, font=self.worldFont, fill=self.textFill)
