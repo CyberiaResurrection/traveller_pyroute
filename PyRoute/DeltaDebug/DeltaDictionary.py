@@ -310,12 +310,12 @@ class SectorDictionary(dict):
             if self[sub_name].skipped is False and 0 == len(self[sub_name].items):
                 self[sub_name].items = None
 
-    def write_file(self, output_dir):
+    def write_file(self, output_dir, suffix='-min'):
         exists = os.path.exists(output_dir)
         if not exists:
             os.makedirs(output_dir)
 
-        out_name = os.path.join(output_dir, self.filename) + "-min"
+        out_name = os.path.join(output_dir, self.filename) + suffix
 
         handle = codecs.open(out_name, 'w', 'utf-8')
         for line in self.headers:
