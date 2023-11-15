@@ -15,4 +15,6 @@ pytest-console-scripts
 pytest-randomly
 pytest-subtests
 reportlab >= 4.1.0
+requests
+requests-mock
 ruff >= 0.3.0
