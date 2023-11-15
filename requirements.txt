@@ -21,6 +21,7 @@ pytest-timeout
 reportlab >= 4.1.0
 requests
 requests_toolbelt
+requests-mock
 responses
 ruff >= 0.3.0
 setuptools
