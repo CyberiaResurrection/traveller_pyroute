@@ -164,6 +164,7 @@ class ParseStarInput:
         star.eti_passenger = 0
         star.eti_worlds = 0
         star.calculate_eti()
+        ParseStarInput._check_tl(star)
 
         star.trade_id = None  # Used by the Speculative Trade
         star.calc_hash()
@@ -194,3 +195,50 @@ class ParseStarInput:
         transformed = ParseStarInput.transformer.transform(result)
 
         return transformed
+
+    @staticmethod
+    def _check_tl(star):
+        if '???-' in str(star.uwp):
+            return
+
+        max_tl, min_tl = ParseStarInput.check_tl_core(star)
+
+        if min_tl <= star.tl <= max_tl:
+            return
+
+        star.logger.error('{}-{} Calculated TL "{}" not in range {}-{}'.format(star, star.uwp, star.tl, min_tl, max_tl))
+
+    @staticmethod
+    def check_tl_core(star):
+        mod = 0
+        if star.size in '01':
+            mod += 2
+        elif star.size in '234':
+            mod += 1
+        if star.atmo in '0123ABCDEF':
+            mod += 1
+        if star.hydro in '9A':
+            mod += 1
+        if 'A' == star.hydro:
+            mod += 1
+        if star.pop in '123459ABCDEF':
+            mod += 1
+        if star.pop in '9ABCDEF':
+            mod += 1
+        if star.pop in 'ABCDEF':
+            mod += 2
+        if star.gov in '05':
+            mod += 1
+        elif 'D' == star.gov:
+            mod -= 2
+        if 'X' == star.port:
+            mod -= 4
+        if star.port in 'ABC':
+            mod += 2
+        if star.port in 'AB':
+            mod += 2
+        if 'A' == star.port:
+            mod += 2
+        min_tl = max(0, mod)
+        max_tl = mod + 6
+        return max_tl, min_tl

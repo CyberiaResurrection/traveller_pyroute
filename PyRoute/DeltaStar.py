@@ -442,6 +442,9 @@ class DeltaStar(Star):
 
         self.social = social
 
+    def _fix_tl(self):
+        max_tl, min_tl = ParseStarInput.check_tl_core(self)
+
     def _drop_invalid_trade_code(self, targcode):
         self.tradeCode.codes = [code for code in self.tradeCode.codes if code != targcode]
         self.tradeCode.codeset = [code for code in self.tradeCode.codeset if code != targcode]
