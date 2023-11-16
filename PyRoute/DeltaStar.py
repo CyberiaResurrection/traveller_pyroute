@@ -353,6 +353,8 @@ class DeltaStar(Star):
         self._fix_pop_code('Ph', '8')
         self._fix_pop_code('Hi', '9ABCD')
 
+        self._fix_tl()
+
         self.calculate_importance()
 
         self._fix_economics()
