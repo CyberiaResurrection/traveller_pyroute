@@ -364,3 +364,136 @@ class DeltaStar(Star):
         if code_match and not phys_match:
             line = '{}-{} Found invalid "{}" in trade codes: {}'.format(self, self.uwp, code, self.tradeCode.codeset)
             msg.append(line)
+
+    def canonicalise(self):
+        self.uwp.canonicalise()
+        self.tradeCode.canonicalise(self)
+        self.fix_tl()
+
+        self.calculate_importance()
+        self._fix_economics()
+        self._fix_social()
+        self.star_list_object.canonicalise()
+        # Now all's squared up, recalculate importance as something might have changed
+        self.calculate_importance()
+
+    def _fix_economics(self):
+        if self.economics is None:
+            return
+        econ = self.economics
+        if '0' == str(self.pop):
+            self.social = '[0000]'
+
+            econ = econ[:2] + '00' + econ[4:]
+            old_efficiency = self._ehex_to_int(self.economics[4:6])
+            if 0 != old_efficiency:
+                econ = econ[:4] + "+0)"
+
+        elif self.tradeCode.low:
+            econ = self.economics
+            infrastructure = str(self._int_to_ehex(max(0, self.importance)))
+            econ = econ[:3] + infrastructure + econ[4:]
+            old_efficiency = self._ehex_to_int(self.economics[4:6])
+            if 0 == old_efficiency:
+                eff = "+1"
+                econ = econ[:4] + eff + econ[6]
+
+        elif self.tradeCode.nonindustrial:
+            old_infrastructure = self._ehex_to_int(self.economics[3])
+            infrastructure = old_infrastructure
+            if infrastructure > 6 + self.importance:
+                infrastructure = str(self._int_to_ehex(6 + self.importance))
+                econ = econ[:3] + infrastructure + econ[4:]
+            old_efficiency = self._ehex_to_int(self.economics[4:6])
+            if 0 == old_efficiency:
+                eff = "+1"
+                econ = econ[:4] + eff + econ[6]
+
+        else:
+            old_infrastructure = self._ehex_to_int(self.economics[3])
+            infrastructure = old_infrastructure
+            if infrastructure > 12 + self.importance:
+                infrastructure = str(self._int_to_ehex(12 + self.importance))
+                econ = econ[:3] + infrastructure + econ[4:]
+            old_efficiency = self._ehex_to_int(self.economics[4:6])
+            if 0 == old_efficiency:
+                eff = "+1"
+                econ = econ[:4] + eff + econ[6]
+
+        labour = str(self._int_to_ehex(max(self.popCode - 1, 0)))
+        econ = econ[:2] + labour + econ[3:]
+
+        resources = self._ehex_to_int(self.economics[1])
+        max_resources = 12 + self.ggCount + self.belts
+        if 8 > self.uwp.tl_code:
+            max_resources = 12
+        nu_resources = self._int_to_ehex(max(0, min(max_resources, resources)))
+        econ = econ[0:1] + nu_resources + econ[2:]
+
+        assert 7 == len(econ), "Unexpected econ code length"
+        self.economics = econ
+
+    def _fix_social(self):
+        if self.social is None:
+            return
+        social = self.social
+        pop = self.popCode
+
+        old_strangeness = self._ehex_to_int(social[3])
+        old_homogeneity = self._ehex_to_int(self.social[1])
+        old_symbols = self._ehex_to_int(social[4])
+
+        if '0' == str(self.pop) or '?' == str(self.pop):
+            social = '[0000]'
+        else:
+            homogeneity = old_homogeneity
+            if max(1, pop - 5) > homogeneity:
+                homogeneity = max(1, pop - 5)
+            elif (pop + 5) < homogeneity:
+                homogeneity = pop + 5
+            homogeneity = str(self._int_to_ehex(homogeneity))
+            social = social[:1] + homogeneity + social[2:]
+
+            pop_plus_imp = min(33, max(1, pop + self.importance))  # Cap out at 33 - converts to ehex as Z
+            acceptance = str(self._int_to_ehex(pop_plus_imp))
+            social = social[:2] + acceptance + social[3:]
+
+            strangeness = old_strangeness
+            if 1 > strangeness:
+                strangeness = 1
+            elif 10 < strangeness:
+                strangeness = 10
+
+            strangeness = str(self._int_to_ehex(strangeness))
+
+            social = social[:3] + strangeness + social[4:]
+
+            symbols = old_symbols
+            if max(1, self.tl - 5) > symbols:
+                symbols = max(1, self.tl - 5)
+            elif self.tl + 5 < symbols:
+                symbols = self.tl + 5
+
+            symbols = str(self._int_to_ehex(symbols))
+
+            social = social[:4] + symbols + social[5:]
+
+        assert 6 == len(social), "Unexpected social code length"
+
+        self.social = social
+
+    def _fix_tl(self):
+        if self.tl_unknown:  # if TL is unknown, no point canonicalising it
+            return
+
+        max_tl, min_tl = ParseStarInput.check_tl_core(self)
+        new_tl = max(min_tl, min(max_tl, self.tl))
+        self.tl = new_tl
+
+    def _drop_invalid_trade_code(self, targcode):
+        self.tradeCode.codes = [code for code in self.tradeCode.codes if code != targcode]
+        self.tradeCode.codeset = [code for code in self.tradeCode.codeset if code != targcode]
+
+    def _add_missing_trade_code(self, targcode):
+        self.tradeCode.codes.append(targcode)
+        self.tradeCode.codeset.append(targcode)

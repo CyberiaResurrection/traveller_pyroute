@@ -142,8 +142,10 @@ class Star(object):
         for key in state:
             item = state[key]
             setattr(foo, key, item)
+        foo.index = self.index
         foo.hex = copy.deepcopy(self.hex)
         foo.calc_hash()
+        foo.tradeCode = copy.deepcopy(self.tradeCode)
 
         return foo
 
@@ -795,6 +797,8 @@ class Star(object):
         assert self.star_list_object is not None, "Star " + str(self.name) + " has empty star_list_object attribute"
         result, msg = self.star_list_object.is_well_formed()
         assert result, msg
+        assert "O:" + self.position not in self.tradeCode.owner, "Star " + str(self.name) + " cannot own itself"
+        assert "C:" + self.position not in self.tradeCode.colony, "Star " + str(self.name) + " cannot colonise itself"
         return True
 
     @property

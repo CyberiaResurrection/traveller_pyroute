@@ -23,6 +23,12 @@ class Utilities:
 
     @staticmethod
     def ehex_to_int(value):
+        value = value.strip()
+        if '+' == value[0]:
+            value = value[1:]
+        elif '-' == value[0]:
+            val = int(value)
+            return val
         val = int(value, 36) if value in '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ' else 0
         val -= 1 if val > 18 else 0
         val -= 1 if val > 22 else 0
