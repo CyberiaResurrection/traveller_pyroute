@@ -637,6 +637,14 @@ class TradeCodes(object):
     def match_in_codes(self, code) -> bool:
         return (self.industrial and code.nonindustrial) or (self.nonindustrial and code.industrial)
 
+    def trim_self_ownership_and_colonisation(self, star) -> None:
+        owned = 'O:' + star.position
+        colonised = 'C:' + star.position
+        self._drop_invalid_trade_code(owned)
+        self._drop_invalid_trade_code('C:' + star.position)
+        self.owner = [item for item in self.owner if item != owned]
+        self.colony = [item for item in self.colony if item != colonised]
+
     def is_well_formed(self) -> tuple[bool, str]:
         msg = ""
         for code in self.codeset:
@@ -834,6 +842,7 @@ class TradeCodes(object):
     def _drop_invalid_trade_code(self, targcode):
         self.codes = [code for code in self.codes if code != targcode]
         self.codeset = [code for code in self.codeset if code != targcode]
+        self.dcode = [code for code in self.dcode if code != targcode]
 
     def _add_missing_trade_code(self, targcode):
         self.codes.append(targcode)
