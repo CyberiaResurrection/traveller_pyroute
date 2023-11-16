@@ -278,6 +278,10 @@ class Star(object):
         self.uwp.tl = value
 
     @property
+    def tl_unknown(self):
+        return '?' == self.uwp.tl
+
+    @property
     def star_list(self):
         return self.star_list_object.stars_list
 
