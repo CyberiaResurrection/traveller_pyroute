@@ -198,7 +198,7 @@ class ParseStarInput:
 
     @staticmethod
     def _check_tl(star):
-        if '???-' in str(star.uwp):
+        if '???-' in str(star.uwp) or star.tl_unknown:
             return
 
         max_tl, min_tl = ParseStarInput.check_tl_core(star)

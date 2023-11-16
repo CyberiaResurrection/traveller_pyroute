@@ -443,7 +443,12 @@ class DeltaStar(Star):
         self.social = social
 
     def _fix_tl(self):
+        if self.tl_unknown:  # if TL is unknown, no point canonicalising it
+            return
+
         max_tl, min_tl = ParseStarInput.check_tl_core(self)
+        new_tl = max(min_tl, min(max_tl, self.tl))
+        self.tl = new_tl
 
     def _drop_invalid_trade_code(self, targcode):
         self.tradeCode.codes = [code for code in self.tradeCode.codes if code != targcode]

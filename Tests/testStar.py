@@ -370,6 +370,10 @@ class TestStar(unittest.TestCase):
                 star1.star_list_object.move_biggest_to_primary()
                 star1.index = 0
                 star1.allegiance_base = star1.alg_code
+                if expected_uwp.endswith('?'):
+                    self.assertTrue(star1.tl_unknown, "Tl_unknown not set for UWP " + expected_uwp)
+                else:
+                    self.assertFalse(star1.tl_unknown, "Tl_unknown set for UWP " + expected_uwp)
 
                 self.assertTrue(star1.is_well_formed())
 
@@ -729,6 +733,17 @@ class TestStar(unittest.TestCase):
 
         parse_line = star1.parse_to_line()
         foo = 1
+
+    def testParseUnknownTL(self):
+        line = '0101 Raktegham            C529767-?                                      - K - 921   K3 A0 V       '
+        star1 = Star.parse_line_into_star(line, Sector('# Core', '# 0, 0'), 'fixed', 'fixed')
+        star1.index = 0
+        star1.allegiance_base = star1.alg_code
+        self.assertTrue(star1.tl_unknown, "Tl_unknown not set")
+
+        parse_line = star1.parse_to_line()
+        expected_uwp = 'C529767-?'
+        self.assertTrue(expected_uwp in parse_line, "UWP not regnerated")
 
 
 if __name__ == "__main__":

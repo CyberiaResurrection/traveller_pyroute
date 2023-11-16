@@ -133,6 +133,10 @@ class Star(object):
         result = str(self.position) + " "
         result += self.name.ljust(20) + " "
 
+        economics = str(self.economics) if self.economics is not None else '-'
+        social = str(self.social) if self.social is not None else '-'
+        star_list = str(self.star_list_object).ljust(14)
+
         result += str(self.uwp)
         imp_chunk = "{ " + str(self.importance) + " }"
         star_list = str(self.star_list_object).ljust(14)
@@ -267,6 +271,10 @@ class Star(object):
     @tl.setter
     def tl(self, value):
         self.uwp.tl = value
+
+    @property
+    def tl_unknown(self):
+        return '?' == self.uwp.tl
 
     @property
     def star_list(self):
