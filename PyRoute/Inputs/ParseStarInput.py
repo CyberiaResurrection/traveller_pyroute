@@ -78,6 +78,7 @@ class ParseStarInput:
             raise e
         try:
             star.tradeCode = TradeCodes(data[3].strip())
+            star.tradeCode.trim_self_ownership_and_colonisation(star)
         except MultipleWPopError:
             return None
         star.ownedBy = star.tradeCode.owned_by(star)
@@ -181,6 +182,7 @@ class ParseStarInput:
         star.eti_passenger = 0
         star.eti_worlds = 0
         star.calculate_eti()
+        ParseStarInput.check_tl(star)
 
         star.trade_id = None  # Used by the Speculative Trade
         star.calc_hash()

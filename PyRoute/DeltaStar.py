@@ -168,59 +168,6 @@ class DeltaStar(Star):
 
         self.tradeCode = TradeCodes(' '.join(nu_codes))
 
-    def check_canonical(self) -> tuple[bool, list[str]]:
-        msg = list()
-
-        self._check_uwp()
-
-        outer_logger = logging.getLogger("PyRoute.Star")
-        old_level = outer_logger.level
-        old_handlers = len(outer_logger.handlers)
-        outer_logger.setLevel(10)  # pragma: no mutate
-        list_handler = ListHandler()
-        outer_logger.addHandler(list_handler)
-
-        self.check_ex()
-        msg.extend(list_handler.messages)
-        list_handler.messages = []
-        if self.tradeCode and self.economics and not self.tradeCode.barren and 0 == self._ehex_to_int(self.economics[5]):
-            line = '{} - EX Calculated efficiency 0 should be coded as 1 (implied by p18, book 3 of T5.10)'.format(self)
-            msg.append(line)
-
-        if ('O:' + self.position) in self.tradeCode.codes:
-            line = '{}-{} Found invalid "{}" in trade codes: {}'.format(self, self.uwp, 'O:' + self.position, self.tradeCode.codes)
-            msg.append(line)
-        if ('C:' + self.position) in self.tradeCode.codes:
-            line = '{}-{} Found invalid "{}" in trade codes: {}'.format(self, self.uwp, 'C:' + self.position, self.tradeCode.codes)
-            msg.append(line)
-
-        self.check_cx()
-        msg.extend(list_handler.messages)
-
-        outer_logger.removeHandler(list_handler)
-        new_handlers = len(outer_logger.handlers)
-        assert old_handlers == new_handlers
-        outer_logger.setLevel(old_level)
-
-        self.tradeCode.check_world_codes(self, msg)
-
-        ParseStarInput.check_tl(self, fullmsg=msg)
-
-        return 0 == len(msg), msg
-
-    def _check_uwp(self):
-        if self.atmo not in '0123456789ABCDEF':
-            self.logger.warning('{}-{} Atmospheric code "{}" out of range - not in range 0-F'
-                                .format(self, self.uwp, self.atmo))
-        if self.hydro not in '0123456789A':
-            self.logger.warning('{}-{} Hydrographic code "{}" out of range - not in range 0-A'
-                                .format(self, self.uwp, self.hydro))
-
-        if 'X' == self.gov:  # Line up with how Lintsec treats 'X' government codes
-            self.logger.warning(
-                '{}-{} Calculated government code "{}" out of range - should be {}'.
-                    format(self, self.uwp, 'X', '0'))
-
 
 class ListHandler(logging.Handler):
     def __init__(self):
