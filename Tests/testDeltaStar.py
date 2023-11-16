@@ -244,6 +244,22 @@ class testDeltaStar(unittest.TestCase):
         self.assertFalse(actual)
         self.assertEqual(exp_msg, msg)
 
+    def test_check_TL_canonicalisation(self):
+        check_list = [
+            ("0411 New Vision           E4248DA-7 Ph Pi Pz                   { -2 } (A76+1) [A679] BDe   -  A 715 11 ImDi F9 V",
+             "0411 New Vision           E4248DA-6 Ph Pi Pz                              { -2 } (A76+1) [A679] BDe  -  A 715 11 ImDi F9 V                                                    ")
+        ]
+
+        for chunk in check_list:
+            with self.subTest():
+                original = chunk[0]
+                old_star = DeltaStar.parse_line_into_star(original, Sector('# Core', '# 0, 0'), 'fixed', 'fixed')
+
+                expected = chunk[1]
+                old_star.canonicalise()
+                actual = old_star.parse_to_line()
+                self.assertEqual(expected, actual, "Unexpected TL canonicalisation result")
+
 
 if __name__ == '__main__':
     unittest.main()
