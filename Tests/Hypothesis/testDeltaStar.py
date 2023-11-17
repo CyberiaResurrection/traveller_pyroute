@@ -497,6 +497,21 @@ class testDeltaStar(unittest.TestCase):
         second_round = nu_foo.parse_to_line()
         self.assertEqual(first_round, second_round, 'Canonicalisation should be idempotent.\nHypothesis input: ' + starline + '\n')
 
+    def test_plain_canonicalisation(self):
+        cases = [
+            ('0917 Deyis II             E874000-0 Ba Da (Kebkh) Re                      { -3 } (200-5) [0000] -     -  A 000 10 ImDi K4 II                                                        ',
+             '0917 Deyis II             E874000-2 Da Di(Kebkh) Re                       { -3 } (200-5) [0000] -     -  A 000 10 ImDi K4 II                                                    ')
+        ]
+
+        sector = Sector(' Core', ' 0, 0')
+        for line, expected in cases:
+            with self.subTest():
+                foo = DeltaStar.parse_line_into_star(line, sector, 'fixed', 'fixed')
+                foo.canonicalise()
+                foo_string = foo.parse_to_line()
+
+                self.assertEqual(expected, foo_string, 'Unexpected canonicalisation result')
+
 
 if __name__ == '__main__':
     unittest.main()
