@@ -3,7 +3,7 @@ import unittest
 
 import requests_mock
 
-from PyRoute.Canonicalisation.Canonicaliser import Canonicaliser
+from PyRoute.Canonicalisation.SectorCanonicaliser import SectorCanonicaliser
 from Tests.baseTest import baseTest
 
 
@@ -14,7 +14,7 @@ class testCanonicaliser(baseTest):
         zaru = self.unpack_filename('DeltaFiles/Zarushagar.sec')
 
         output_dir = tempfile.gettempdir()
-        foo = Canonicaliser(zaru, output_dir)
+        foo = SectorCanonicaliser(zaru, output_dir)
         foo.process()
         # Copy of New Vision starline in dictionary should not be TL-canonical
         targ = [item for item in foo.dictionary.lines if 'New Vision' in item][0]
