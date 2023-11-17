@@ -10,6 +10,7 @@ from PyRoute.Inputs.ParseStarInput import ParseStarInput
 from PyRoute.Nobles import Nobles
 from PyRoute.Star import Star
 from PyRoute.TradeCodes import TradeCodes
+from SystemData.Utilities import Utilities
 
 
 class DeltaStar(Star):
@@ -488,7 +489,7 @@ class DeltaStar(Star):
 
         max_tl, min_tl = ParseStarInput.check_tl_core(self)
         new_tl = max(min_tl, min(max_tl, self.tl))
-        self.tl = new_tl
+        self.tl = Utilities.int_to_ehex(new_tl)
 
     def _drop_invalid_trade_code(self, targcode):
         self.tradeCode.codes = [code for code in self.tradeCode.codes if code != targcode]

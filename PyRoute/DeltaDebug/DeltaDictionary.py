@@ -362,6 +362,17 @@ class SectorDictionary(dict):
                 line = raw_line.strip('\n') + '\n'
                 handle.write(line)
 
+    def canonicalise_headers(self):
+        new_hex = 'Hex  Name                 UWP       Remarks                               {Ix}   (Ex)    [Cx]   N     B  Z PBG W  A    Stellar         Routes                                   \n'
+        new_dash = '---- -------------------- --------- ------------------------------------- ------ ------- ------ ----- -- - --- -- ---- --------------- -----------------------------------------\n'
+        num_headers = len(self.headers)
+        for i in range(0, num_headers):
+            raw_line = self.headers[i]
+            if raw_line.startswith('Hex  '):
+                self.headers[i] = new_hex
+            elif raw_line.startswith('---- --'):
+                self.headers[i] = new_dash
+
     @staticmethod
     def load_traveller_map_file(filename) -> Optional[Sector]:
         from PyRoute.Inputs.ParseSectorInput import ParseSectorInput
