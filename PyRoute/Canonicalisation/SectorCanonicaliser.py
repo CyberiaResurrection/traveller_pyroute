@@ -13,7 +13,7 @@ from PyRoute.DeltaStar import DeltaStar
 from PyRoute.DeltaDebug.DeltaDictionary import SectorDictionary
 
 
-class Canonicaliser(object):
+class SectorCanonicaliser(object):
 
     def __init__(self, filename, output_dir):
         self.dictionary = SectorDictionary.load_traveller_map_file(filename)
