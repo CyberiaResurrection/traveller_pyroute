@@ -28,15 +28,7 @@ class Canonicaliser(object):
     def write(self):
         if not self.processed_lines:
             raise ValueError('Process() has not been run')
-        new_hex = 'Hex  Name                 UWP       Remarks                               {Ix}   (Ex)    [Cx]   N    B  Z PBG W  A    Stellar         Routes                                   \n'
-        new_dash = '---- -------------------- --------- ------------------------------------- ------ ------- ------ ---- -- - --- -- ---- --------------- -----------------------------------------\n'
-        num_headers = len(self.dictionary.headers)
-        for i in range(0, num_headers):
-            raw_line = self.dictionary.headers[i]
-            if raw_line.startswith('Hex  '):
-                self.dictionary.headers[i] = new_hex
-            elif raw_line.startswith('---- --'):
-                self.dictionary.headers[i] = new_dash
+        self.dictionary.canonicalise_headers()
 
         self.dictionary = self.dictionary.switch_lines(self.processed_lines)
         self.processed_lines = []
