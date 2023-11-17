@@ -7,6 +7,8 @@ A wrapper to enable a supplied sector to be converted (as far as possible) to a 
 
 """
 
+import requests
+
 from PyRoute.DeltaStar import DeltaStar
 from PyRoute.DeltaDebug.DeltaDictionary import SectorDictionary
 
@@ -33,3 +35,23 @@ class Canonicaliser(object):
         self.dictionary = self.dictionary.switch_lines(self.processed_lines)
         self.processed_lines = []
         self.dictionary.write_file(self.output_dir, suffix='-canonical')
+
+    def lintsec(self, url):
+        data = []
+        for line in self.dictionary.headers:
+            data.append(line)
+        for line in self.dictionary.lines:
+            data.append(line)
+        headers = {'Content-Type': 'text/plain; charset=utf-8'}
+        data = '\n'.join(data)
+
+        r = requests.post(url, data, headers=headers)
+        if 200 == r.status_code:
+            return True, []
+
+        if 400 == r.status_code:
+            content = r.text
+            lines = content.splitlines()
+            warnings = [item for item in lines if 'Warning:' in item]
+
+            return False, warnings
