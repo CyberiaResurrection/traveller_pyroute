@@ -327,8 +327,8 @@ class SectorDictionary(dict):
         handle.close()
 
     def canonicalise_headers(self):
-        new_hex =  'Hex  Name                 UWP       Remarks                               {Ix}   (Ex)    [Cx]   N    B  Z PBG W  A    Stellar         Routes                                   \n'
-        new_dash = '---- -------------------- --------- ------------------------------------- ------ ------- ------ ---- -- - --- -- ---- --------------- -----------------------------------------\n'
+        new_hex =  'Hex  Name                 UWP       Remarks                               {Ix}   (Ex)    [Cx]   N     B  Z PBG W  A    Stellar         Routes                                   \n'
+        new_dash = '---- -------------------- --------- ------------------------------------- ------ ------- ------ ----- -- - --- -- ---- --------------- -----------------------------------------\n'
         num_headers = len(self.headers)
         for i in range(0, num_headers):
             raw_line = self.headers[i]
