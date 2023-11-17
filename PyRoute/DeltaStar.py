@@ -371,6 +371,8 @@ class DeltaStar(Star):
         self.tradeCode.canonicalise(self)
         self.fix_tl()
 
+        self._fix_sophonts()
+
         self.calculate_importance()
         self._fix_economics()
         self._fix_social()
@@ -490,6 +492,16 @@ class DeltaStar(Star):
         max_tl, min_tl = ParseStarInput.check_tl_core(self)
         new_tl = max(min_tl, min(max_tl, self.tl))
         self.tl = Utilities.int_to_ehex(new_tl)
+
+    def _fix_sophonts(self):
+        # if world has pop zero _and_ a native race, they're presumed to be cactus
+        if '0' == self.pop and 0 < len(self.tradeCode.homeworld_list):
+            string_code = str(self.tradeCode)
+            if string_code.startswith('('):
+                # Zero-pop dieback subsumes barren
+                string_code = string_code.replace(' Ba ', ' ')
+                string_code = 'Di' + string_code
+                self.tradeCode = TradeCodes(string_code)
 
     def _drop_invalid_trade_code(self, targcode):
         self.tradeCode.codes = [code for code in self.tradeCode.codes if code != targcode]
