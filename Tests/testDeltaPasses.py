@@ -56,8 +56,8 @@ class testDeltaPasses(baseTest):
         self.assertTrue(reduction_pass.preflight(), "Input should be reducible")
         reduction_pass.run()
 
-        expected_hex_line = 'Hex  Name                 UWP       Remarks                               {Ix}   (Ex)    [Cx]   N    B  Z PBG W  A    Stellar         Routes                                   \n'
-        expected_dash_line = '---- -------------------- --------- ------------------------------------- ------ ------- ------ ---- -- - --- -- ---- --------------- -----------------------------------------\n'
+        expected_hex_line = 'Hex  Name                 UWP       Remarks                               {Ix}   (Ex)    [Cx]   N     B  Z PBG W  A    Stellar         Routes                                   \n'
+        expected_dash_line = '---- -------------------- --------- ------------------------------------- ------ ------- ------ ----- -- - --- -- ---- --------------- -----------------------------------------\n'
 
         headers = reducer.sectors['Zarushagar'].headers
         self.assertEqual(expected_hex_line, headers[36])

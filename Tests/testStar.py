@@ -704,7 +704,7 @@ class TestStar(unittest.TestCase):
         star = Star.parse_line_into_star(starline, sector, 'fixed', 'fixed')
         self.assertIsNotNone(star, "Starline should parse cleanly")
         self.assertFalse(star.oldskool, "Zero extensions present should result in oldskool")
-        expected = '2618 Horden 2618          D54A367-D Ht Lo O:2915 Wa                       { -1 } -       -      -    -  - 401 0  So   D                                                       '
+        expected = '2618 Horden 2618          D54A367-D Ht Lo O:2915 Wa                       { -1 } -       -      -     -  - 401 0  So   D                                                        '
         actual = star.parse_to_line()
         self.assertEqual(expected, actual)
         # verify parse_to_line() results cleanly reparse
@@ -721,7 +721,7 @@ class TestStar(unittest.TestCase):
         star = Star.parse_line_into_star(starline, sector, 'fixed', 'fixed')
         self.assertIsNotNone(star, "Starline should parse cleanly")
         self.assertTrue(star.oldskool, "Zero extensions present should result in oldskool")
-        expected = '2618 Horden 2618          ?54A367-D Ht Lo O:2915 Wa                                             -    -  - 401 0  So   D                                                       '
+        expected = '2618 Horden 2618          ?54A367-D Ht Lo O:2915 Wa                                             -     -  - 401 0  So   D                                                        '
         actual = star.parse_to_line()
         self.assertEqual(expected, actual)
         # verify parse_to_line() results cleanly reparse
@@ -738,7 +738,7 @@ class TestStar(unittest.TestCase):
         star = Star.parse_line_into_star(starline, sector, 'fixed', 'fixed')
         self.assertIsNotNone(star, "Starline should parse cleanly")
         self.assertTrue(star.oldskool, "Zero extensions present should result in oldskool")
-        expected = '0406 Abrpriabr            X7820?0-0 Ba                                                          -    -  - 001 11 NaXX K0 V                                                    '
+        expected = '0406 Abrpriabr            X7820?0-0 Ba                                                          -     -  - 001 11 NaXX K0 V                                                     '
         actual = star.parse_to_line()
         self.assertEqual(expected, actual)
         # verify parse_to_line() results cleanly reparse
