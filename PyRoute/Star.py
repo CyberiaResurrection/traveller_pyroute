@@ -281,9 +281,17 @@ class Star(object):
     def atmo(self):
         return self.uwp.atmo
 
+    @atmo.setter
+    def atmo(self, value):
+        self.uwp.atmo = value
+
     @property
     def hydro(self):
         return self.uwp.hydro
+
+    @hydro.setter
+    def hydro(self, value):
+        self.uwp.hydro = value
 
     @property
     def pop(self):
@@ -292,6 +300,10 @@ class Star(object):
     @property
     def gov(self):
         return self.uwp.gov
+
+    @gov.setter
+    def gov(self, value):
+        self.uwp.gov = value
 
     @property
     def law(self):
