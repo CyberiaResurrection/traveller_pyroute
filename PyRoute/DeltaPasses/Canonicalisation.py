@@ -33,7 +33,7 @@ class Canonicalisation(object):
         interesting, msg, _ = self.reducer._check_interesting(self.reducer.args, temp_sectors)
 
         if interesting:
-            new_hex = 'Hex  Name                 UWP       Remarks                               {Ix}   (Ex)    [Cx]   N    B  Z PBG W  A    Stellar         Routes                                   \n'
+            new_hex =  'Hex  Name                 UWP       Remarks                               {Ix}   (Ex)    [Cx]   N    B  Z PBG W  A    Stellar         Routes                                   \n'
             new_dash = '---- -------------------- --------- ------------------------------------- ------ ------- ------ ---- -- - --- -- ---- --------------- -----------------------------------------\n'
             for sec_name in temp_sectors:
                 num_headers = len(temp_sectors[sec_name].headers)
