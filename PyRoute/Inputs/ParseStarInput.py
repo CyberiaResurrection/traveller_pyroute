@@ -239,6 +239,6 @@ class ParseStarInput:
             mod += 2
         if 'A' == star.port:
             mod += 2
-        min_tl = max(0, mod)
+        min_tl = max(0, mod + 1)
         max_tl = mod + 6
         return max_tl, min_tl
