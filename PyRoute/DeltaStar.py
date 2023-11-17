@@ -11,6 +11,7 @@ from PyRoute.Inputs.ParseStarInput import ParseStarInput
 from PyRoute.Nobles import Nobles
 from PyRoute.Star import Star
 from PyRoute.TradeCodes import TradeCodes
+from SystemData.Utilities import Utilities
 
 
 class DeltaStar(Star):
