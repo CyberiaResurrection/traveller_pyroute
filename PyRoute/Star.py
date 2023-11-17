@@ -249,9 +249,17 @@ class Star(object):
     def atmo(self):
         return self.uwp.atmo
 
+    @atmo.setter
+    def atmo(self, value):
+        self.uwp.atmo = value
+
     @property
     def hydro(self):
         return self.uwp.hydro
+
+    @hydro.setter
+    def hydro(self, value):
+        self.uwp.hydro = value
 
     @property
     def pop(self):
@@ -260,6 +268,10 @@ class Star(object):
     @property
     def gov(self):
         return self.uwp.gov
+
+    @gov.setter
+    def gov(self, value):
+        self.uwp.gov = value
 
     @property
     def law(self):
@@ -466,16 +478,16 @@ class Star(object):
         homogeneity = self._ehex_to_int(self.social[1])  # pop + flux, min 1
         if pop == 0 and homogeneity != 0:
             self.logger.warning(
-                '{} - CX calculated homogeneity {} should be 0 for barren worlds'.format(self, homogeneity))
+                '{} - CX Calculated homogeneity {} should be 0 for barren worlds'.format(self, homogeneity))
         elif pop != 0 and not max(1, pop - 5) <= homogeneity <= pop + 5:
             self.logger.warning(
-                '{} - CX calculated homogeneity {} not in range {} - {}'.
+                '{} - CX Calculated homogeneity {} not in range {} - {}'.
                 format(self, homogeneity, max(1, pop - 5), pop + 5))
 
         acceptance = self._ehex_to_int(self.social[2])  # pop + Ix, min 1
         if pop == 0 and acceptance != 0:
             self.logger.warning(
-                '{} - CX calculated acceptance {} should be 0 for barren worlds'.format(self, acceptance))
+                '{} - CX Calculated acceptance {} should be 0 for barren worlds'.format(self, acceptance))
         elif pop != 0 and not max(1, pop + self.importance) == acceptance:
             self.logger.warning(
                 '{} - CX Calculated acceptance {} does not match generated acceptance {}'.
@@ -484,17 +496,17 @@ class Star(object):
         strangeness = self._ehex_to_int(self.social[3])  # flux + 5
         if pop == 0 and strangeness != 0:
             self.logger.warning(
-                '{} - CX calculated strangeness {} should be 0 for barren worlds'.format(self, strangeness))
+                '{} - CX Calculated strangeness {} should be 0 for barren worlds'.format(self, strangeness))
         elif pop != 0 and not 1 <= strangeness <= 10:
             self.logger.warning(
-                '{} - CX calculated strangeness {} not in range {} - {}'.format(self, strangeness, 1, 10))
+                '{} - CX Calculated strangeness {} not in range {} - {}'.format(self, strangeness, 1, 10))
 
         symbols = self._ehex_to_int(self.social[4])  # TL + flux, min 1
         if pop == 0 and symbols != 0:
-            self.logger.warning('{} - CX calculated symbols {} should be 0 for barren worlds'.format(self, symbols))
+            self.logger.warning('{} - CX Calculated symbols {} should be 0 for barren worlds'.format(self, symbols))
         elif pop != 0 and not max(1, self.tl - 5) <= symbols <= self.tl + 5:
             self.logger.warning(
-                '{} - CX calculated symbols {} not in range {} - {}'.
+                '{} - CX Calculated symbols {} not in range {} - {}'.
                 format(self, symbols, max(1, self.tl - 5), self.tl + 5))
 
     def fix_cx(self):

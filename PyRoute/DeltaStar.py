@@ -226,7 +226,7 @@ class DeltaStar(Star):
         self._check_pop_code(msg, code, pop)
 
         code = 'Hi'
-        pop = '9ABCD'
+        pop = '9ABCDEF'
         self._check_pop_code(msg, code, pop)
 
         self._check_econ_code(msg, 'Na', '0123', '0123', '6789ABCD')
@@ -236,6 +236,7 @@ class DeltaStar(Star):
         self._check_econ_code(msg, 'Pa', '456789', '45678', '48')
         self._check_econ_code(msg, 'Ri', '68', None, '678')
         self._check_econ_code(msg, 'Ag', '456789', '45678', '567')
+        ParseStarInput._check_tl(self, fullmsg=msg)
 
         return 0 == len(msg), msg
 
@@ -329,6 +330,9 @@ class DeltaStar(Star):
             self._add_missing_trade_code(code)
 
     def canonicalise(self):
+        self._fix_tl()
+        self.uwp.canonicalise()
+
         self._fix_trade_code('De', '0123456789ABC', '23456789', '0')
         self._fix_trade_code('Ga', '678', '568', '567')
         self._fix_trade_code('Fl', None, 'ABC', '123456789A')
@@ -352,9 +356,8 @@ class DeltaStar(Star):
         self._fix_pop_code('Lo', '123')
         self._fix_pop_code('Ni', '456')
         self._fix_pop_code('Ph', '8')
-        self._fix_pop_code('Hi', '9ABCD')
-
-        self._fix_tl()
+        self._fix_pop_code('Hi', '9ABCDEF')
+        self._fix_sophonts()
 
         self.calculate_importance()
 
@@ -452,6 +455,16 @@ class DeltaStar(Star):
         max_tl, min_tl = ParseStarInput.check_tl_core(self)
         new_tl = max(min_tl, min(max_tl, self.tl))
         self.tl = Utilities.int_to_ehex(new_tl)
+
+    def _fix_sophonts(self):
+        # if world has pop zero _and_ a native race, they're presumed to be cactus
+        if '0' == self.pop and 0 < len(self.tradeCode.homeworld_list):
+            string_code = str(self.tradeCode)
+            if string_code.startswith('('):
+                # Zero-pop dieback subsumes barren
+                string_code = string_code.replace(' Ba ', ' ')
+                string_code = 'Di' + string_code
+                self.tradeCode = TradeCodes(string_code)
 
     def _drop_invalid_trade_code(self, targcode):
         self.tradeCode.codes = [code for code in self.tradeCode.codes if code != targcode]

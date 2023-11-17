@@ -222,7 +222,7 @@ class ParseStarInput:
         return transformed, is_station
 
     @staticmethod
-    def _check_tl(star):
+    def _check_tl(star, fullmsg=None):
         if '???-' in str(star.uwp) or star.tl_unknown:
             return
 
@@ -231,7 +231,13 @@ class ParseStarInput:
         if min_tl <= star.tl <= max_tl:
             return
 
-        star.logger.error('{}-{} Calculated TL "{}" not in range {}-{}'.format(star, star.uwp, star.tl, min_tl, max_tl))
+        msg = '{}-{} Calculated TL "{}" not in range {}-{}'.format(star, star.uwp, star.tl, min_tl, max_tl)
+
+        if not isinstance(fullmsg, list):
+            star.logger.error(msg)
+        else:
+            fullmsg.append(msg)
+
 
     @staticmethod
     def check_tl_core(star):
@@ -264,6 +270,6 @@ class ParseStarInput:
             mod += 2
         if 'A' == star.port:
             mod += 2
-        min_tl = max(0, mod)
+        min_tl = max(0, mod + 1)
         max_tl = mod + 6
         return max_tl, min_tl
