@@ -58,6 +58,19 @@ def process():
 
     counter = 0
 
+    warning_summary = {}
+
+    out_of_range_warnings = {
+        'Law': 'Warning: Law=X out of range; should be: Gov(=Y) + Flux',
+        'Gov': 'Warning: Gov=X out of range; should be: Pop(=Y) + Flux',
+        'TL': 'Warning: TL=X out of range; should be: mods(=Y) + 1D',
+        'Atm': 'Warning: Atm=X out of range; should be: 0...F',
+        'Hyd': 'Warning: Hyd=X out of range; should be: 0...A',
+        'Worlds': 'Warning: Worlds: W=X out of range',
+        'ResLo': 'Warning: (Ex) Resources=X out of range; should be: 2D if TL(=Y)<8',
+        'ResHi': 'Warning: (Ex) Resources=X out of range; should be: 2D + GG(=Y) + Belts(=Z) if TL(=A)=8+',
+    }
+
     for sector_file in sectors_list:
         foo = SectorCanonicaliser(sector_file, args.outputdir)
         filename = os.path.basename(sector_file)
@@ -70,10 +83,49 @@ def process():
             out_name = os.path.join(args.outputdir, filename) + '-warnings'
             with codecs.open(out_name, 'w', 'utf-8') as handle:
                 for item in lines:
+                    bitz = item.split(',')[0]
+                    if 'Nonstandard sophont' not in bitz:
+                        if 'out of range' in bitz:
+                            if 'Law=' in bitz:
+                                bitz = out_of_range_warnings['Law']
+                            elif 'Gov=' in bitz:
+                                bitz = out_of_range_warnings['Gov']
+                            elif 'TL=' in bitz:
+                                bitz = out_of_range_warnings['TL']
+                            elif 'Atm=' in bitz:
+                                bitz = out_of_range_warnings['Atm']
+                            elif 'Worlds: W=' in bitz:
+                                bitz = out_of_range_warnings['Worlds']
+                            elif 'Resources=' in bitz and '2D if TL(' in bitz:
+                                bitz = out_of_range_warnings['ResLo']
+                            elif 'Resources=' in bitz and '2D + GG(' in bitz:
+                                bitz = out_of_range_warnings['ResHi']
+                            elif 'Hyd=' in bitz:
+                                bitz = out_of_range_warnings['Hyd']
+
+                        elif 'Unexpected value for Stellar' in bitz:
+                            bitz = 'Warning: Unexpected value for Stellar'
+                        elif 'Invalid stellar data:' in bitz:
+                            bitz = 'Warning: Invalid stellar data'
+                        elif 'PBG: Pop Exponent = 0 but Population Multiplier' in bitz:
+                            bitz = 'Warning: PBG: Pop Exponent = 0 but Population Multiplier (=X) > 0'
+
+                        if bitz not in warning_summary:
+                            warning_summary[bitz] = 0
+                        warning_summary[bitz] += 1
+
                     item = item.strip() + '\n'
                     handle.write(item)
         logger.critical('Processed ' + sector_file)
         counter += 1
+
+    if 0 < len(warning_summary):
+        warning_summary = {k: v for k, v in sorted(warning_summary.items(), key=lambda line: line[1], reverse=True)}
+        out_name = os.path.join(args.outputdir, 'warnings-summary')
+        with codecs.open(out_name, 'w', 'utf-8') as handle:
+            for item in warning_summary:
+                line = item + ': ' + str(warning_summary[item]) + '\n'
+                handle.write(line)
 
     logger.critical("%s sectors canonicalised" % counter)
 
