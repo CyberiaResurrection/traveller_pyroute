@@ -148,7 +148,7 @@ class DeltaStar(Star):
             code = 'Va'
             line = '{}-{} Calculated "{}" not in trade codes {}'.format(self, self.uwp, code, self.tradeCode.codeset)
             msg.append(line)
-        if not self.tradeCode.barren and 0 == efficiency:
+        if 0 == efficiency:
             line = '{} - EX Calculated efficiency 0 should be coded as 1 (implied by p18, book 3 of T5.10)'.format(self)
 
             msg.append(line)
@@ -397,10 +397,9 @@ class DeltaStar(Star):
                 econ = econ[:3] + infrastructure + econ[4:]
         labour = str(self._int_to_ehex(max(self.popCode - 1, 0)))
         econ = econ[:2] + labour + econ[3:]
-        if '0' != str(self.pop):
-            efficiency = econ[4:6]
-            if '+0' == efficiency or '-0' == efficiency:
-                econ = econ.replace(efficiency, '+1')
+        efficiency = econ[4:6]
+        if '+0' == efficiency or '-0' == efficiency:
+            econ = econ.replace(efficiency, '+1')
 
         assert 7 == len(econ), "Unexpected econ code length"
         self.economics = econ
