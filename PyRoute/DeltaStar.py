@@ -425,6 +425,10 @@ class DeltaStar(Star):
 
         labour = str(self._int_to_ehex(max(self.popCode - 1, 0)))
         econ = econ[:2] + labour + econ[3:]
+        efficiency = econ[4:6]
+        if '0' != str(self.pop):
+            if '+0' == efficiency or '-0' == efficiency:
+                econ = econ.replace(efficiency, '+1')
 
         resources = self._ehex_to_int(self.economics[1])
         max_resources = 12 + self.ggCount + self.belts
