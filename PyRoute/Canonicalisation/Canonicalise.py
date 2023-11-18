@@ -109,6 +109,8 @@ def process():
                             bitz = 'Warning: Invalid stellar data'
                         elif 'PBG: Pop Exponent = 0 but Population Multiplier' in bitz:
                             bitz = 'Warning: PBG: Pop Exponent = 0 but Population Multiplier (=X) > 0'
+                        elif 'Warning: {Ix} Importance=' in bitz:
+                            bitz = 'Warning: {Ix} Importance=X incorrect; should be: Y'
 
                         if bitz not in warning_summary:
                             warning_summary[bitz] = 0
