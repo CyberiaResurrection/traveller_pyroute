@@ -463,7 +463,7 @@ class Star(object):
             self.logger.warning('{} - EX Calculated infrastructure {} not in range 0 - {}'.
                                 format(self, infrastructure, 12 + self.importance))
 
-        if not self.tradeCode.barren and 0 == efficiency:
+        if 0 == efficiency:
             self.logger.warning(
                 '{} - EX Calculated efficiency 0 should be coded as 1 (implied by p18, book 3 of T5.10)'.
                 format(self)
