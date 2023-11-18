@@ -401,6 +401,13 @@ class DeltaStar(Star):
         if '+0' == efficiency or '-0' == efficiency:
             econ = econ.replace(efficiency, '+1')
 
+        resources = self._ehex_to_int(econ[1])
+
+        if not self.tl_unknown and 8 > self.tl:
+            resources = min(12, resources)
+            resource_str = str(self._int_to_ehex(resources))
+            econ = econ[0] + resource_str + econ[2:]
+
         assert 7 == len(econ), "Unexpected econ code length"
         self.economics = econ
 
