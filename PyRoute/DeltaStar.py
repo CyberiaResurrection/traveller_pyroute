@@ -261,7 +261,7 @@ class DeltaStar(Star):
             msg.append(line)
 
     def _fix_trade_code(self, code, size, atmo, hydro):
-        size = '0123456789ABC' if size is None else size
+        size = '0123456789ABCDEF' if size is None else size
         atmo = '0123456789ABCDEF' if atmo is None else atmo
         hydro = '0123456789A' if hydro is None else hydro
 
@@ -344,7 +344,7 @@ class DeltaStar(Star):
         self._fix_trade_code('He', '3456789ABC', '2479ABC', '012')
         self._fix_trade_code('As', '0', '0', '0')
         self._fix_trade_code('Ic', None, '01', '123456789A')
-        self._fix_trade_code('Oc', 'ABCD', '3456789DEF', 'A')
+        self._fix_trade_code('Oc', 'ABCDEF', '3456789DEF', 'A')
         self._fix_trade_code('Po', None, '2345', '0123')
         self._fix_trade_code('Va', None, '0', None)
         self._fix_trade_code('Wa', '3456789', '3456789DEF', 'A')
