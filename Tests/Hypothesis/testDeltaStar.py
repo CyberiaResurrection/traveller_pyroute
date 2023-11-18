@@ -502,7 +502,11 @@ class testDeltaStar(unittest.TestCase):
     def test_plain_canonicalisation(self):
         cases = [
             ('0917 Deyis II             E874000-0 Ba Da (Kebkh) Re                      { -3 } (200-5) [0000] -     -  A 000 10 ImDi K4 II                                                        ',
-             '0917 Deyis II             E874000-2 Da Di(Kebkh) Re                       { -3 } (200-5) [0000] -     -  A 000 10 ImDi K4 II                                                    ')
+             '0917 Deyis II             E874000-2 Da Di(Kebkh) Re                       { -3 } (200-5) [0000] -     -  A 000 10 ImDi K4 II                                                    '),
+            ('0235 Oduart               C7B3004-5 Fl Di(Oduart) Da             { -2 } (800+2) [0000] - M  A 004 10 HvFd G4 V M3 V M7 V',
+             '0235 Oduart               C7B3004-5 Da Di(Oduart) Fl                      { -2 } (800+2) [0000] -     M  A 004 10 HvFd G4 V M3 V M7 V                                           '),
+            ('0101                      X73A000-0 Ba Lo Ni Wa                         - -  - 012   --',
+             '0101                      X73A000-1 Di Wa                                 { -3 } -       -      -     -  - 012 0  --                                                            ')
         ]
 
         sector = Sector(' Core', ' 0, 0')
