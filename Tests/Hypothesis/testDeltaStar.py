@@ -518,7 +518,10 @@ class testDeltaStar(unittest.TestCase):
              '0825 Corstation           C005100-8 Ic Lo Va                              { -2 } (500-5) [1113] -     -  - 211 14 GaFd M0 V M1 V                                                '),
             # Population zero, TL 0, alongside a specific dieback should keep the barren
             ('0924 Ognar                X867000-0 Ba Ga Di(Ogna)       {-3 } (300+1) [0000] - -  R 004 10 Og K1 V',
-             '0924 Ognar                X867000-0 Ba Di(Ogna) Ga                        { -3 } (300+1) [0000] -     -  R 004 10 Og   K1 V                                                     ')
+             '0924 Ognar                X867000-0 Ba Di(Ogna) Ga                        { -3 } (300+1) [0000] -     -  R 004 10 Og   K1 V                                                     '),
+            # Dieback of two-word sophont name tripped things up
+            ('2117 Sabmiqys             A560056-H De Fo Di(Gya Ks)          { 2 }  (600-4) [0000] -    -  R 004 9  ImDa G3 V          ',
+             '2117 Sabmiqys             A560056-D De Di(Gya Ks) Fo                      { 1 }  (600-4) [0000] -     -  R 004 9  ImDa G3 V                                                     ')
         ]
 
         sector = Sector(' Core', ' 0, 0')
