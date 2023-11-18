@@ -441,6 +441,7 @@ class Star(object):
 
         labor = self._ehex_to_int(self.economics[2])
         infrastructure = self._ehex_to_int(self.economics[3])
+        efficiency = self._ehex_to_int(self.economics[5])
 
         if labor != max(self.popCode - 1, 0):
             self.logger.warning('{} - EX Calculated labor {} does not match generated labor {}'.format(self, labor, max(
@@ -461,6 +462,12 @@ class Star(object):
         elif not 0 <= infrastructure <= 12 + self.importance:
             self.logger.warning('{} - EX Calculated infrastructure {} not in range 0 - {}'.
                                 format(self, infrastructure, 12 + self.importance))
+
+        if not self.tradeCode.barren and 0 == efficiency:
+            self.logger.warning(
+                '{} - EX Calculated efficiency 0 should be coded as 1 (implied by p18, book 3 of T5.10)'.
+                format(self)
+            )
 
     def fix_ex(self) -> None:
         if not self.economics:
