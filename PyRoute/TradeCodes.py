@@ -162,6 +162,7 @@ class TradeCodes(object):
         while i < num_codes - 1:
             i += 1
             raw = raw_codes[i]
+            nextcode = None if i == num_codes - 1 else raw_codes[i + 1]
             # Filter duplicates
             if raw in codes:
                 continue
@@ -178,7 +179,7 @@ class TradeCodes(object):
             if 2 < len(raw) and (raw.startswith('[]') or raw.startswith('()')):
                 raw = raw[2:]
             if raw.startswith('Di('):
-                if not raw.endswith(')') and i < num_codes - 1:
+                if not raw.endswith(')') and i < num_codes - 1:  # We've found a two-word sophont code
                     next = raw_codes[i + 1]
                     if next.endswith(')'):
                         combo = raw + ' ' + next
