@@ -509,6 +509,7 @@ class testDeltaStar(unittest.TestCase):
     @example('0101 0                    A000400-0 As Ba                                  { 0 } (001+0) [0000] - - A 000 0 NaHu G5 V')
     @example('0101 0                    A000000-0 Cp Cp Cp Cp Cp Cp Cp Cp Cp Cp          { 0 } (000+0) [0000] - - A 000 0 NaHu G5 V')
     @example('0101 0                    A000600-0 Cp Cx Cs Mr Da RsA RsB RsG             { 0 } (000+0) [0000] - - A 000 0 NaHu G5 V')
+    @example('0101 0                    A000600-0 Cp Cx Cs Mr Da RsA                     { 0 } (000+0) [0000] - - A 000 0 NaHu G5 V')
     def test_canonicalise_from_regex_match_and_verify_idempotency(self, starline):
         sector = Sector('# Core', '# 0, 0')
         foo = None
@@ -534,7 +535,8 @@ class testDeltaStar(unittest.TestCase):
         foo.trim_self_ownership()
         foo.trim_self_colonisation()
         self.assertIsNotNone(foo._hash, "Hash not calculated for original star")
-        assume(foo.is_well_formed(enforce=False))
+        well_formed = foo.is_well_formed(enforce=False)
+        assume(well_formed)
 
         foo.canonicalise()
         nu_result, nu_messages = foo.check_canonical()  # Should be in canonical form after canonicalise call
