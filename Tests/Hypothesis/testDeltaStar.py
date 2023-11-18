@@ -189,6 +189,7 @@ class testDeltaStar(unittest.TestCase):
     @example('0101 0                    AD20000-0 As As                                  { 0 } (000+0) [0000] B - A 000 0 NaHu G5 V')
     @example('0101 0                    A000900-0 As In                                  { 0 } (000+0) [0000] B - A 000 0 NaHu G5 V')
     @example('0101 0                    A001900-0 As In                                  { 0 } (000+0) [0000] B - A 000 0 NaHu G5 V')
+    @example('0101 0                    A000000-0 As Ba                                  { 0 } (000+0) [0000] - - A 000 0 NaHu G5 V')
     def test_check_canonicalisation(self, starline) -> None:
         outer_logger = logging.getLogger("PyRoute.Star")
         inner_logger = logging.getLogger("PyRoute.TradeCodes")
