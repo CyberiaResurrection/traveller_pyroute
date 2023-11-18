@@ -495,16 +495,18 @@ class DeltaStar(Star):
 
     def _fix_sophonts(self):
         # if world has pop zero _and_ a native race, they're presumed to be cactus
-        if '0' == self.pop and 0 < len(self.tradeCode.homeworld_list):
-            string_code = str(self.tradeCode)
-            if string_code.startswith('('):
-                # Zero-pop dieback subsumes barren
-                string_code = string_code.replace(' Ba ', ' ')
-                string_code = 'Di' + string_code
-                self.tradeCode = TradeCodes(string_code)
-        if '0' == self.pop and 0 == len(self.tradeCode.homeworld_list) and not self.tl_unknown and 0 < self.tl:
-            if 'Ba' in self.tradeCode.codes and 'Di' in self.tradeCode.codes:  # When both present, Di subsumes Ba
-                self._drop_invalid_trade_code('Ba')
+        if '0' == self.pop:
+            self.popM = 0
+            if 0 < len(self.tradeCode.homeworld_list):
+                string_code = str(self.tradeCode)
+                if string_code.startswith('('):
+                    # Zero-pop dieback subsumes barren
+                    string_code = string_code.replace(' Ba ', ' ')
+                    string_code = 'Di' + string_code
+                    self.tradeCode = TradeCodes(string_code)
+            if 0 == len(self.tradeCode.homeworld_list) and not self.tl_unknown and 0 < self.tl:
+                if 'Ba' in self.tradeCode.codes and 'Di' in self.tradeCode.codes:  # When both present, Di subsumes Ba
+                    self._drop_invalid_trade_code('Ba')
 
     def _drop_invalid_trade_code(self, targcode):
         self.tradeCode.codes = [code for code in self.tradeCode.codes if code != targcode]

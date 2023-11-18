@@ -260,6 +260,21 @@ class testDeltaStar(unittest.TestCase):
                 actual = old_star.parse_to_line()
                 self.assertEqual(expected, actual, "Unexpected TL canonicalisation result")
 
+    def test_pop_mult_canonicalisation_on_zero_pop_world(self):
+        check_list = [
+            ("1507                      E447000-0 Ba                    { -3 } (400+4) [0000] - - - 331 11 NaXX M0 V M4 V",
+             "1507                      E447000-3 Ba                                    { -3 } (400+0) [0000] -     -  - 031 11 NaXX M0 V M4 VI                                               ")
+        ]
+
+        for chunk in check_list:
+            with self.subTest():
+                original = chunk[0]
+                old_star = DeltaStar.parse_line_into_star(original, Sector('# Core', '# 0, 0'), 'fixed', 'fixed')
+
+                expected = chunk[1]
+                old_star.canonicalise()
+                actual = old_star.parse_to_line()
+                self.assertEqual(expected, actual, "Unexpected PBG canonicalisation result")
 
 if __name__ == '__main__':
     unittest.main()
