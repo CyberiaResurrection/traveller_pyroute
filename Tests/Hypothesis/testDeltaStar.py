@@ -506,7 +506,11 @@ class testDeltaStar(unittest.TestCase):
             ('0235 Oduart               C7B3004-5 Fl Di(Oduart) Da             { -2 } (800+2) [0000] - M  A 004 10 HvFd G4 V M3 V M7 V',
              '0235 Oduart               C7B3004-5 Da Di(Oduart) Fl                      { -2 } (800+2) [0000] -     M  A 004 10 HvFd G4 V M3 V M7 V                                           '),
             ('0101                      X73A000-0 Ba Lo Ni Wa                         - -  - 012   --',
-             '0101                      X73A000-1 Di Wa                                 { -3 } -       -      -     -  - 012 0  --                                                            ')
+             '0101                      X73A000-1 Di Wa                                 { -3 } -       -      -     -  - 012 0  --                                                            '),
+            ('0527 Wellington Base      AEFA422-E Ht Ni Oc                            - M  R 711   He',
+             '0527 Wellington Base      AEFA422-E Ht Ni Oc                              { 1 }  -       -      -     M  R 711 0  He                                                            '),
+            ('0239 Etromen              CFB8558-B Fl Ni                               - -  A 523   Na',
+             '0239 Etromen              CFB8558-B Fl Ni                                 { 0 }  -       -      -     -  A 523 0  Na                                                            ')
         ]
 
         sector = Sector(' Core', ' 0, 0')
