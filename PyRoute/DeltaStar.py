@@ -123,6 +123,7 @@ class DeltaStar(Star):
 
         if self.economics is not None:
             infrastructure = self._ehex_to_int(self.economics[3] if self.economics is not None else '0')
+            efficiency = self._ehex_to_int(self.economics[5])
             if self.tradeCode.barren and infrastructure != 0:
                 line = '{} - EX Calculated infrastructure {} does not match generated infrastructure {}'.format(self,
                                                                                                                 infrastructure,
@@ -146,6 +147,10 @@ class DeltaStar(Star):
         if '0' == str(self.atmo) and 'Va' not in self.tradeCode.codeset:
             code = 'Va'
             line = '{}-{} Calculated "{}" not in trade codes {}'.format(self, self.uwp, code, self.tradeCode.codeset)
+            msg.append(line)
+        if not self.tradeCode.barren and 0 == efficiency:
+            line = '{} - EX Calculated efficiency 0 should be coded as 1 (implied by p18, book 3 of T5.10)'.format(self)
+
             msg.append(line)
 
         if '0' == str(self.atmo) and '0' == str(self.size) and '0' == str(self.hydro) and 'As' not in self.tradeCode.codeset:
