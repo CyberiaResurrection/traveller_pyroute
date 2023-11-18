@@ -430,9 +430,9 @@ class DeltaStar(Star):
             if '+0' == efficiency or '-0' == efficiency:
                 econ = econ.replace(efficiency, '+1')
 
-        resources = self._ehex_to_int(self.economics[1])
+        resources = self._ehex_to_int(econ[1])
         max_resources = 12 + self.ggCount + self.belts
-        if 8 > self.uwp.tl_code:
+        if not self.tl_unknown and 8 > self.uwp.tl_code:
             max_resources = 12
         nu_resources = self._int_to_ehex(max(0, min(max_resources, resources)))
         econ = econ[0:1] + nu_resources + econ[2:]
