@@ -510,7 +510,12 @@ class testDeltaStar(unittest.TestCase):
             ('0527 Wellington Base      AEFA422-E Ht Ni Oc                            - M  R 711   He',
              '0527 Wellington Base      AEFA422-E Ht Ni Oc                              { 1 }  -       -      -     M  R 711 0  He                                                            '),
             ('0239 Etromen              CFB8558-B Fl Ni                               - -  A 523   Na',
-             '0239 Etromen              CFB8558-B Fl Ni                                 { 0 }  -       -      -     -  A 523 0  Na                                                            ')
+             '0239 Etromen              CFB8558-B Fl Ni                                 { 0 }  -       -      -     -  A 523 0  Na                                                            '),
+            # For some reason, as of 19 Nov 2023, lintsec says the following expected lines are missing an As trade code
+            ('1220 Gateway              A002688-B As Ic Na Ni Va Cx      { 1 }  (C55+1) [675B] - -  - 822 16 GaFd A2 V F0 V',
+             '1220 Gateway              A002688-B Cx Ic Na Ni Va                        { 1 }  (C55+1) [675B] -     -  - 822 16 GaFd A2 V F0 V                                                '),
+            ('0825 Corstation           C005100-8 As Ic Lo Va            { -2 } (500-5) [1113] - -  - 211 14 GaFd M0 V M1 V',
+             '0825 Corstation           C005100-8 Ic Lo Va                              { -2 } (500-5) [1113] -     -  - 211 14 GaFd M0 V M1 V                                                ')
         ]
 
         sector = Sector(' Core', ' 0, 0')
