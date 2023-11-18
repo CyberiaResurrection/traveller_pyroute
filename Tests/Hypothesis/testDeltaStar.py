@@ -515,7 +515,10 @@ class testDeltaStar(unittest.TestCase):
             ('1220 Gateway              A002688-B As Ic Na Ni Va Cx      { 1 }  (C55+1) [675B] - -  - 822 16 GaFd A2 V F0 V',
              '1220 Gateway              A002688-B Cx Ic Na Ni Va                        { 1 }  (C55+1) [675B] -     -  - 822 16 GaFd A2 V F0 V                                                '),
             ('0825 Corstation           C005100-8 As Ic Lo Va            { -2 } (500-5) [1113] - -  - 211 14 GaFd M0 V M1 V',
-             '0825 Corstation           C005100-8 Ic Lo Va                              { -2 } (500-5) [1113] -     -  - 211 14 GaFd M0 V M1 V                                                ')
+             '0825 Corstation           C005100-8 Ic Lo Va                              { -2 } (500-5) [1113] -     -  - 211 14 GaFd M0 V M1 V                                                '),
+            # Population zero, TL 0, alongside a specific dieback should keep the barren
+            ('0924 Ognar                X867000-0 Ba Ga Di(Ogna)       {-3 } (300+1) [0000] - -  R 004 10 Og K1 V',
+             '0924 Ognar                X867000-0 Ba Di(Ogna) Ga                        { -3 } (300+1) [0000] -     -  R 004 10 Og   K1 V                                                     ')
         ]
 
         sector = Sector(' Core', ' 0, 0')

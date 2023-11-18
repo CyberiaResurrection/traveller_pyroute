@@ -463,6 +463,7 @@ class DeltaStar(Star):
 
     def _fix_sophonts(self):
         # if world has pop zero _and_ a native race, they're presumed to be cactus
+        has_tl = not self.tl_unknown and 0 < self.tl
         if '0' == self.pop:
             self.popM = 0
             if 0 < len(self.tradeCode.homeworld_list):
@@ -472,9 +473,9 @@ class DeltaStar(Star):
                     string_code = string_code.replace(' Ba ', ' ')
                     string_code = 'Di' + string_code
                     self.tradeCode = TradeCodes(string_code)
-                else:
+                elif has_tl:
                     self._drop_invalid_trade_code('Ba')
-            if 0 == len(self.tradeCode.homeworld_list) and not self.tl_unknown and 0 < self.tl:
+            if 0 == len(self.tradeCode.homeworld_list) and has_tl:
                 if 'Ba' in self.tradeCode.codes:
                     self._drop_invalid_trade_code('Ba')
                 if 'Di' not in self.tradeCode.codes:
