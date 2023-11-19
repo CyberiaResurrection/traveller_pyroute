@@ -78,7 +78,7 @@ def process():
         foo.process()
         foo.write()
         result, lines = foo.lintsec(args.lintsec)
-        if not result:
+        if not result and 0 < len(lines):
             logger.critical('Warnings found for ' + sector_file)
             out_name = os.path.join(args.outputdir, filename) + '-warnings'
             with codecs.open(out_name, 'w', 'utf-8') as handle:
