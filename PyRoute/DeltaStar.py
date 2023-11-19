@@ -179,6 +179,8 @@ class DeltaStar(Star):
         self._check_uwp()
         efficiency = None
 
+        self._check_uwp()
+
         if self.economics is not None:
             infrastructure = self._ehex_to_int(self.economics[3])
             efficiency = self._ehex_to_int(self.economics[5])
@@ -296,6 +298,8 @@ class DeltaStar(Star):
 
         ParseStarInput.check_tl(self, fullmsg=msg)
 
+        self._check_uwp()
+
         return 0 == len(msg), msg
 
     def _check_uwp(self):
@@ -379,6 +383,18 @@ class DeltaStar(Star):
         self.star_list_object.canonicalise()
         # Now all's squared up, recalculate importance as something might have changed
         self.calculate_importance()
+
+    def _fix_uwp(self):
+        hydro = self._ehex_to_int(self.hydro)  # Cap hydro to A/10
+        if 10 < hydro:
+            self.hydro = 'A'
+
+        atmo = self._ehex_to_int(self.atmo)  # Cap atmo to F/15
+        if 15 < atmo:
+            self.atmo = 'F'
+
+        if 'X' == self.gov:
+            self.gov = '0'
 
     def _fix_economics(self):
         if self.economics is None:
