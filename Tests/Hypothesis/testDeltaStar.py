@@ -552,5 +552,6 @@ class testDeltaStar(unittest.TestCase):
         second_round = nu_foo.parse_to_line()
         self.assertEqual(first_round, second_round, 'Canonicalisation should be idempotent.\nHypothesis input: ' + starline + '\n')
 
+
 if __name__ == '__main__':
     unittest.main()
