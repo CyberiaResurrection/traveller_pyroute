@@ -121,6 +121,8 @@ class DeltaStar(Star):
     def check_canonical(self):
         msg = []
 
+        self._check_uwp()
+
         if self.economics is not None:
             infrastructure = self._ehex_to_int(self.economics[3] if self.economics is not None else '0')
             efficiency = self._ehex_to_int(self.economics[5])
@@ -241,6 +243,8 @@ class DeltaStar(Star):
         self._check_econ_code(msg, 'Ri', '68', None, '678')
         self._check_econ_code(msg, 'Ag', '456789', '45678', '567')
 
+        self._check_uwp()
+
         return 0 == len(msg), msg
 
     def _check_trade_code(self, msg, code, size, atmo, hydro):
@@ -332,7 +336,33 @@ class DeltaStar(Star):
         elif phys_match and not code_match:
             self._add_missing_trade_code(code)
 
+    def _check_uwp(self):
+        if self.atmo not in '0123456789ABCDEF':
+            self.logger.warning('{}-{} Atmospheric code "{}" out of range - not in range 0-F'
+                                .format(self, self.uwp, self.atmo))
+        if self.hydro not in '0123456789A':
+            self.logger.warning('{}-{} Hydrographic code "{}" out of range - not in range 0-A'
+                                .format(self, self.uwp, self.hydro))
+
+        if 'X' == self.gov:  # Line up with how Lintsec treats 'X' government codes
+            self.logger.warning(
+                '{}-{} Calculated government code "{}" out of range - should be {}'.
+                    format(self, self.uwp, 'X', '0'))
+
+    def _fix_uwp(self):
+        hydro = self._ehex_to_int(self.hydro)  # Cap hydro to A/10
+        if 10 < hydro:
+            self.hydro = 'A'
+
+        atmo = self._ehex_to_int(self.atmo)  # Cap atmo to F/15
+        if 15 < atmo:
+            self.atmo = 'F'
+
+        if 'X' == self.gov:
+            self.gov = '0'
+
     def canonicalise(self):
+        self._fix_uwp()
         self._fix_tl()
 
         self._fix_trade_code('De', '0123456789ABC', '23456789', '0')
