@@ -131,7 +131,8 @@ def bidirectional_astar_path_numpy(G, source, target, bulk_heuristic, min_cost=N
             # Skip bad paths that were enqueued before finding a better one
             qcost = distances[curnode, direction]
             if qcost <= dist:
-                queue[direction] = [item for item in queue[direction] if item[1] > distances[item[2], direction]]
+                queue[direction] = [item for item in queue[direction] if not (item[1] > distances[item[2], direction])]
+                queue[other] = [item for item in queue[other] if not (item[1] > distances[item[2], other])]
                 continue
             # If we've found a better path, update
             revis_continue += 1
@@ -171,10 +172,10 @@ def bidirectional_astar_path_numpy(G, source, target, bulk_heuristic, min_cost=N
 
                     upbound = candidate_bound
                     has_bound = True
-                    path = buildpath(curnode, parent, parents[:, direction])
+                    path = buildpath(curnode, parent, explored[direction])
                     # kludge to work around short-range double-ups
                     if dir_target != path[-1]:
-                        revpath = buildpath(neighbour, neighparent, parents[:, other], False)
+                        revpath = buildpath(neighbour, neighparent, explored[other], False)
                         for item in revpath:
                             path.append(item)
                     bestpath = path
@@ -203,7 +204,7 @@ def buildpath(node, parent, explored, reverse=True):
     path = [node]
     node = parent
 
-    while node != TREE_ROOT:
+    while node is not None:
         path.append(node)
         node = explored[node]
     if reverse:
