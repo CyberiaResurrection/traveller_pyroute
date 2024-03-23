@@ -74,11 +74,11 @@ class testAStarNumpy(baseTest):
         source = galaxy.star_mapping[0]
         target = galaxy.star_mapping[36]
 
-        exp_route = [0, 8, 9, 15, 24, 26, 36]
-        exp_diagnostics = {'branch_factor': 1.001, 'f_exhausted': 0, 'g_exhausted': 1, 'neighbour_bound': 34,
-                            'new_upbounds': 3, 'nodes_expanded': 37, 'nodes_queued': 2, 'nodes_revisited': 2,
-                            'num_jumps': 6, 'un_exhausted': 33, 'targ_exhausted': 0}
-        exp_cost = 281.0
+        exp_route = [0, 8, 9, 15, 24, 36]
+        exp_diagnostics = {'branch_factor': 2.229, 'f_exhausted': 0, 'g_exhausted': 2, 'neighbour_bound': 20,
+                            'new_upbounds': 2, 'nodes_expanded': 24, 'nodes_queued': 43, 'nodes_revisited': 3,
+                            'num_jumps': 5, 'un_exhausted': 18, 'targ_exhausted': 0}
+        exp_cost = 239.0
         act_route, diagnostics = bidirectional_astar_path_numpy(dist_graph, source.index, target.index, heuristic)
         act_cost = galaxy.route_cost(exp_route)
         self.assertEqual(exp_route, act_route)
