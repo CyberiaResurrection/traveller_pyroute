@@ -179,6 +179,7 @@ def bidirectional_astar_path_numpy(G, source, target, bulk_heuristic, min_cost=N
                 if upbound > candidate_bound:
                     new_upbounds += 1
                     neighparent = parents[neighbour, other]
+                    neighparent = None if TREE_ROOT == neighparent else neighparent
 
                     upbound = candidate_bound
                     has_bound = True

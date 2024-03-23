@@ -84,3 +84,36 @@ class testAStarNumpy(baseTest):
         self.assertEqual(exp_route, act_route)
         self.assertEqual(exp_cost, act_cost)
         self.assertEqual(exp_diagnostics, diagnostics)
+
+    def testBidirectionalAStarOverSubsectorSourceAndTargetConnected(self):
+        sourcefile = self.unpack_filename('DeltaFiles/Zarushagar-Ibara.sec')
+
+        sector = SectorDictionary.load_traveller_map_file(sourcefile)
+        delta = DeltaDictionary()
+        delta[sector.name] = sector
+
+        args = self._make_args()
+
+        galaxy = DeltaGalaxy(args.btn, args.max_jump)
+        galaxy.read_sectors(delta, args.pop_code, args.ru_calc,
+                            args.route_reuse, args.routes, args.route_btn, args.mp_threads, args.debug_flag)
+        galaxy.output_path = args.output
+
+        galaxy.generate_routes()
+        galaxy.trade.calculate_components()
+        dist_graph = DistanceGraph(galaxy.stars)
+        heuristic = dist_graph.distances_from_target
+
+        source = galaxy.star_mapping[0]
+        target = galaxy.star_mapping[8]
+
+        exp_route = [0, 8]
+        exp_diagnostics = {'branch_factor': 9.0, 'f_exhausted': 1, 'g_exhausted': 0, 'neighbour_bound': 3,
+                            'new_upbounds': 1, 'nodes_expanded': 4, 'nodes_queued': 9, 'nodes_revisited': 0,
+                            'num_jumps': 1, 'un_exhausted': 2, 'targ_exhausted': 0}
+        exp_cost = 74.0
+        act_route, diagnostics = bidirectional_astar_path_numpy(dist_graph, source.index, target.index, heuristic)
+        act_cost = galaxy.route_cost(exp_route)
+        self.assertEqual(exp_route, act_route)
+        self.assertEqual(exp_cost, act_cost)
+        self.assertEqual(exp_diagnostics, diagnostics)
