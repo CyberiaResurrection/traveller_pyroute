@@ -112,6 +112,7 @@ def bidirectional_astar_path_numpy(G, source, target, bulk_heuristic, min_cost=N
         node_counter += 1
         min_f[direction] = estimate
         min_f_other = min_f[other]
+        active_threshold = upbound - min_f_other
 
         # There's no point checking for upbound busts when upbound is infinite
         if has_bound:
@@ -119,7 +120,9 @@ def bidirectional_astar_path_numpy(G, source, target, bulk_heuristic, min_cost=N
                 continue
 
             # if curnode plus shortest path in the other direction busts upbound, move on
-            if dist + min_f_other > upbound:
+            if dist + min_f_other - potentials[other][curnode] > upbound:
+                queue[0] = [item for item in queue[0] if item[1] + min_f[1] - potentials[1][item[2]] <= upbound]
+                queue[1] = [item for item in queue[1] if item[1] + min_f[0] - potentials[0][item[2]] <= upbound]
                 continue
 
         if curnode in explored[direction]:
@@ -151,6 +154,13 @@ def bidirectional_astar_path_numpy(G, source, target, bulk_heuristic, min_cost=N
             g_exhausted += 1
             continue
         active_weights = active_weights[keep]
+        if has_bound:
+            keep = active_weights <= active_threshold
+            active_nodes = active_nodes[keep]
+            if 0 == len(active_nodes):
+                f_exhausted += 1
+                continue
+            active_weights = active_weights[keep]
         augmented_weights = active_weights + potentials[direction][active_nodes]
         num_neighbours = len(active_nodes)
         parents[active_nodes, direction] = curnode
