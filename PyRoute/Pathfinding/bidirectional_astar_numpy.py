@@ -83,7 +83,6 @@ def bidirectional_astar_path_numpy(G, source, target, bulk_heuristic, min_cost=N
 
     # minimum f values for each queue
     min_f = np.zeros(2)
-    # preheat min_f with starting heuristic values
     min_f[0] = potentials[0][source]
     min_f[1] = potentials[1][target]
 
@@ -174,6 +173,8 @@ def bidirectional_astar_path_numpy(G, source, target, bulk_heuristic, min_cost=N
             act_weight = active_weights[i]
             aug_weight = augmented_weights[i]
             if aug_weight > upbound:
+                continue
+            if act_weight - potentials[other][neighbour] > active_threshold:
                 continue
             # If the neighbour we're looking at has a label in _both_ searches, then the searches have met,
             # and we can start updating a few things
