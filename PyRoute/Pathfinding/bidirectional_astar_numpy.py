@@ -157,13 +157,21 @@ def bidirectional_astar_path_numpy(G, source, target, bulk_heuristic, min_cost=N
             continue
         active_weights = active_weights[keep]
         if has_bound:
-            keep = active_weights <= active_threshold
+            keep = active_weights - potentials[other][active_nodes] <= active_threshold
             active_nodes = active_nodes[keep]
             if 0 == len(active_nodes):
                 f_exhausted += 1
                 continue
             active_weights = active_weights[keep]
         augmented_weights = active_weights + potentials[direction][active_nodes]
+        if has_bound:
+            keep = augmented_weights <= upbound
+            active_nodes = active_nodes[keep]
+            if 0 == len(active_nodes):
+                f_exhausted += 1
+                continue
+            active_weights = active_weights[keep]
+            augmented_weights = augmented_weights[keep]
         num_neighbours = len(active_nodes)
         parents[active_nodes, direction] = curnode
         distances[active_nodes, direction] = active_weights
