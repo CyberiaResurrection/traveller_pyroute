@@ -68,7 +68,7 @@ def bidirectional_astar_path_numpy(G, source, target, bulk_heuristic, min_cost=N
     upbound = floatinf if upbound is None else upbound
     has_bound = floatinf != upbound
     bestpath = None
-    diagnostics = False
+    diagnostics = True
 
     # pre-calc the minimum-cost edge on each node
     min_cost = np.zeros(len(G))
@@ -155,6 +155,7 @@ def bidirectional_astar_path_numpy(G, source, target, bulk_heuristic, min_cost=N
             if floatinf > distances[neighbour, other]:
                 candidate_bound = np.sum(distances[neighbour, :])
                 if upbound > candidate_bound:
+                    new_upbounds += 1
                     raw_nodes = G_succ[neighbour]
                     neighbour_nodes = raw_nodes[0]
                     neighbour_weights = raw_nodes[1]
@@ -186,6 +187,14 @@ def bidirectional_astar_path_numpy(G, source, target, bulk_heuristic, min_cost=N
         bestpath.reverse()
     if not diagnostics:
         return bestpath, {}
+    branch = _calc_branching_factor(queue_counter, len(bestpath) - 1)
+    neighbour_bound = node_counter - 1 + revis_continue - revisited
+    un_exhausted = neighbour_bound - f_exhausted - g_exhausted - targ_exhausted
+    diagnostics = {'nodes_expanded': node_counter, 'nodes_queued': queue_counter, 'branch_factor': branch,
+                   'num_jumps': len(bestpath) - 1, 'nodes_revisited': revisited, 'neighbour_bound': neighbour_bound,
+                   'new_upbounds': new_upbounds, 'g_exhausted': g_exhausted, 'f_exhausted': f_exhausted,
+                   'un_exhausted': un_exhausted, 'targ_exhausted': targ_exhausted}
+    return bestpath, diagnostics
 
 
 def buildpath(node, parent, explored, reverse=True):
