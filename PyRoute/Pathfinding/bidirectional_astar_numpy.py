@@ -12,6 +12,9 @@ from heapq import heappop, heappush, heapify
 import networkx as nx
 import numpy as np
 
+TREE_ROOT = -1
+TREE_NONE = -100
+
 
 def _calc_branching_factor(nodes_queued, path_len):
     if path_len == nodes_queued:
@@ -59,6 +62,9 @@ def bidirectional_astar_path_numpy(G, source, target, bulk_heuristic, min_cost=N
 
     # Maps explored nodes to parent closest to the respective direction's source.
     explored = [{}, {}]
+    parents = np.ones((len(G), 2), dtype=int) * TREE_NONE
+    parents[source, 0] = TREE_ROOT
+    parents[target, 1] = TREE_ROOT
 
     # Traces lowest distance from respective direction's source node found for each node
     distances = np.ones((len(G), 2)) * float('+inf')
@@ -129,6 +135,7 @@ def bidirectional_astar_path_numpy(G, source, target, bulk_heuristic, min_cost=N
                 continue
             # If we've found a better path, update
             revis_continue += 1
+            parents[curnode, direction] = parent
             distances[curnode, direction] = dist
 
         explored[direction][curnode] = parent
@@ -145,6 +152,7 @@ def bidirectional_astar_path_numpy(G, source, target, bulk_heuristic, min_cost=N
         active_weights = active_weights[keep]
         augmented_weights = active_weights + potentials[direction][active_nodes]
         num_neighbours = len(active_nodes)
+        parents[active_nodes, direction] = curnode
         distances[active_nodes, direction] = active_weights
 
         for i in range(num_neighbours):
@@ -159,25 +167,14 @@ def bidirectional_astar_path_numpy(G, source, target, bulk_heuristic, min_cost=N
                 candidate_bound = np.sum(distances[neighbour, :])
                 if upbound > candidate_bound:
                     new_upbounds += 1
-                    raw_nodes = G_succ[neighbour]
-                    neighbour_nodes = raw_nodes[0]
-                    neighbour_weights = raw_nodes[1]
-                    neighparent = None
-                    neighcost = floatinf
-                    for i in range(len(neighbour_nodes)):
-                        node = neighbour_nodes[i]
-                        if node in explored[other]:
-                            nodecost = neighbour_weights[i]
-                            if neighcost > nodecost:
-                                neighparent = node
-                                neighcost = nodecost
+                    neighparent = parents[neighbour, other]
 
                     upbound = candidate_bound
                     has_bound = True
-                    path = buildpath(curnode, parent, explored[direction])
+                    path = buildpath(curnode, parent, parents[:, direction])
                     # kludge to work around short-range double-ups
                     if dir_target != path[-1]:
-                        revpath = buildpath(neighbour, neighparent, explored[other], False)
+                        revpath = buildpath(neighbour, neighparent, parents[:, other], False)
                         for item in revpath:
                             path.append(item)
                     bestpath = path
@@ -206,7 +203,7 @@ def buildpath(node, parent, explored, reverse=True):
     path = [node]
     node = parent
 
-    while node is not None:
+    while node != TREE_ROOT:
         path.append(node)
         node = explored[node]
     if reverse:
