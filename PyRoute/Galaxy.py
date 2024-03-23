@@ -400,6 +400,7 @@ class Galaxy(AreaItem):
         self.big_component = None
         self.star_mapping = dict()
         self.trade = None
+        self.bidir_path = False
 
     # For the JSONPickel work
     def __getstate__(self):
@@ -775,7 +776,7 @@ class Galaxy(AreaItem):
         # admissible
         raw = np.maximum(raw, distances)
 
-        return 1.005 * raw
+        return raw * (0.995 if self.bidir_path else 1.005)
 
     def route_cost(self, route):
         """
