@@ -75,9 +75,9 @@ class testAStarNumpy(baseTest):
         target = galaxy.star_mapping[36]
 
         exp_route = [0, 8, 9, 15, 24, 36]
-        exp_diagnostics = {'branch_factor': 2.131, 'f_exhausted': 0, 'g_exhausted': 1, 'neighbour_bound': 30,
-                            'new_upbounds': 3, 'nodes_expanded': 33, 'nodes_queued': 37, 'nodes_revisited': 2,
-                            'num_jumps': 5, 'un_exhausted': 29, 'targ_exhausted': 0}
+        exp_diagnostics = {'branch_factor': 2.059, 'f_exhausted': 6, 'g_exhausted': 1, 'neighbour_bound': 18,
+                            'new_upbounds': 3, 'nodes_expanded': 21, 'nodes_queued': 33, 'nodes_revisited': 2,
+                            'num_jumps': 5, 'un_exhausted': 11, 'targ_exhausted': 0}
         exp_cost = 239.0
         act_route, diagnostics = bidirectional_astar_path_numpy(dist_graph, source.index, target.index, heuristic)
         act_cost = galaxy.route_cost(exp_route)
