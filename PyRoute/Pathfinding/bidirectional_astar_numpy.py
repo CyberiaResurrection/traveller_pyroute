@@ -74,7 +74,6 @@ def bidirectional_astar_path_numpy(G, source, target, bulk_heuristic, min_cost=N
     # Tracks shortest _complete_ path found so far
     floatinf = float('inf')
     upbound = floatinf if upbound is None else upbound
-    has_bound = floatinf != upbound
     bestpath = None
     diagnostics = True
 
@@ -116,13 +115,11 @@ def bidirectional_astar_path_numpy(G, source, target, bulk_heuristic, min_cost=N
         min_f_other = min_f[other]
         active_threshold = upbound - min_f_other
 
-        # There's no point checking for upbound busts when upbound is infinite
-        if has_bound:
-            # if curnode busts upbound, or curnode plus shortest path in the other direction busts upbound, move on
-            if estimate > upbound or (dist + min_f_other - potentials[other][curnode] > upbound):
-                queue[0] = [item for item in queue[0] if item[1] + min_f[1] - potentials[1][item[2]] <= upbound]
-                queue[1] = [item for item in queue[1] if item[1] + min_f[0] - potentials[0][item[2]] <= upbound]
-                continue
+        # if curnode busts upbound, or curnode plus shortest path in the other direction busts upbound, move on
+        if estimate > upbound or (dist + min_f_other - potentials[other][curnode] > upbound):
+            queue[0] = [item for item in queue[0] if item[1] + min_f[1] - potentials[1][item[2]] <= upbound]
+            queue[1] = [item for item in queue[1] if item[1] + min_f[0] - potentials[0][item[2]] <= upbound]
+            continue
 
         if curnode in explored[direction]:
             revisited += 1
@@ -153,22 +150,24 @@ def bidirectional_astar_path_numpy(G, source, target, bulk_heuristic, min_cost=N
             g_exhausted += 1
             continue
         active_weights = active_weights[keep]
-        if has_bound:
-            keep = active_weights - potentials[other][active_nodes] <= active_threshold
+        keep = active_weights - potentials[other][active_nodes] <= active_threshold
+        if not keep.all():
             active_nodes = active_nodes[keep]
             if 0 == len(active_nodes):
                 f_exhausted += 1
                 continue
             active_weights = active_weights[keep]
+
         augmented_weights = active_weights + potentials[direction][active_nodes]
-        if has_bound:
-            keep = augmented_weights <= upbound
+        keep = augmented_weights <= upbound
+        if not keep.all():
             active_nodes = active_nodes[keep]
             if 0 == len(active_nodes):
                 f_exhausted += 1
                 continue
             active_weights = active_weights[keep]
             augmented_weights = augmented_weights[keep]
+
         num_neighbours = len(active_nodes)
         parents[active_nodes, direction] = curnode
         distances[active_nodes, direction] = active_weights
