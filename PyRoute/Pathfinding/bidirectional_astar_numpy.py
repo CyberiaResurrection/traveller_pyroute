@@ -16,6 +16,8 @@ import numpy as np
 def _calc_branching_factor(nodes_queued, path_len):
     if path_len == nodes_queued:
         return 1.0
+    if 1 == path_len:
+        return nodes_queued
 
     # Letting nodes_queued be S, and path_len be d, we're trying to solve for the value of r in the following:
     # S = r * ( r ^ (d-1) - 1 ) / ( r - 1 )
@@ -123,6 +125,7 @@ def bidirectional_astar_path_numpy(G, source, target, bulk_heuristic, min_cost=N
             # Skip bad paths that were enqueued before finding a better one
             qcost = distances[curnode, direction]
             if qcost <= dist:
+                queue[direction] = [item for item in queue[direction] if item[1] > distances[item[2], direction]]
                 continue
             # If we've found a better path, update
             revis_continue += 1
@@ -178,8 +181,10 @@ def bidirectional_astar_path_numpy(G, source, target, bulk_heuristic, min_cost=N
                         for item in revpath:
                             path.append(item)
                     bestpath = path
-                    # TODO: Queue grooming
+                    queue[0] = [item for item in queue[0] if item[1] + min_f[1] - potentials[1][item[2]] <= upbound]
+                    queue[1] = [item for item in queue[1] if item[1] + min_f[0] - potentials[0][item[2]] <= upbound]
             push(queue[direction], (aug_weight, act_weight, neighbour, curnode))
+            queue_counter += 1
 
     if bestpath is None:
         raise nx.NetworkXNoPath(f"Node {target} not reachable from {source}")
