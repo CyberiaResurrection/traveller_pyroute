@@ -83,6 +83,9 @@ def bidirectional_astar_path_numpy(G, source, target, bulk_heuristic, min_cost=N
 
     # minimum f values for each queue
     min_f = np.zeros(2)
+    # preheat min_f with starting heuristic values
+    min_f[0] = potentials[0][source]
+    min_f[1] = potentials[1][target]
 
     node_counter = 0
     queue_counter = 2  # Source and target nodes are already queued
