@@ -101,7 +101,7 @@ def bidirectional_astar_path_numpy(G, source, target, bulk_heuristic, min_cost=N
             direction = 1
         elif 0 == len(queue[1]):  # Reverse queue is empty, forcing selection of forward queue
             direction = 0
-        else:
+        else:  # If both queues aren't empty, select reverse queue if it's shorter, otherwise forward queue
             direction = 1 if len(queue[1]) < len(queue[0]) else 0
         other = 1 - direction
 
@@ -130,6 +130,8 @@ def bidirectional_astar_path_numpy(G, source, target, bulk_heuristic, min_cost=N
             # Skip bad paths that were enqueued before finding a better one
             qcost = distances[curnode, direction]
             if qcost <= dist:
+                # Since we've hit a bad path, groom both queues to remove other such paths and save effort of
+                # expanding them
                 queue[direction] = [item for item in queue[direction] if not (item[1] > distances[item[2], direction])]
                 queue[other] = [item for item in queue[other] if not (item[1] > distances[item[2], other])]
                 continue
@@ -144,12 +146,16 @@ def bidirectional_astar_path_numpy(G, source, target, bulk_heuristic, min_cost=N
         raw_nodes = G_succ[curnode]
         active_nodes = raw_nodes[0]
         active_weights = dist + raw_nodes[1]
+        # First stage of neighbour filtering - dump neighbours that bust their distance labels in current direction
         keep = active_weights <= distances[active_nodes, direction]
         active_nodes = active_nodes[keep]
         if 0 == len(active_nodes):
             g_exhausted += 1
             continue
         active_weights = active_weights[keep]
+        # Second stage of neighbour filtering - dump neighbours that bust:
+        # g(current search, neighbour) + min f from other search - h(current search, neighbour) <= upbound
+        # Filtering here means we have a chance of not needing to generate augmented weights for third stage filtering
         keep = active_weights - potentials[other][active_nodes] <= active_threshold
         if not keep.all():
             active_nodes = active_nodes[keep]
@@ -159,6 +165,8 @@ def bidirectional_astar_path_numpy(G, source, target, bulk_heuristic, min_cost=N
             active_weights = active_weights[keep]
 
         augmented_weights = active_weights + potentials[direction][active_nodes]
+        # Third stage of filtering - dump neighbours whose augmented weights
+        # (g(current search, neighbour) + h(current search, neighbour)) bust current upbound
         keep = augmented_weights <= upbound
         if not keep.all():
             active_nodes = active_nodes[keep]
@@ -176,21 +184,23 @@ def bidirectional_astar_path_numpy(G, source, target, bulk_heuristic, min_cost=N
             neighbour = active_nodes[i]
             act_weight = active_weights[i]
             aug_weight = augmented_weights[i]
-            if aug_weight > upbound:
+            if aug_weight > upbound:  # If upbound has changed since we started spinning thru neighbors, check for bust
                 continue
-            if act_weight - potentials[other][neighbour] > active_threshold:
-                continue
+            # Retained for completeness of algorithm description, but didn't actually fire in testing
+            #if act_weight - potentials[other][neighbour] > active_threshold:
+            #    continue
+
             # If the neighbour we're looking at has a label in _both_ searches, then the searches have met,
             # and we can start updating a few things
             if floatinf > distances[neighbour, other]:
-                candidate_bound = np.sum(distances[neighbour, :])
+                # In testing, this worked out >5x faster than np.sum(distances[neighbour, :])
+                candidate_bound = distances[neighbour, 0] + distances[neighbour, 1]
                 if upbound > candidate_bound:
                     new_upbounds += 1
                     neighparent = parents[neighbour, other]
                     neighparent = None if TREE_ROOT == neighparent else neighparent
 
                     upbound = candidate_bound
-                    has_bound = True
                     path = buildpath(curnode, parent, explored[direction])
                     # kludge to work around short-range double-ups
                     if dir_target != path[-1]:
@@ -198,6 +208,7 @@ def bidirectional_astar_path_numpy(G, source, target, bulk_heuristic, min_cost=N
                         for item in revpath:
                             path.append(item)
                     bestpath = path
+                    # Now we've found a better path, groom both queues for nodes busting the new upbound
                     queue[0] = [item for item in queue[0] if item[1] + min_f[1] - potentials[1][item[2]] <= upbound]
                     queue[1] = [item for item in queue[1] if item[1] + min_f[0] - potentials[0][item[2]] <= upbound]
             push(queue[direction], (aug_weight, act_weight, neighbour, curnode))
