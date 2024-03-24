@@ -112,8 +112,12 @@ def bidirectional_astar_path_numpy(G, source, target, bulk_heuristic, min_cost=N
 
         # if curnode busts upbound, or curnode plus shortest path in the other direction busts upbound, move on
         if estimate > upbound or (dist + min_f_other - potentials[other][curnode] > upbound):
+            queue[0] = [item for item in queue[0] if item[0] <= upbound]
+            queue[1] = [item for item in queue[1] if item[0] <= upbound]
             queue[0] = [item for item in queue[0] if item[1] + min_f[1] - potentials[1][item[2]] <= upbound]
             queue[1] = [item for item in queue[1] if item[1] + min_f[0] - potentials[0][item[2]] <= upbound]
+            heapify(queue[0])
+            heapify(queue[1])
             continue
 
         if curnode in explored[direction]:
@@ -129,6 +133,8 @@ def bidirectional_astar_path_numpy(G, source, target, bulk_heuristic, min_cost=N
                 # expanding them
                 queue[direction] = [item for item in queue[direction] if not (item[1] > distances[item[2], direction])]
                 queue[other] = [item for item in queue[other] if not (item[1] > distances[item[2], other])]
+                heapify(queue[0])
+                heapify(queue[1])
                 continue
             # If we've found a better path, update
             revis_continue += 1
@@ -209,6 +215,8 @@ def bidirectional_astar_path_numpy(G, source, target, bulk_heuristic, min_cost=N
                     # Now we've found a better path, groom both queues for nodes busting the new upbound
                     queue[0] = [item for item in queue[0] if item[1] + min_f[1] - potentials[1][item[2]] <= upbound]
                     queue[1] = [item for item in queue[1] if item[1] + min_f[0] - potentials[0][item[2]] <= upbound]
+                    heapify(queue[0])
+                    heapify(queue[1])
             heappush(queue[direction], (aug_weight, act_weight, neighbour, curnode))
             queue_counter += 1
 
