@@ -47,9 +47,6 @@ def _calc_branching_factor(nodes_queued, path_len):
 
 def bidirectional_astar_path_numpy(G, source, target, bulk_heuristic, min_cost=None, upbound=None):
 
-    push = heappush
-    pop = heappop
-
     G_succ = G._arcs  # For speed-up
 
     # pre-calc heuristics for all nodes to the respective direction's target node
@@ -78,7 +75,7 @@ def bidirectional_astar_path_numpy(G, source, target, bulk_heuristic, min_cost=N
     diagnostics = True
 
     # pre-calc the minimum-cost edge on each node
-    min_cost = np.zeros(len(G))
+    min_cost = np.zeros(len(G)) if min_cost is None else min_cost
 
     # minimum f values for each queue
     min_f = np.zeros(2)
@@ -92,7 +89,6 @@ def bidirectional_astar_path_numpy(G, source, target, bulk_heuristic, min_cost=N
     f_exhausted = 0
     new_upbounds = 0
     targ_exhausted = 0
-    un_exhausted = 0
     revis_continue = 0
 
     # Now begin the bidirectional pathfinding
@@ -105,7 +101,6 @@ def bidirectional_astar_path_numpy(G, source, target, bulk_heuristic, min_cost=N
             direction = 1 if len(queue[1]) < len(queue[0]) else 0
         other = 1 - direction
 
-        dir_source = target if 1 == direction else source
         dir_target = source if 1 == direction else target
 
         # Pop the smallest item from current queue.
@@ -214,7 +209,7 @@ def bidirectional_astar_path_numpy(G, source, target, bulk_heuristic, min_cost=N
                     # Now we've found a better path, groom both queues for nodes busting the new upbound
                     queue[0] = [item for item in queue[0] if item[1] + min_f[1] - potentials[1][item[2]] <= upbound]
                     queue[1] = [item for item in queue[1] if item[1] + min_f[0] - potentials[0][item[2]] <= upbound]
-            push(queue[direction], (aug_weight, act_weight, neighbour, curnode))
+            heappush(queue[direction], (aug_weight, act_weight, neighbour, curnode))
             queue_counter += 1
 
     if bestpath is None:
