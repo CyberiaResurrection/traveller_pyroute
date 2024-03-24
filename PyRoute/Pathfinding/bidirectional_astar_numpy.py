@@ -93,13 +93,13 @@ def bidirectional_astar_path_numpy(G, source, target, bulk_heuristic, min_cost=N
 
     # Now begin the bidirectional pathfinding
     while queue[0] or queue[1]:  # While at least one queued node remains to process, across either queue
-        if 0 == len(queue[0]):  # Forward queue is empty, forcing selection of reverse queue
+        if not queue[0]:  # Forward queue is empty, forcing selection of reverse queue
             direction = 1
-        elif 0 == len(queue[1]):  # Reverse queue is empty, forcing selection of forward queue
+        elif not queue[1]:  # Reverse queue is empty, forcing selection of forward queue
             direction = 0
         else:  # If both queues aren't empty, select reverse queue if it's shorter, otherwise forward queue
             direction = 1 if len(queue[1]) < len(queue[0]) else 0
-        other = 1 - direction
+        other = ~direction
 
         dir_target = source if 1 == direction else target
 
