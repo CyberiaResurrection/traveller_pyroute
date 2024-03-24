@@ -212,13 +212,18 @@ def bidirectional_astar_path_numpy(G, source, target, bulk_heuristic, min_cost=N
                         for item in revpath:
                             path.append(item)
                     bestpath = path
-                    # Now we've found a better path, groom both queues for nodes busting the new upbound
-                    queue[0] = [item for item in queue[0] if item[1] + min_f[1] - potentials[1][item[2]] <= upbound]
-                    queue[1] = [item for item in queue[1] if item[1] + min_f[0] - potentials[0][item[2]] <= upbound]
-                    heapify(queue[0])
-                    heapify(queue[1])
+
             heappush(queue[direction], (aug_weight, act_weight, neighbour, curnode))
             queue_counter += 1
+
+        if new_bound:  # Save queue grooming to the end, in case more than one upper bound landed
+            # Now we've found a better path, groom both queues for nodes busting the new upbound
+            queue[0] = [item for item in queue[0] if item[0] <= upbound]
+            queue[1] = [item for item in queue[1] if item[0] <= upbound]
+            queue[0] = [item for item in queue[0] if item[1] + min_f[1] - potentials[1][item[2]] <= upbound]
+            queue[1] = [item for item in queue[1] if item[1] + min_f[0] - potentials[0][item[2]] <= upbound]
+            heapify(queue[0])
+            heapify(queue[1])
 
     if bestpath is None:
         raise nx.NetworkXNoPath(f"Node {target} not reachable from {source}")
