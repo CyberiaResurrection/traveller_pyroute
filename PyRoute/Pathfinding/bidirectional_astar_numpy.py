@@ -179,13 +179,15 @@ def bidirectional_astar_path_numpy(G, source, target, bulk_heuristic, min_cost=N
         num_neighbours = len(active_nodes)
         parents[active_nodes, direction] = curnode
         distances[active_nodes, direction] = active_weights
+        new_bound = False
 
         for i in range(num_neighbours):
             neighbour = active_nodes[i]
             act_weight = active_weights[i]
             aug_weight = augmented_weights[i]
-            if aug_weight > upbound:  # If upbound has changed since we started spinning thru neighbors, check for bust
-                continue
+            if new_bound:
+                if aug_weight > upbound:  # If upbound has changed since we started spinning thru neighbors, check for bust
+                    continue
             # Retained for completeness of algorithm description, but didn't actually fire in testing
             #if act_weight - potentials[other][neighbour] > active_threshold:
             #    continue
@@ -196,6 +198,7 @@ def bidirectional_astar_path_numpy(G, source, target, bulk_heuristic, min_cost=N
                 # In testing, this worked out >5x faster than np.sum(distances[neighbour, :])
                 candidate_bound = distances[neighbour, 0] + distances[neighbour, 1]
                 if upbound > candidate_bound:
+                    new_bound = True
                     new_upbounds += 1
                     neighparent = parents[neighbour, other]
                     neighparent = None if TREE_ROOT == neighparent else neighparent
