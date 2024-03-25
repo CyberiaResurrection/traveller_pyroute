@@ -99,7 +99,7 @@ def bidirectional_astar_path_numpy(G, source, target, bulk_heuristic, min_cost=N
             direction = 0
         else:  # If both queues aren't empty, select reverse queue if it's shorter, otherwise forward queue
             direction = 1 if len(queue[1]) < len(queue[0]) else 0
-        other = ~direction
+        other = 1 - direction
 
         dir_target = source if 1 == direction else target
 
@@ -112,10 +112,10 @@ def bidirectional_astar_path_numpy(G, source, target, bulk_heuristic, min_cost=N
 
         # if curnode busts upbound, or curnode plus shortest path in the other direction busts upbound, move on
         if estimate > upbound or (dist + min_f_other - potentials[other][curnode] > upbound):
-            queue[0] = [item for item in queue[0] if item[0] <= upbound]
-            queue[1] = [item for item in queue[1] if item[0] <= upbound]
-            queue[0] = [item for item in queue[0] if item[1] + min_f[1] - potentials[1][item[2]] <= upbound]
-            queue[1] = [item for item in queue[1] if item[1] + min_f[0] - potentials[0][item[2]] <= upbound]
+            queue[0] = [item for item in queue[0]
+                        if (item[0] <= upbound) and (item[1] + min_f[1] - potentials[1][item[2]] <= upbound)]
+            queue[1] = [item for item in queue[1]
+                        if (item[0] <= upbound) and (item[1] + min_f[0] - potentials[0][item[2]] <= upbound)]
             heapify(queue[0])
             heapify(queue[1])
             continue
@@ -218,10 +218,16 @@ def bidirectional_astar_path_numpy(G, source, target, bulk_heuristic, min_cost=N
 
         if new_bound:  # Save queue grooming to the end, in case more than one upper bound landed
             # Now we've found a better path, groom both queues for nodes busting the new upbound
-            queue[0] = [item for item in queue[0] if item[0] <= upbound]
-            queue[1] = [item for item in queue[1] if item[0] <= upbound]
-            queue[0] = [item for item in queue[0] if item[1] + min_f[1] - potentials[1][item[2]] <= upbound]
-            queue[1] = [item for item in queue[1] if item[1] + min_f[0] - potentials[0][item[2]] <= upbound]
+            # first, update min_f values before we groom the queues
+            if queue[0]:
+                min_f[0] = max(min_f[0], queue[0][0][0])
+            if queue[1]:
+                min_f[1] = max(min_f[1], queue[1][0][0])
+
+            queue[0] = [item for item in queue[0]
+                        if (item[0] <= upbound) and (item[1] + min_f[1] - potentials[1][item[2]] <= upbound)]
+            queue[1] = [item for item in queue[1]
+                        if (item[0] <= upbound) and (item[1] + min_f[0] - potentials[0][item[2]] <= upbound)]
             heapify(queue[0])
             heapify(queue[1])
 
