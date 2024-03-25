@@ -209,8 +209,7 @@ def bidirectional_astar_path_numpy(G, source, target, bulk_heuristic, min_cost=N
                     # kludge to work around short-range double-ups
                     if dir_target != path[-1]:
                         revpath = buildpath(neighbour, neighparent, explored[other], False)
-                        for item in revpath:
-                            path.append(item)
+                        path.extend(revpath)
                     bestpath = path
 
             heappush(queue[direction], (aug_weight, act_weight, neighbour, curnode))
@@ -219,10 +218,8 @@ def bidirectional_astar_path_numpy(G, source, target, bulk_heuristic, min_cost=N
         if new_bound:  # Save queue grooming to the end, in case more than one upper bound landed
             # Now we've found a better path, groom both queues for nodes busting the new upbound
             # first, update min_f values before we groom the queues
-            if queue[0]:
-                min_f[0] = max(min_f[0], queue[0][0][0])
-            if queue[1]:
-                min_f[1] = max(min_f[1], queue[1][0][0])
+            min_f[0] = max(min_f[0], queue[0][0][0]) if queue[0] else min_f[0]
+            min_f[1] = max(min_f[1], queue[1][0][0]) if queue[1] else min_f[1]
 
             queue[0] = [item for item in queue[0]
                         if (item[0] <= upbound) and (item[1] + min_f[1] - potentials[1][item[2]] <= upbound)]
