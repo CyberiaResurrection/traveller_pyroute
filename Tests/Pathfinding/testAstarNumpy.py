@@ -152,3 +152,25 @@ class testAStarNumpy(baseTest):
         self.assertEqual(exp_route, act_route)
         self.assertEqual(exp_cost, act_cost)
         self.assertEqual(exp_diagnostics, diagnostics)
+
+    def testBidirectionalAStarBoundBlowup(self):
+        sourcefile = self.unpack_filename('DeltaFiles/bidirectional_astar_blowups/Zdiedeiant.sec')
+
+        sector = SectorDictionary.load_traveller_map_file(sourcefile)
+        delta = DeltaDictionary()
+        delta[sector.name] = sector
+
+        args = self._make_args()
+
+        galaxy = DeltaGalaxy(args.btn, args.max_jump)
+        galaxy.read_sectors(delta, args.pop_code, args.ru_calc,
+                            args.route_reuse, args.routes, args.route_btn, args.mp_threads, args.debug_flag)
+        galaxy.output_path = args.output
+
+        galaxy.generate_routes()
+        galaxy.trade.calculate_components()
+        galaxy.trade.shortest_path_tree = ApproximateShortestPathTreeDistanceGraph(0, galaxy.stars, 0)
+        dist_graph = DistanceGraph(galaxy.stars)
+        heuristic = galaxy.heuristic_distance_bulk
+
+        galaxy.trade.calculate_routes()
