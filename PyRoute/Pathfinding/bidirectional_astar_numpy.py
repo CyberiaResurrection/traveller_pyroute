@@ -75,7 +75,10 @@ def bidirectional_astar_path_numpy(G, source, target, bulk_heuristic, min_cost=N
     diagnostics = True
 
     # pre-calc the minimum-cost edge on each node
-    min_cost = np.zeros(len(G)) if min_cost is None else min_cost
+    mincost = np.zeros((len(G), 2), dtype=float)
+    if min_cost is not None:
+        mincost[:, 0] = min_cost
+    up_threshold = upbound - mincost
 
     # minimum f values for each queue
     min_f = np.zeros(2)
@@ -148,7 +151,7 @@ def bidirectional_astar_path_numpy(G, source, target, bulk_heuristic, min_cost=N
         active_nodes = raw_nodes[0]
         active_weights = dist + raw_nodes[1]
         # First stage of neighbour filtering - dump neighbours that bust their distance labels in current direction
-        keep = active_weights <= distances[active_nodes, direction]
+        keep = active_weights <= np.minimum(distances[active_nodes, direction], up_threshold[active_nodes, direction])
         active_nodes = active_nodes[keep]
         if 0 == len(active_nodes):
             g_exhausted += 1
@@ -227,6 +230,7 @@ def bidirectional_astar_path_numpy(G, source, target, bulk_heuristic, min_cost=N
                         if (item[0] <= upbound) and (item[1] + min_f[0] - potentials[0][item[2]] <= upbound)]
             heapify(queue[0])
             heapify(queue[1])
+            up_threshold = upbound - mincost
 
     if bestpath is None:
         raise nx.NetworkXNoPath(f"Node {target} not reachable from {source}")
