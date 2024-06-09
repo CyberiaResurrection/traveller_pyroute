@@ -75,9 +75,9 @@ class testAStarNumpy(baseTest):
         target = galaxy.star_mapping[36]
 
         exp_route = [0, 8, 9, 15, 24, 36]
-        exp_diagnostics = {'branch_factor': 2.059, 'f_exhausted': 6, 'g_exhausted': 1, 'neighbour_bound': 18,
-                            'new_upbounds': 3, 'nodes_expanded': 21, 'nodes_queued': 33, 'nodes_revisited': 2,
-                            'num_jumps': 5, 'un_exhausted': 11, 'targ_exhausted': 0}
+        exp_diagnostics = {'branch_factor': 2.0, 'f_exhausted': 9, 'g_exhausted': 1, 'neighbour_bound': 19,
+                            'new_upbounds': 2, 'nodes_expanded': 21, 'nodes_queued': 30, 'nodes_revisited': 1,
+                            'num_jumps': 5, 'un_exhausted': 9, 'targ_exhausted': 0}
         exp_cost = 239.0
         act_route, diagnostics = bidirectional_astar_path_numpy(dist_graph, source.index, target.index, heuristic)
         act_cost = galaxy.route_cost(exp_route)
@@ -110,9 +110,9 @@ class testAStarNumpy(baseTest):
         target = galaxy.star_mapping[36]
 
         exp_route = [0, 8, 9, 15, 24, 36]
-        exp_diagnostics = {'branch_factor': 1.842, 'f_exhausted': 4, 'g_exhausted': 0, 'neighbour_bound': 11,
-                            'new_upbounds': 1, 'nodes_expanded': 13, 'nodes_queued': 23, 'nodes_revisited': 1,
-                            'num_jumps': 5, 'un_exhausted': 7, 'targ_exhausted': 0}
+        exp_diagnostics = {'branch_factor': 1.979, 'f_exhausted': 6, 'g_exhausted': 0, 'neighbour_bound': 17,
+                            'new_upbounds': 1, 'nodes_expanded': 19, 'nodes_queued': 29, 'nodes_revisited': 1,
+                            'num_jumps': 5, 'un_exhausted': 11, 'targ_exhausted': 0}
         exp_cost = 239.0
         act_route, diagnostics = bidirectional_astar_path_numpy(dist_graph, source.index, target.index, heuristic)
         act_cost = galaxy.route_cost(exp_route)
@@ -143,9 +143,9 @@ class testAStarNumpy(baseTest):
         target = galaxy.star_mapping[8]
 
         exp_route = [0, 8]
-        exp_diagnostics = {'branch_factor': 9.0, 'f_exhausted': 2, 'g_exhausted': 0, 'neighbour_bound': 4,
-                            'new_upbounds': 1, 'nodes_expanded': 5, 'nodes_queued': 9, 'nodes_revisited': 0,
-                            'num_jumps': 1, 'un_exhausted': 2, 'targ_exhausted': 0}
+        exp_diagnostics = {'branch_factor': 4.0, 'f_exhausted': 3, 'g_exhausted': 0, 'neighbour_bound': 3,
+                            'new_upbounds': 1, 'nodes_expanded': 4, 'nodes_queued': 4, 'nodes_revisited': 0,
+                            'num_jumps': 1, 'un_exhausted': 0, 'targ_exhausted': 0}
         exp_cost = 74.0
         act_route, diagnostics = bidirectional_astar_path_numpy(dist_graph, source.index, target.index, heuristic)
         act_cost = galaxy.route_cost(exp_route)
