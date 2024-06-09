@@ -14,7 +14,7 @@ from PyRoute.AllyGen import AllyGen
 from PyRoute.Calculation.RouteCalculation import RouteCalculation
 from PyRoute.Pathfinding.ApproximateShortestPathForestUnified import ApproximateShortestPathForestUnified
 from PyRoute.TradeBalance import TradeBalance
-from PyRoute.Pathfinding.astar_numpy import astar_path_numpy
+# from PyRoute.Pathfinding.astar_numpy import astar_path_numpy
 from PyRoute.Pathfinding.bidirectional_astar_numpy import bidirectional_astar_path_numpy
 
 
@@ -301,7 +301,6 @@ class TradeCalculation(RouteCalculation):
             rawroute, diag = bidirectional_astar_path_numpy(self.star_graph, star.index, target.index,
                                            self.galaxy.heuristic_distance_bulk, min_cost=mincost, upbound=upbound,
                                            diagnostics=self.debug_flag)
-
 
             if self.debug_flag:
                 moshdex = np.where(self.pathfinding_data['branch_factor'] == -1.0)[0][0]

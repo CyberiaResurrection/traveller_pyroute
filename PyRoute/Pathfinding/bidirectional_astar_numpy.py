@@ -190,7 +190,7 @@ def bidirectional_astar_path_numpy(G, source, target, bulk_heuristic, min_cost=N
                 if aug_weight > upbound:  # If upbound has changed since we started spinning thru neighbors, check for bust
                     continue
             # Retained for completeness of algorithm description, but didn't actually fire in testing
-            #if act_weight - potentials[other][neighbour] > active_threshold:
+            # if act_weight - potentials[other][neighbour] > active_threshold:
             #    continue
 
             # If the neighbour we're looking at has a label in _both_ searches, then the searches have met,
