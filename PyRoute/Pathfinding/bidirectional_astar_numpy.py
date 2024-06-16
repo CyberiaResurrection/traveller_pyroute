@@ -45,7 +45,7 @@ def _calc_branching_factor(nodes_queued, path_len):
     return round(new, 3)
 
 
-def bidirectional_astar_path_numpy(G, source, target, bulk_heuristic, min_cost=None, upbound=None):
+def bidirectional_astar_path_numpy(G, source, target, bulk_heuristic, min_cost=None, upbound=None, diagnostics=False):
 
     G_succ = G._arcs  # For speed-up
 
@@ -72,7 +72,6 @@ def bidirectional_astar_path_numpy(G, source, target, bulk_heuristic, min_cost=N
     floatinf = float('inf')
     upbound = floatinf if upbound is None else upbound
     bestpath = None
-    diagnostics = True
 
     # pre-calc the minimum-cost edge on each node
     mincost = np.zeros((len(G), 2), dtype=float)
@@ -96,12 +95,13 @@ def bidirectional_astar_path_numpy(G, source, target, bulk_heuristic, min_cost=N
 
     # Now begin the bidirectional pathfinding
     while queue[0] or queue[1]:  # While at least one queued node remains to process, across either queue
-        if not queue[0]:  # Forward queue is empty, forcing selection of reverse queue
-            direction = 1
-        elif not queue[1]:  # Reverse queue is empty, forcing selection of forward queue
-            direction = 0
-        else:  # If both queues aren't empty, select reverse queue if it's shorter, otherwise forward queue
+        if queue[0] and queue[1]:  # If both queues aren't empty, select reverse queue if it's shorter, otherwise forward queue
             direction = 1 if len(queue[1]) < len(queue[0]) else 0
+        elif not queue[0]:  # Forward queue is empty, forcing selection of reverse queue
+            direction = 1
+        else:  # Reverse queue is empty, forcing selection of forward queue
+            direction = 0
+
         other = 1 - direction
 
         dir_target = source if 1 == direction else target
