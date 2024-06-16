@@ -189,9 +189,7 @@ def bidirectional_astar_path_numpy(G, source, target, bulk_heuristic, min_cost=N
             neighbour = active_nodes[i]
             act_weight = active_weights[i]
             aug_weight = augmented_weights[i]
-            if new_bound:
-                if aug_weight > upbound:  # If upbound has changed since we started spinning thru neighbors, check for bust
-                    continue
+
             # Retained for completeness of algorithm description, but didn't actually fire in testing
             # if act_weight - potentials[other][neighbour] > active_threshold:
             #    continue
