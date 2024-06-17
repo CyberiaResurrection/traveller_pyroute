@@ -191,8 +191,6 @@ def bidirectional_astar_path_numpy(G, source, target, bulk_heuristic, min_cost=N
 
         for i in range(num_neighbours):
             neighbour = active_nodes[i]
-            act_weight = active_weights[i]
-            aug_weight = augmented_weights[i]
 
             # Retained for completeness of algorithm description, but didn't actually fire in testing
             # if act_weight - potentials[other][neighbour] > active_threshold:
@@ -217,7 +215,7 @@ def bidirectional_astar_path_numpy(G, source, target, bulk_heuristic, min_cost=N
                         path.extend(revpath)
                     bestpath = path
 
-            heappush(queue[direction], (aug_weight, act_weight, neighbour, curnode))
+            heappush(queue[direction], (augmented_weights[i], active_weights[i], neighbour, curnode))
             queue_counter += 1
 
         if new_bound:  # Save queue grooming to the end, in case more than one upper bound landed
