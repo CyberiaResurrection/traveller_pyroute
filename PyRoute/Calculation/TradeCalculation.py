@@ -298,9 +298,10 @@ class TradeCalculation(RouteCalculation):
 
             self.galaxy.bidir_path = True
             mincost = self.star_graph.min_cost(active_nodes, target.index, indirect=True)
+            revmincost = self.star_graph.min_cost(active_nodes, star.index, indirect=True)
             rawroute, diag = bidirectional_astar_path_numpy(self.star_graph, star.index, target.index,
                                            self.galaxy.heuristic_distance_bulk, min_cost=mincost, upbound=upbound,
-                                           diagnostics=self.debug_flag)
+                                           diagnostics=self.debug_flag, revmincost=revmincost)
 
             if self.debug_flag:
                 moshdex = np.where(self.pathfinding_data['branch_factor'] == -1.0)[0][0]
