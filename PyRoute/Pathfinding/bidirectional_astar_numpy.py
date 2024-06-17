@@ -118,9 +118,11 @@ def bidirectional_astar_path_numpy(G, source, target, bulk_heuristic, min_cost=N
         # if curnode busts upbound, or curnode plus shortest path in the other direction busts upbound, move on
         if estimate > upbound or (dist + min_f_other - potentials[other][curnode] > upbound):
             queue[0] = [item for item in queue[0]
-                        if (item[0] <= upbound) and (item[1] + min_f[1] - potentials[1][item[2]] <= upbound)]
+                        if (item[0] <= upbound) and (item[1] + min_f[1] - potentials[1][item[2]] <= upbound)
+                        and not (item[1] > distances[item[2], 0])]
             queue[1] = [item for item in queue[1]
-                        if (item[0] <= upbound) and (item[1] + min_f[0] - potentials[0][item[2]] <= upbound)]
+                        if (item[0] <= upbound) and (item[1] + min_f[0] - potentials[0][item[2]] <= upbound)
+                        and not (item[1] > distances[item[2], 1])]
             heapify(queue[0])
             heapify(queue[1])
             continue
