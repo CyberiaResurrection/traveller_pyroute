@@ -45,7 +45,7 @@ def _calc_branching_factor(nodes_queued, path_len):
     return round(new, 3)
 
 
-def bidirectional_astar_path_numpy(G, source, target, bulk_heuristic, min_cost=None, upbound=None, diagnostics=False):
+def bidirectional_astar_path_numpy(G, source, target, bulk_heuristic, min_cost=None, upbound=None, diagnostics=False, revmincost=None):
 
     G_succ = G._arcs  # For speed-up
 
@@ -77,6 +77,8 @@ def bidirectional_astar_path_numpy(G, source, target, bulk_heuristic, min_cost=N
     mincost = np.zeros((len(G), 2), dtype=float)
     if min_cost is not None:
         mincost[:, 0] = min_cost
+    if revmincost is not None:
+        mincost[:, 1] = revmincost
     up_threshold = upbound - mincost
 
     # minimum f values for each queue
