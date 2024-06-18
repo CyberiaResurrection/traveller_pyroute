@@ -106,8 +106,6 @@ def bidirectional_astar_path_numpy(G, source, target, bulk_heuristic, min_cost=N
 
         other = 1 - direction
 
-        dir_target = source if 1 == direction else target
-
         # Pop the smallest item from current queue.
         estimate, dist, curnode, parent = heappop(queue[direction])
         node_counter += 1
@@ -209,10 +207,8 @@ def bidirectional_astar_path_numpy(G, source, target, bulk_heuristic, min_cost=N
 
                     upbound = candidate_bound
                     path = buildpath(curnode, parent, explored[direction])
-                    # kludge to work around short-range double-ups
-                    if dir_target != path[-1]:
-                        revpath = buildpath(neighbour, neighparent, explored[other], False)
-                        path.extend(revpath)
+                    revpath = buildpath(neighbour, neighparent, explored[other], False)
+                    path.extend(revpath)
                     bestpath = path
 
             heappush(queue[direction], (augmented_weights[i], active_weights[i], neighbour, curnode))
