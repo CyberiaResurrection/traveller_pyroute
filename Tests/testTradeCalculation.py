@@ -178,10 +178,10 @@ class testTradeCalculation(unittest.TestCase):
                 sector = Sector('# Core', '# 0, 0')
                 galaxy.sectors[sector.name] = sector
 
-                star1 = self.make_imperial_star1()
+                star1 = self.make_imperial_star1(sector)
                 star1.wtn = wtn
 
-                star2 = self.make_imperial_star_2()
+                star2 = self.make_imperial_star_2(sector)
                 star2.wtn = wtn
 
                 self.assertEqual(2 * wtn, TradeCalculation.get_btn(star1, star2, 0))
@@ -198,10 +198,10 @@ class testTradeCalculation(unittest.TestCase):
                 sector = Sector('# Core', '# 0, 0')
                 galaxy.sectors[sector.name] = sector
 
-                star1 = self.make_imperial_star1()
+                star1 = self.make_imperial_star1(sector)
                 star1.wtn = wtn
 
-                star2 = self.make_imperial_star_2()
+                star2 = self.make_imperial_star_2(sector)
                 star2.wtn = 2 * wtn
 
                 self.assertEqual(2 * wtn + 1, TradeCalculation.get_btn(star1, star2, 0))
@@ -218,10 +218,10 @@ class testTradeCalculation(unittest.TestCase):
                 sector = Sector('# Core', '# 0, 0')
                 galaxy.sectors[sector.name] = sector
 
-                star1 = self.make_imperial_star1()
+                star1 = self.make_imperial_star1(sector)
                 star1.wtn = 6
 
-                star2 = self.make_imperial_star_2()
+                star2 = self.make_imperial_star_2(sector)
                 star2.wtn = wtn
 
                 self.assertEqual(13, TradeCalculation.get_btn(star1, star2, 0))
@@ -237,11 +237,11 @@ class testTradeCalculation(unittest.TestCase):
                 sector = Sector('# Core', '# 0, 0')
                 galaxy.sectors[sector.name] = sector
 
-                star1 = self.make_imperial_star1()
+                star1 = self.make_imperial_star1(sector)
                 star1.wtn = wtn
                 star1.tradeCode = TradeCodes("Ag Ni")
 
-                star2 = self.make_imperial_star_2()
+                star2 = self.make_imperial_star_2(sector)
                 star2.wtn = wtn
                 star2.tradeCode = TradeCodes("In Na")
 
@@ -260,10 +260,10 @@ class testTradeCalculation(unittest.TestCase):
                 sector = Sector('# Core', '# 0, 0')
                 galaxy.sectors[sector.name] = sector
 
-                star1 = self.make_imperial_star1()
+                star1 = self.make_imperial_star1(sector)
                 star1.wtn = wtn
 
-                star2 = self.make_imperial_star_2()
+                star2 = self.make_imperial_star_2(sector)
                 star2.wtn = wtn
                 star2.alg_code = "Wild"
 
@@ -282,10 +282,10 @@ class testTradeCalculation(unittest.TestCase):
                 sector = Sector('# Core', '# 0, 0')
                 galaxy.sectors[sector.name] = sector
 
-                star1 = self.make_imperial_star1()
+                star1 = self.make_imperial_star1(sector)
                 star1.wtn = wtn
 
-                star2 = self.make_imperial_star_2()
+                star2 = self.make_imperial_star_2(sector)
                 star2.wtn = wtn
                 star2.alg_code = "So"
 
@@ -297,21 +297,23 @@ class testTradeCalculation(unittest.TestCase):
                 self.assertEqual(expected, actual)
 
     @staticmethod
-    def make_imperial_star1():
+    def make_imperial_star1(sector):
         star1 = Star()
         star1.tradeCode = TradeCodes("")
         star1.alg_code = "Im"
         star1.position = "1009"
-        star1.set_location(10, 9)
+        star1.sector = sector
+        star1.set_location()
         return star1
 
     @staticmethod
-    def make_imperial_star_2():
+    def make_imperial_star_2(sector):
         star2 = Star()
         star2.tradeCode = TradeCodes("")
         star2.alg_code = "Im"
         star2.position = "1010"
-        star2.set_location(10, 10)
+        star2.sector = sector
+        star2.set_location()
         return star2
 
 
