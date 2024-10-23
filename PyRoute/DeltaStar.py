@@ -305,3 +305,9 @@ class DeltaStar(Star):
         if code_match and not phys_match:
             line = '{}-{} Found invalid "{}" in trade codes: {}'.format(self, self.uwp, code, self.tradeCode.codeset)
             msg.append(line)
+
+    def trim_self_ownership(self):
+        pass
+
+    def trim_self_colonisation(self):
+        pass
