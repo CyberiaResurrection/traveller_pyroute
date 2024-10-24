@@ -521,6 +521,8 @@ class testDeltaStar(unittest.TestCase):
     @example('0101 0                    A000000-0 As Ri                                  { 0 } (000+0) [0000] B - A 000 0 NaHu G5 V')
     @example('0101 0                    A244500-0 As As                                  { 0 } (000+0) [0000] B - A 000 0 NaHu G5 V')
     @example('0101 0                    A000000-0 As As                                  { 0 } (001+0) [0000] B - A 000 0 NaHu G5 V')
+    @example('0101 0                    A244500-0 As As O:0101                           { 0 } (000+0) [0000] B - A 000 0 NaHu G5 V')
+    @example('0101 0                    A244500-0 As As C:0101                           { 0 } (000+0) [0000] B - A 000 0 NaHu G5 V')
     @example('0101 000000000000000 ???????-? 000000000000000       - - A 000 0 00')
     @example('0101 000000000000000 ???????-? 000000000000000 - -  [0001] B - A 000   00')
     def test_canonicalise_from_regex_match_and_verify_idempotency(self, starline):
@@ -540,8 +542,6 @@ class testDeltaStar(unittest.TestCase):
         foo.index = 0
         foo.allegiance_base = 'NaHu'
 
-        foo.trim_self_ownership()
-        foo.trim_self_colonisation()
         self.assertIsNotNone(foo._hash, "Hash not calculated for original star")
         well_formed = foo.is_well_formed()
         assume(well_formed)
