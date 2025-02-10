@@ -6,7 +6,6 @@ from PIL import Image
 
 import networkx as nx
 import numpy as np
-import pytest
 from pymupdf import pymupdf
 
 from PyRoute.DeltaDebug.DeltaDictionary import DeltaDictionary, SectorDictionary
