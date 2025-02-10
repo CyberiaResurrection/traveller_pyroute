@@ -358,5 +358,6 @@ class testStar(unittest.TestCase):
         foo.check_cx()
         foo.calculate_ru('fixed')
 
+
 if __name__ == '__main__':
     unittest.main()

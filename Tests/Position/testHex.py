@@ -210,6 +210,7 @@ class testHex(unittest.TestCase):
         hex_distance = star1.hex.hex_distance(star2.hex)
         self.assertEqual(exp_distance, hex_distance)
 
+
 if __name__ == "__main__":
     # import sys;sys.argv = ['', 'Test.testName']
     unittest.main()
