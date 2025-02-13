@@ -327,7 +327,7 @@ class SectorDictionary(dict):
 
         out_name = os.path.join(output_dir, self.filename) + "-min"
 
-        handle = codecs.open(out_name, 'w', 'utf-8')
+        handle = codecs.open(out_name, 'w', encoding="utf-8")
         for line in self.headers:
             handle.write(line)
 
@@ -344,7 +344,7 @@ class SectorDictionary(dict):
 
         # read travellermap file in, line by line
         try:
-            with codecs.open(filename, 'r', 'utf-8') as infile:
+            with codecs.open(filename, 'r', encoding="utf-8") as infile:
                 try:
                     lines = [line for line in infile]
                 except (OSError, IOError):

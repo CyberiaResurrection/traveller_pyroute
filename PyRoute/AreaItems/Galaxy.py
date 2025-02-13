@@ -85,7 +85,7 @@ class Galaxy(AreaItem):
         ParseStarInput.deep_space = {} if (options.deep_space is None or not isinstance(options.deep_space, dict)) else options.deep_space
         for sector in sectors:
             try:
-                with codecs.open(sector, 'r', 'utf-8') as infile:
+                with codecs.open(sector, 'r', encoding='utf-8') as infile:
                     try:
                         lines = [line for line in infile]
                     except (OSError, IOError):
@@ -316,7 +316,7 @@ class Galaxy(AreaItem):
     def process_owned_worlds(self):
         ow_names = os.path.join(self.output_path, 'owned-worlds-names.csv')
         ow_list = os.path.join(self.output_path, 'owned-worlds-list.csv')
-        with codecs.open(ow_names, 'w+', 'utf-8') as f, codecs.open(ow_list, 'w+', 'utf-8') as g:
+        with codecs.open(ow_names, 'w+', encoding="utf-8") as f, codecs.open(ow_list, 'w+', encoding="utf-8") as g:
 
             for world in self.stars:
                 worldstar = self.star_mapping[world]
