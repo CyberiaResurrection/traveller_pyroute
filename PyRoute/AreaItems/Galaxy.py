@@ -104,7 +104,9 @@ class Galaxy(AreaItem):
                 self.logger.error("sector file %s loads duplicate sector %s" % (sector, str(sec)))
                 continue
 
-            for lineno, line in enumerate(lines):
+            lineno = -1
+            for _, line in enumerate(lines):
+                lineno += 1
                 if line.startswith('Hex'):
                     break
                 if line.startswith('# Subsector'):

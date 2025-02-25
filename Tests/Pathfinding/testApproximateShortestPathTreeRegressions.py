@@ -40,7 +40,7 @@ class testApproximateShortestPathTreeRegressions(baseTest):
         stars[0].is_landmark = True
 
         galaxy.trade.shortest_path_tree = ApproximateShortestPathForestUnified(stars[0].index, galaxy.stars, 0)
-        for (star, neighbour, data) in btn:
+        for (star, neighbour, _) in btn:
             galaxy.trade.get_trade_between(star, neighbour)
 
     def test_restart_blowup_on_jump_4(self):
@@ -70,7 +70,7 @@ class testApproximateShortestPathTreeRegressions(baseTest):
         stars[0].is_landmark = True
 
         galaxy.trade.shortest_path_tree = ApproximateShortestPathForestUnified(stars[0].index, galaxy.stars, 0)
-        for (star, neighbour, data) in btn:
+        for (star, neighbour, _) in btn:
             galaxy.trade.get_trade_between(star, neighbour)
 
     def test_restart_blowup_on_jump_4_1(self):
@@ -100,7 +100,7 @@ class testApproximateShortestPathTreeRegressions(baseTest):
         stars[0].is_landmark = True
 
         galaxy.trade.shortest_path_tree = ApproximateShortestPathForestUnified(stars[0].index, galaxy.stars, 0)
-        for (star, neighbour, data) in btn:
+        for (star, neighbour, _) in btn:
             galaxy.trade.get_trade_between(star, neighbour)
 
     def test_stars_node_types(self):
@@ -129,7 +129,7 @@ class testApproximateShortestPathTreeRegressions(baseTest):
         stars.sort(key=lambda item: item.wtn, reverse=True)
 
         galaxy.trade.shortest_path_tree = ApproximateShortestPathForestUnified(stars[0].index, galaxy.stars, 0)
-        for (star, neighbour, data) in btn:
+        for (star, neighbour, _) in btn:
             galaxy.trade.get_trade_between(star, neighbour)
 
         galaxy.process_owned_worlds()
@@ -271,7 +271,7 @@ class testApproximateShortestPathTreeRegressions(baseTest):
         stars.sort(key=lambda item: item.wtn, reverse=True)
 
         galaxy.trade.shortest_path_tree = ApproximateShortestPathForestUnified(stars[0].index, galaxy.stars, 0)
-        for (star, neighbour, data) in btn:
+        for (star, neighbour, _) in btn:
             galaxy.trade.get_trade_between(star, neighbour)
 
         galaxy.process_owned_worlds()
@@ -303,7 +303,7 @@ class testApproximateShortestPathTreeRegressions(baseTest):
         stars.sort(key=lambda item: item.wtn, reverse=True)
 
         galaxy.trade.shortest_path_tree = ApproximateShortestPathForestUnified(stars[0].index, galaxy.stars, 0)
-        for (star, neighbour, data) in btn:
+        for (star, neighbour, _) in btn:
             galaxy.trade.get_trade_between(star, neighbour)
 
         galaxy.process_owned_worlds()
