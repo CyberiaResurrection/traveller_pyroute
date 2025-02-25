@@ -8,6 +8,8 @@ Thanks to @GamesByDavidE for original prototype and design discussions
 import copy
 
 import numpy as np
+from networkx.classes import Graph
+from numpy.core import multiarray
 
 from PyRoute.Pathfinding.DistanceBase import DistanceBase
 
@@ -16,7 +18,7 @@ class DistanceGraph(DistanceBase):
 
     __slots__ = '_arcs', '_positions', '_nodes', '_indexes', '_min_cost', '_min_indirect'
 
-    def __init__(self, graph):
+    def __init__(self, graph: Graph):
         super().__init__(graph)
         self._arcs = [
             (
@@ -36,7 +38,7 @@ class DistanceGraph(DistanceBase):
             if 0 < len(node_neighbours):
                 self._min_indirect[i] = min(self._min_cost[node_neighbours])
 
-    def min_cost(self, target, indirect=False):
+    def min_cost(self, target: int, indirect: bool = False) -> multiarray:
         min_cost = copy.deepcopy(self._min_cost)
         min_cost[target] = 0
 
@@ -52,7 +54,7 @@ class DistanceGraph(DistanceBase):
 
         return min_cost
 
-    def lighten_edge(self, u, v, weight):
+    def lighten_edge(self, u: int, v: int, weight: float) -> None:
         self._lighten_arc(u, v, weight)
         self._lighten_arc(v, u, weight)
         self._min_cost[u] = min(self._min_cost[u], weight)
