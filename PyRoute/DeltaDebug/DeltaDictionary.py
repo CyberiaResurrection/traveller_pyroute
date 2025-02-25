@@ -157,7 +157,7 @@ class SectorDictionary(dict):
         assert isinstance(value, SubsectorDictionary), "Values must be SubsectorDictionary objects"
         super().__setitem__(item, value)
 
-    def __deepcopy__(self, memodict={}):
+    def __deepcopy__(self, memodict: dict = {}):
         foo = self._setup_clone_sector_dict()
 
         foo.headers = copy.deepcopy(self.headers)
@@ -447,7 +447,7 @@ class SubsectorDictionary(dict):
             return 0
         return len(self.items)
 
-    def __deepcopy__(self, memodict={}):
+    def __deepcopy__(self, memodict: dict = {}):
         foo = SubsectorDictionary(self.name, self.position)
         if self.skipped:
             foo.items = None
