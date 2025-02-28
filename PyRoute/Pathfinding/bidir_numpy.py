@@ -100,19 +100,15 @@ def bidir_path_numpy(G, source: int, target: int, bulk_heuristic,
 
     while queue_fwd and queue_rev:
         if len(queue_rev) < len(queue_fwd):
-            queue_rev, explored_rev, distances_rev, upbound, mindex = bidir_iteration(G_succ, diagnostics, queue_rev,
-                                                                              explored_rev, distances_rev, distances_fwd,
-                                                                              potential_rev, potential_fwd,
-                                                                              target, source, upbound, f_fwd)
+            upbound, mindex = bidir_iteration(G_succ, diagnostics, queue_rev, explored_rev, distances_rev,
+                                            distances_fwd, potential_rev, potential_fwd, upbound, f_fwd)
             if queue_rev:
                 f_rev = queue_rev[0][0]
             if -1 != mindex:
                 smalldex = mindex
         else:
-            queue_fwd, explored_fwd, distances_fwd, upbound, mindex = bidir_iteration(G_succ, diagnostics, queue_fwd,
-                                                                              explored_fwd, distances_fwd, distances_rev,
-                                                                              potential_fwd, potential_rev,
-                                                                              source, target, upbound, f_rev)
+            upbound, mindex = bidir_iteration(G_succ, diagnostics, queue_fwd, explored_fwd, distances_fwd,
+                                              distances_rev, potential_fwd, potential_rev, upbound, f_rev)
             if queue_fwd:
                 f_fwd = queue_fwd[0][0]
             if -1 != mindex:
@@ -138,8 +134,7 @@ def bidir_path_numpy(G, source: int, target: int, bulk_heuristic,
 
 def bidir_iteration(G_succ: list[tuple[list[int], list[float]]], diagnostics: bool, queue: list[tuple],
                     explored: dict[int, int], distances: np.ndarray[float], distances_other: np.ndarray[float],
-                    potentials: np.ndarray[float], potentials_other: np.ndarray[float], source: int, target: int,
-                    upbound: float, f_other: float):
+                    potentials: np.ndarray[float], potentials_other: np.ndarray[float], upbound: float, f_other: float):
     # Pop the smallest item from queue.
     _, dist, curnode, parent = heappop(queue)
     mindex = -1
@@ -147,11 +142,11 @@ def bidir_iteration(G_succ: list[tuple[list[int], list[float]]], diagnostics: bo
     if curnode in explored:
         # Do not override the parent of starting node
         if explored[curnode] == -1:
-            return queue, explored, distances, upbound, mindex
+            return upbound, mindex
         # We've found a bad path, just move on
         qcost = distances[curnode]
         if qcost <= dist:
-            return queue, explored, distances, upbound, mindex
+            return upbound, mindex
         # If we've found a better path, update
         #revis_continue += 1
         distances[curnode] = dist
@@ -161,10 +156,7 @@ def bidir_iteration(G_succ: list[tuple[list[int], list[float]]], diagnostics: bo
     active_nodes = G_succ[curnode][0]
     active_costs = G_succ[curnode][1]
 
-    targdex = -1
     num_nodes = len(active_nodes)
-    for i in range(num_nodes):
-        act_nod = active_nodes[i]
 
     # Now unconditionally queue _all_ nodes that are still active, worrying about filtering out the bound-busting
     # neighbours later.
@@ -185,9 +177,8 @@ def bidir_iteration(G_succ: list[tuple[list[int], list[float]]], diagnostics: bo
         if upbound > rawbound:
             upbound = rawbound
             mindex = act_nod
-            explored[act_nod] = curnode
 
-    return queue, explored, distances, upbound, mindex
+    return upbound, mindex
 
 
 def bidir_fix_explored(explored, distances, G_succ, smalldex: int) -> dict:
@@ -202,8 +193,6 @@ def bidir_fix_explored(explored, distances, G_succ, smalldex: int) -> dict:
             if act_nod in explored and skipcost > act_wt:
                 explored[smalldex] = act_nod
                 skipcost = act_wt
-
-        foo = 1
 
     return explored
 
