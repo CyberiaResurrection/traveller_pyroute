@@ -95,21 +95,28 @@ def bidir_path_numpy(G, source: int, target: int, bulk_heuristic,
     f_rev = potential_rev[target]
     oldbound = upbound
 
+    # track smallest node in both distance arrays
+    smalldex = -1
+
     while queue_fwd and queue_rev:
         if len(queue_rev) < len(queue_fwd):
-            queue_rev, explored_rev, distances_rev, upbound = bidir_iteration(G_succ, diagnostics, queue_rev,
+            queue_rev, explored_rev, distances_rev, upbound, mindex = bidir_iteration(G_succ, diagnostics, queue_rev,
                                                                               explored_rev, distances_rev, distances_fwd,
                                                                               potential_rev, potential_fwd,
                                                                               target, source, upbound, f_fwd)
             if queue_rev:
                 f_rev = queue_rev[0][0]
+            if -1 != mindex:
+                smalldex = mindex
         else:
-            queue_fwd, explored_fwd, distances_fwd, upbound = bidir_iteration(G_succ, diagnostics, queue_fwd,
+            queue_fwd, explored_fwd, distances_fwd, upbound, mindex = bidir_iteration(G_succ, diagnostics, queue_fwd,
                                                                               explored_fwd, distances_fwd, distances_rev,
                                                                               potential_fwd, potential_rev,
                                                                               source, target, upbound, f_rev)
             if queue_fwd:
                 f_fwd = queue_fwd[0][0]
+            if -1 != mindex:
+                smalldex = mindex
 
         if oldbound > upbound:
             oldbound = upbound
@@ -117,12 +124,15 @@ def bidir_path_numpy(G, source: int, target: int, bulk_heuristic,
             queue_rev = [item for item in queue_rev if item[0] <= upbound]
             heapify(queue_fwd)
             heapify(queue_rev)
-        #bestpath, diag = astar_numpy_core(G_succ, diagnostics, distances, potential_fwd, source, target, float64max)
 
-    bestpath = []
-    diag = {}
-    if 0 == len(bestpath):
+    if -1 == smalldex:
         raise nx.NetworkXNoPath(f"Node {target} not reachable from {source}")
+
+    explored_fwd = bidir_fix_explored(explored_fwd, distances_fwd, G_succ, smalldex)
+    explored_rev = bidir_fix_explored(explored_rev, distances_rev, G_succ, smalldex)
+    bestpath = bidir_build_path(explored_fwd, explored_rev, smalldex)
+    diag = {}
+
     return bestpath, diag
 
 
@@ -132,15 +142,16 @@ def bidir_iteration(G_succ: list[tuple[list[int], list[float]]], diagnostics: bo
                     upbound: float, f_other: float):
     # Pop the smallest item from queue.
     _, dist, curnode, parent = heappop(queue)
+    mindex = -1
 
     if curnode in explored:
         # Do not override the parent of starting node
         if explored[curnode] == -1:
-            return queue, explored, distances, upbound
+            return queue, explored, distances, upbound, mindex
         # We've found a bad path, just move on
         qcost = distances[curnode]
         if qcost <= dist:
-            return queue, explored, distances, upbound
+            return queue, explored, distances, upbound, mindex
         # If we've found a better path, update
         #revis_continue += 1
         distances[curnode] = dist
@@ -170,9 +181,49 @@ def bidir_iteration(G_succ: list[tuple[list[int], list[float]]], diagnostics: bo
             continue
         distances[act_nod] = act_wt
         heappush(queue, (aug_wt, act_wt, act_nod, curnode))
-        upbound = min(upbound, act_wt + distances_other[act_nod])
+        rawbound = act_wt + distances_other[act_nod]
+        if upbound > rawbound:
+            upbound = rawbound
+            mindex = act_nod
+            explored[act_nod] = curnode
 
-    return queue, explored, distances, upbound
+    return queue, explored, distances, upbound, mindex
+
+
+def bidir_fix_explored(explored, distances, G_succ, smalldex: int) -> dict:
+    if smalldex not in explored:
+        active_nodes = G_succ[smalldex][0]
+        active_costs = G_succ[smalldex][1]
+        skipcost = float64max
+
+        for i in range(len(active_nodes)):
+            act_nod = active_nodes[i]
+            act_wt = distances[act_nod] + active_costs[i]
+            if act_nod in explored and skipcost > act_wt:
+                explored[smalldex] = act_nod
+                skipcost = act_wt
+
+        foo = 1
+
+    return explored
+
+
+def bidir_build_path(explored_fwd: dict, explored_rev: dict, smalldex: int) -> list[int]:
+    path = [smalldex]
+    node = explored_fwd[smalldex]
+    while node is not None:
+        assert node not in path, "Node " + str(node) + " duplicated in discovered path"
+        path.append(node)
+        node = explored_fwd[node]
+    path.reverse()
+
+    node = explored_rev[smalldex]
+    while node is not None:
+        assert node not in path, "Node " + str(node) + " duplicated in discovered path"
+        path.append(node)
+        node = explored_rev[node]
+
+    return path
 
 
 #@cython.cfunc
