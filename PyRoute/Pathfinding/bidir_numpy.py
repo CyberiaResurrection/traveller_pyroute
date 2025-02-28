@@ -14,15 +14,15 @@ A*-like pathfinding.  This code:
         - Sanity and correctness of this upper bound are the _caller_'s responsibility
         - If the supplied upper bound produces a pathfinding failure, so be it
 """
-#import cython
-#from cython.cimports.numpy import numpy as cnp
-#from cython.cimports.minmaxheap import MinMaxHeap, astar_t
+import cython
+from cython.cimports.numpy import numpy as cnp
+from cython.cimports.minmaxheap import MinMaxHeap, astar_t
 from heapq import heappop, heappush, heapify
 
 import networkx as nx
 import numpy as np
 
-#cnp.import_array()
+cnp.import_array()
 
 float64max = np.finfo(np.float64).max
 
@@ -67,8 +67,8 @@ def _calc_branching_factor(nodes_queued: int, path_len: int):
 def bidir_path_numpy(G, source: int, target: int, bulk_heuristic,
                      upbound: float = float64max, diagnostics: bool = False):
     G_succ: list[tuple[list[int], list[float]]]
-    potential_fwd: list[float]
-    potential_rev: list[float]
+    potential_fwd: cnp.ndarray[cython.float]
+    potential_rev: cnp.ndarray[cython.float]
     # upbound: cython.float
     distances_fwd: np.ndarray[float, 1]
     distances_rev: np.ndarray[float, 1]
@@ -77,10 +77,12 @@ def bidir_path_numpy(G, source: int, target: int, bulk_heuristic,
     # pre-calc heuristics for all nodes to the target node
     potential_fwd = bulk_heuristic(target)
     potential_rev = bulk_heuristic(source)
+    potential_fwd_view: cython.double[:] = potential_fwd
+    potential_rev_view: cython.double[:] = potential_rev
 
     # Maps explored nodes to parent closest to the source.
-    explored_fwd: dict[int, int] = {}
-    explored_rev: dict[int, int] = {}
+    explored_fwd: dict[cython.int, cython.int] = {}
+    explored_rev: dict[cython.int, cython.int] = {}
 
     # Traces lowest distance from source node found for each node
     distances_fwd = np.ones((len(G_succ)), dtype=float) * float64max
@@ -96,7 +98,7 @@ def bidir_path_numpy(G, source: int, target: int, bulk_heuristic,
     oldbound = upbound
 
     # track smallest node in both distance arrays
-    smalldex = -1
+    smalldex: cython.int = -1
 
     while queue_fwd and queue_rev:
         if len(queue_rev) < len(queue_fwd):
@@ -181,7 +183,7 @@ def bidir_iteration(G_succ: list[tuple[list[int], list[float]]], diagnostics: bo
     return upbound, mindex
 
 
-def bidir_fix_explored(explored, distances, G_succ, smalldex: int) -> dict:
+def bidir_fix_explored(explored, distances, G_succ, smalldex: cython.int) -> dict:
     if smalldex not in explored:
         active_nodes = G_succ[smalldex][0]
         active_costs = G_succ[smalldex][1]
@@ -197,7 +199,7 @@ def bidir_fix_explored(explored, distances, G_succ, smalldex: int) -> dict:
     return explored
 
 
-def bidir_build_path(explored_fwd: dict, explored_rev: dict, smalldex: int) -> list[int]:
+def bidir_build_path(explored_fwd: dict, explored_rev: dict, smalldex: cython.int) -> list[int]:
     path = [smalldex]
     node = explored_fwd[smalldex]
     while node is not None:
