@@ -7,6 +7,7 @@ from Cython.Build import cythonize
 
 sources = [
     "astar_numpy.py",
+    "bidir_numpy.py",
     "single_source_dijkstra_core.py",
     "ApproximateShortestPathForestUnified.py",
     "minmaxheap.pyx",
