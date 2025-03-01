@@ -93,10 +93,10 @@ def bidir_path_numpy(G, source: cython.int, target: cython.int, bulk_heuristic,
     distances_rev_view[target] = 0.0
 
     # track forward and reverse queues
-    queue_fwd = [(potential_fwd[source], 0, source, -1)]
-    queue_rev = [(potential_rev[target], 0, target, -1)]
-    f_fwd = potential_fwd[source]
-    f_rev = potential_rev[target]
+    f_fwd: cython.float = potential_fwd_view[source]
+    f_rev: cython.float = potential_rev_view[target]
+    queue_fwd = [(f_fwd, 0, source, -1)]
+    queue_rev = [(f_rev, 0, target, -1)]
     oldbound = upbound
 
     # track smallest node in both distance arrays
