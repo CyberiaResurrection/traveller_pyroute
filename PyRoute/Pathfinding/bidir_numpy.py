@@ -208,7 +208,12 @@ def bidir_fix_explored(explored: dict[cython.int, cython.int], distances: cnp.nd
 
     return explored
 
-
+@cython.cfunc
+@cython.infer_types(True)
+@cython.boundscheck(False)
+@cython.initializedcheck(False)
+@cython.nonecheck(False)
+@cython.wraparound(False)
 def bidir_build_path(explored_fwd: dict[cython.int, cython.int], explored_rev: dict[cython.int, cython.int], smalldex: cython.int) -> list[cython.int]:
     path = [smalldex]
     node = explored_fwd[smalldex]
