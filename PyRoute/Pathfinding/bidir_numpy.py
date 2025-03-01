@@ -187,7 +187,12 @@ def bidir_iteration(G_succ: list[tuple[list[cython.int], list[cython.float]]], d
 
     return upbound, mindex
 
-
+@cython.cfunc
+@cython.infer_types(True)
+@cython.boundscheck(False)
+@cython.initializedcheck(False)
+@cython.nonecheck(False)
+@cython.wraparound(False)
 def bidir_fix_explored(explored: dict[cython.int, cython.int], distances: cnp.ndarray[cython.float],
                        active_nodes: cnp.ndarray[cython.int], active_costs: cnp.ndarray[cython.float],
                        smalldex: cython.int) -> dict:
