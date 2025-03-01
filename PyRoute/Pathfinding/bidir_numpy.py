@@ -137,7 +137,12 @@ def bidir_path_numpy(G, source: cython.int, target: cython.int, bulk_heuristic,
 
     return bestpath, diag
 
-
+@cython.cfunc
+@cython.infer_types(True)
+@cython.boundscheck(False)
+@cython.initializedcheck(False)
+@cython.nonecheck(False)
+@cython.wraparound(False)
 def bidir_iteration(G_succ: list[tuple[list[cython.int], list[cython.float]]], diagnostics: cython.bint, queue: list[tuple],
                     explored: dict[cython.int, cython.int], distances: np.ndarray[cython.float],
                     distances_other: np.ndarray[cython.float], potentials: np.ndarray[cython.float],
