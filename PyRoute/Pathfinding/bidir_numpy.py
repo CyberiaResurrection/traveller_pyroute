@@ -91,8 +91,8 @@ def bidir_path_numpy(G, source: int, target: int, bulk_heuristic,
     distances_rev[target] = 0.0
 
     # track forward and reverse queues
-    queue_fwd = [(potential_fwd[source], 0, source, None)]
-    queue_rev = [(potential_rev[target], 0, target, None)]
+    queue_fwd = [(potential_fwd[source], 0, source, -1)]
+    queue_rev = [(potential_rev[target], 0, target, -1)]
     f_fwd = potential_fwd[source]
     f_rev = potential_rev[target]
     oldbound = upbound
@@ -202,14 +202,14 @@ def bidir_fix_explored(explored, distances, G_succ, smalldex: cython.int) -> dic
 def bidir_build_path(explored_fwd: dict, explored_rev: dict, smalldex: cython.int) -> list[int]:
     path = [smalldex]
     node = explored_fwd[smalldex]
-    while node is not None:
+    while node != -1:
         assert node not in path, "Node " + str(node) + " duplicated in discovered path"
         path.append(node)
         node = explored_fwd[node]
     path.reverse()
 
     node = explored_rev[smalldex]
-    while node is not None:
+    while node != -1:
         assert node not in path, "Node " + str(node) + " duplicated in discovered path"
         path.append(node)
         node = explored_rev[node]
