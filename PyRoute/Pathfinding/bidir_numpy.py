@@ -86,9 +86,11 @@ def bidir_path_numpy(G, source: cython.int, target: cython.int, bulk_heuristic,
 
     # Traces lowest distance from source node found for each node
     distances_fwd = np.ones((len(G_succ)), dtype=float) * float64max
-    distances_fwd[source] = 0.0
+    distances_fwd_view: cython.double[:] = distances_fwd
+    distances_fwd_view[source] = 0.0
     distances_rev = np.ones((len(G_succ)), dtype=float) * float64max
-    distances_rev[target] = 0.0
+    distances_rev_view: cython.double[:] = distances_rev
+    distances_rev_view[target] = 0.0
 
     # track forward and reverse queues
     queue_fwd = [(potential_fwd[source], 0, source, -1)]
@@ -102,15 +104,15 @@ def bidir_path_numpy(G, source: cython.int, target: cython.int, bulk_heuristic,
 
     while queue_fwd and queue_rev:
         if len(queue_rev) < len(queue_fwd):
-            upbound, mindex = bidir_iteration(G_succ, diagnostics, queue_rev, explored_rev, distances_rev,
-                                            distances_fwd, potential_rev, potential_fwd, upbound, f_fwd)
+            upbound, mindex = bidir_iteration(G_succ, diagnostics, queue_rev, explored_rev, distances_rev_view,
+                                            distances_fwd_view, potential_rev, potential_fwd, upbound, f_fwd)
             if queue_rev:
                 f_rev = queue_rev[0][0]
             if -1 != mindex:
                 smalldex = mindex
         else:
-            upbound, mindex = bidir_iteration(G_succ, diagnostics, queue_fwd, explored_fwd, distances_fwd,
-                                              distances_rev, potential_fwd, potential_rev, upbound, f_rev)
+            upbound, mindex = bidir_iteration(G_succ, diagnostics, queue_fwd, explored_fwd, distances_fwd_view,
+                                              distances_rev_view, potential_fwd, potential_rev, upbound, f_rev)
             if queue_fwd:
                 f_fwd = queue_fwd[0][0]
             if -1 != mindex:
@@ -126,8 +128,8 @@ def bidir_path_numpy(G, source: cython.int, target: cython.int, bulk_heuristic,
     if -1 == smalldex:
         raise nx.NetworkXNoPath(f"Node {target} not reachable from {source}")
 
-    explored_fwd = bidir_fix_explored(explored_fwd, distances_fwd, G_succ, smalldex)
-    explored_rev = bidir_fix_explored(explored_rev, distances_rev, G_succ, smalldex)
+    explored_fwd = bidir_fix_explored(explored_fwd, distances_fwd_view, G_succ, smalldex)
+    explored_rev = bidir_fix_explored(explored_rev, distances_rev_view, G_succ, smalldex)
     bestpath = bidir_build_path(explored_fwd, explored_rev, smalldex)
     diag = {}
 
