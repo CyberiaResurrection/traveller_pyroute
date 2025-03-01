@@ -28,7 +28,7 @@ float64max = np.finfo(np.float64).max
 
 
 #@cython.cdivision(True)
-def _calc_branching_factor(nodes_queued: int, path_len: int):
+def _calc_branching_factor(nodes_queued: cython.int, path_len: cython.int):
     old: float
     new: float
     rhs: float
@@ -64,8 +64,8 @@ def _calc_branching_factor(nodes_queued: int, path_len: int):
 #@cython.initializedcheck(False)
 #@cython.wraparound(False)
 #@cython.nonecheck(False)
-def bidir_path_numpy(G, source: int, target: int, bulk_heuristic,
-                     upbound: float = float64max, diagnostics: bool = False):
+def bidir_path_numpy(G, source: cython.int, target: cython.int, bulk_heuristic,
+                     upbound: cython.float = float64max, diagnostics: cython.bint = False):
     G_succ: list[tuple[list[int], list[float]]]
     potential_fwd: cnp.ndarray[cython.float]
     potential_rev: cnp.ndarray[cython.float]
@@ -134,9 +134,10 @@ def bidir_path_numpy(G, source: int, target: int, bulk_heuristic,
     return bestpath, diag
 
 
-def bidir_iteration(G_succ: list[tuple[list[int], list[float]]], diagnostics: bool, queue: list[tuple],
-                    explored: dict[int, int], distances: np.ndarray[float], distances_other: np.ndarray[float],
-                    potentials: np.ndarray[float], potentials_other: np.ndarray[float], upbound: float, f_other: float):
+def bidir_iteration(G_succ: list[tuple[list[cython.int], list[cython.float]]], diagnostics: cython.bint, queue: list[tuple],
+                    explored: dict[cython.int, cython.int], distances: np.ndarray[cython.float],
+                    distances_other: np.ndarray[cython.float], potentials: np.ndarray[cython.float],
+                    potentials_other: np.ndarray[cython.float], upbound: cython.float, f_other: cython.float):
     # Pop the smallest item from queue.
     _, dist, curnode, parent = heappop(queue)
     mindex = -1
@@ -183,7 +184,7 @@ def bidir_iteration(G_succ: list[tuple[list[int], list[float]]], diagnostics: bo
     return upbound, mindex
 
 
-def bidir_fix_explored(explored, distances, G_succ, smalldex: cython.int) -> dict:
+def bidir_fix_explored(explored: dict[cython.int, cython.int], distances, G_succ, smalldex: cython.int) -> dict:
     if smalldex not in explored:
         active_nodes = G_succ[smalldex][0]
         active_costs = G_succ[smalldex][1]
@@ -199,7 +200,7 @@ def bidir_fix_explored(explored, distances, G_succ, smalldex: cython.int) -> dic
     return explored
 
 
-def bidir_build_path(explored_fwd: dict, explored_rev: dict, smalldex: cython.int) -> list[int]:
+def bidir_build_path(explored_fwd: dict[cython.int, cython.int], explored_rev: dict[cython.int, cython.int], smalldex: cython.int) -> list[cython.int]:
     path = [smalldex]
     node = explored_fwd[smalldex]
     while node != -1:
