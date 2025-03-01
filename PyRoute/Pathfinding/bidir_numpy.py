@@ -60,10 +60,10 @@ def _calc_branching_factor(nodes_queued: cython.int, path_len: cython.int):
     return round(new, 3)
 
 
-#@cython.boundscheck(False)
-#@cython.initializedcheck(False)
-#@cython.wraparound(False)
-#@cython.nonecheck(False)
+@cython.boundscheck(False)
+@cython.initializedcheck(False)
+@cython.wraparound(False)
+@cython.nonecheck(False)
 def bidir_path_numpy(G, source: cython.int, target: cython.int, bulk_heuristic,
                      upbound: cython.float = float64max, diagnostics: cython.bint = False):
     G_succ: list[tuple[cnp.ndarray[cython.int], cnp.ndarray[cython.float]]] = G._arcs  # For speed-up
