@@ -66,13 +66,12 @@ def _calc_branching_factor(nodes_queued: cython.int, path_len: cython.int):
 #@cython.nonecheck(False)
 def bidir_path_numpy(G, source: cython.int, target: cython.int, bulk_heuristic,
                      upbound: cython.float = float64max, diagnostics: cython.bint = False):
-    G_succ: list[tuple[list[int], list[float]]]
+    G_succ: list[tuple[cnp.ndarray[cython.int], cnp.ndarray[cython.float]]] = G._arcs  # For speed-up
     potential_fwd: cnp.ndarray[cython.float]
     potential_rev: cnp.ndarray[cython.float]
     # upbound: cython.float
     distances_fwd: np.ndarray[float, 1]
     distances_rev: np.ndarray[float, 1]
-    G_succ = G._arcs  # For speed-up
 
     # pre-calc heuristics for all nodes to the target node
     potential_fwd = bulk_heuristic(target)
@@ -85,10 +84,11 @@ def bidir_path_numpy(G, source: cython.int, target: cython.int, bulk_heuristic,
     explored_rev: dict[cython.int, cython.int] = {}
 
     # Traces lowest distance from source node found for each node
-    distances_fwd = np.ones((len(G_succ)), dtype=float) * float64max
+    num_nodes: cython.int = len(G_succ)
+    distances_fwd = np.ones(num_nodes, dtype=float) * float64max
     distances_fwd_view: cython.double[:] = distances_fwd
     distances_fwd_view[source] = 0.0
-    distances_rev = np.ones((len(G_succ)), dtype=float) * float64max
+    distances_rev = np.ones(num_nodes, dtype=float) * float64max
     distances_rev_view: cython.double[:] = distances_rev
     distances_rev_view[target] = 0.0
 
