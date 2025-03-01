@@ -38,6 +38,7 @@ except ImportError:
     from PyRoute.Pathfinding.astar_numpy_fallback import astar_path_numpy
 except AttributeError:
     from PyRoute.Pathfinding.astar_numpy_fallback import astar_path_numpy
+from PyRoute.Pathfinding.bidir_numpy import bidir_path_numpy
 from PyRoute.Star import Star
 
 
@@ -313,13 +314,18 @@ class TradeCalculation(RouteCalculation):
             upbound = self._preheat_upper_bound(star.index, target.index, allow_reheat=True) * 1.005
 
             comp_id = star.component
-            if star.index in self.component_landmarks[comp_id] and \
-                    target.index not in self.component_landmarks[comp_id]:
-                target, star = star, target
+            if star.index in self.component_landmarks[comp_id]:
+                if target.index not in self.component_landmarks[comp_id]:
+                    target, star = star, target
 
-            rawroute, diag = astar_path_numpy(self.star_graph, star.index, target.index,
-                                              self.shortest_path_tree.lower_bound_bulk, upbound=upbound,
-                                              diagnostics=self.debug_flag)
+            if 2 * self.galaxy.max_jump_range < star.distance(target):
+                rawroute, diag = bidir_path_numpy(self.star_graph, star.index, target.index,
+                                                  self.shortest_path_tree.lower_bound_bulk,
+                                                  diagnostics=self.debug_flag)
+            else:
+                rawroute, diag = astar_path_numpy(self.star_graph, star.index, target.index,
+                                                  self.shortest_path_tree.lower_bound_bulk, upbound=upbound,
+                                                  diagnostics=self.debug_flag)
 
             if self.debug_flag:
                 moshdex = np.where(self.pathfinding_data['branch_factor'] == -1.0)[0][0]
