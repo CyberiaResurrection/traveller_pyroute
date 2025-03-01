@@ -128,8 +128,10 @@ def bidir_path_numpy(G, source: cython.int, target: cython.int, bulk_heuristic,
     if -1 == smalldex:
         raise nx.NetworkXNoPath(f"Node {target} not reachable from {source}")
 
-    explored_fwd = bidir_fix_explored(explored_fwd, distances_fwd_view, G_succ, smalldex)
-    explored_rev = bidir_fix_explored(explored_rev, distances_rev_view, G_succ, smalldex)
+    active_nodes: cnp.ndarray[cython.int] = G_succ[smalldex][0]
+    active_costs: cnp.ndarray[cython.float] = G_succ[smalldex][1]
+    explored_fwd = bidir_fix_explored(explored_fwd, distances_fwd_view, active_nodes, active_costs, smalldex)
+    explored_rev = bidir_fix_explored(explored_rev, distances_rev_view, active_nodes, active_costs, smalldex)
     bestpath = bidir_build_path(explored_fwd, explored_rev, smalldex)
     diag = {}
 
@@ -186,10 +188,10 @@ def bidir_iteration(G_succ: list[tuple[list[cython.int], list[cython.float]]], d
     return upbound, mindex
 
 
-def bidir_fix_explored(explored: dict[cython.int, cython.int], distances, G_succ, smalldex: cython.int) -> dict:
+def bidir_fix_explored(explored: dict[cython.int, cython.int], distances: cnp.ndarray[cython.float],
+                       active_nodes: cnp.ndarray[cython.int], active_costs: cnp.ndarray[cython.float],
+                       smalldex: cython.int) -> dict:
     if smalldex not in explored:
-        active_nodes = G_succ[smalldex][0]
-        active_costs = G_succ[smalldex][1]
         skipcost = float64max
 
         for i in range(len(active_nodes)):
