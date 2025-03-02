@@ -27,12 +27,12 @@ cnp.import_array()
 float64max = np.finfo(np.float64).max
 
 
-#@cython.cdivision(True)
+@cython.cdivision(True)
 def _calc_branching_factor(nodes_queued: cython.int, path_len: cython.int):
-    old: float
-    new: float
-    rhs: float
-    power: float
+    old: cython.float
+    new: cython.float
+    rhs: cython.float
+    power: cython.float
     if path_len == nodes_queued or 1 > path_len or 1 > nodes_queued:
         return 1.0
 
