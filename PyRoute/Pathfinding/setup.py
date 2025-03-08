@@ -11,6 +11,7 @@ sources = [
     "single_source_dijkstra_core.py",
     "ApproximateShortestPathForestUnified.py",
     "minmaxheap.pyx",
+    "unordered_map.pyx",
     "TradeCalculationRawRoutes.py",
 ]
 
