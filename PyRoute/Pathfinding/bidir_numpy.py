@@ -17,6 +17,7 @@ A*-like pathfinding.  This code:
 import cython
 from cython.cimports.numpy import numpy as cnp
 from cython.cimports.minmaxheap import MinMaxHeap, astar_t
+from cython.cimports.unordered_map import unordered_map as umap
 from heapq import heappop, heappush, heapify
 
 import networkx as nx
