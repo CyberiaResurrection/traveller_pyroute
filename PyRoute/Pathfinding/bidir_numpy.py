@@ -81,8 +81,8 @@ def bidir_path_numpy(G, source: cython.int, target: cython.int, bulk_heuristic,
     potential_rev_view: cython.double[:] = potential_rev
 
     # Maps explored nodes to parent closest to the source.
-    explored_fwd: dict[cython.int, cython.int] = {}
-    explored_rev: dict[cython.int, cython.int] = {}
+    explored_fwd: umap[cython.int, cython.int] = umap[cython.int, cython.int]()
+    explored_rev: umap[cython.int, cython.int] = umap[cython.int, cython.int]()
 
     # Traces lowest distance from source node found for each node
     num_nodes: cython.int = len(G_succ)
@@ -145,7 +145,7 @@ def bidir_path_numpy(G, source: cython.int, target: cython.int, bulk_heuristic,
 @cython.nonecheck(False)
 @cython.wraparound(False)
 def bidir_iteration(G_succ: list[tuple[list[cython.int], list[cython.float]]], diagnostics: cython.bint, queue: list[tuple],
-                    explored: dict[cython.int, cython.int], distances: np.ndarray[cython.float],
+                    explored: umap[cython.int, cython.int], distances: np.ndarray[cython.float],
                     distances_other: np.ndarray[cython.float], potentials: np.ndarray[cython.float],
                     potentials_other: np.ndarray[cython.float], upbound: cython.float, f_other: cython.float):
     # Pop the smallest item from queue.
@@ -199,9 +199,9 @@ def bidir_iteration(G_succ: list[tuple[list[cython.int], list[cython.float]]], d
 @cython.initializedcheck(False)
 @cython.nonecheck(False)
 @cython.wraparound(False)
-def bidir_fix_explored(explored: dict[cython.int, cython.int], distances: cnp.ndarray[cython.float],
+def bidir_fix_explored(explored: umap[cython.int, cython.int], distances: cnp.ndarray[cython.float],
                        active_nodes: cnp.ndarray[cython.int], active_costs: cnp.ndarray[cython.float],
-                       smalldex: cython.int) -> dict:
+                       smalldex: cython.int) -> umap[cython.int, cython.int]:
     if smalldex not in explored:
         skipcost = float64max
 
@@ -220,7 +220,7 @@ def bidir_fix_explored(explored: dict[cython.int, cython.int], distances: cnp.nd
 @cython.initializedcheck(False)
 @cython.nonecheck(False)
 @cython.wraparound(False)
-def bidir_build_path(explored_fwd: dict[cython.int, cython.int], explored_rev: dict[cython.int, cython.int], smalldex: cython.int) -> list[cython.int]:
+def bidir_build_path(explored_fwd: umap[cython.int, cython.int], explored_rev: umap[cython.int, cython.int], smalldex: cython.int) -> list[cython.int]:
     path = [smalldex]
     node = explored_fwd[smalldex]
     while node != -1:
