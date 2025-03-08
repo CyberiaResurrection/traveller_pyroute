@@ -204,13 +204,17 @@ def bidir_fix_explored(explored: umap[cython.int, cython.int], distances: cnp.nd
                        smalldex: cython.int) -> umap[cython.int, cython.int]:
     if 0 == explored.count(smalldex):
         skipcost = float64max
+        mindex = -1
 
         for i in range(len(active_nodes)):
             act_nod = active_nodes[i]
             act_wt = distances[act_nod] + active_costs[i]
             if 0 != explored.count(act_nod) and skipcost > act_wt:
-                explored[smalldex] = act_nod
+                mindex = act_nod
                 skipcost = act_wt
+
+        if -1 != mindex:
+            explored[smalldex] = mindex
 
     return explored
 
