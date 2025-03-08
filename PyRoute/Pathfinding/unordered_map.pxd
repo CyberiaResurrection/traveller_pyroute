@@ -3,7 +3,7 @@
 
 from libcpp.utility cimport pair
 
-cdef extern from "<unordered_map>" namespace "std::tr1":
+cdef extern from "<unordered_map>" namespace "std":
     cdef cppclass unordered_map[T, U]:
         cppclass iterator:
             pair[T, U]& operator*() nogil
