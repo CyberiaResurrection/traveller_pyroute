@@ -152,7 +152,7 @@ def bidir_iteration(G_succ: list[tuple[list[cython.int], list[cython.float]]], d
     _, dist, curnode, parent = heappop(queue)
     mindex = -1
 
-    if curnode in explored:
+    if 0 != explored.count(curnode):
         # Do not override the parent of starting node
         if explored[curnode] == -1:
             return upbound, mindex
@@ -202,13 +202,13 @@ def bidir_iteration(G_succ: list[tuple[list[cython.int], list[cython.float]]], d
 def bidir_fix_explored(explored: umap[cython.int, cython.int], distances: cnp.ndarray[cython.float],
                        active_nodes: cnp.ndarray[cython.int], active_costs: cnp.ndarray[cython.float],
                        smalldex: cython.int) -> umap[cython.int, cython.int]:
-    if smalldex not in explored:
+    if 0 == explored.count(smalldex):
         skipcost = float64max
 
         for i in range(len(active_nodes)):
             act_nod = active_nodes[i]
             act_wt = distances[act_nod] + active_costs[i]
-            if act_nod in explored and skipcost > act_wt:
+            if 0 != explored.count(act_nod) and skipcost > act_wt:
                 explored[smalldex] = act_nod
                 skipcost = act_wt
 
