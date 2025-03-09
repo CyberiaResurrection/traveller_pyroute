@@ -33,3 +33,4 @@ cdef extern from "<unordered_map>" namespace "std":
         void rehash(size_t)
         size_t size() nogil
         void swap(unordered_map&) nogil
+        void reserve(size_t)
