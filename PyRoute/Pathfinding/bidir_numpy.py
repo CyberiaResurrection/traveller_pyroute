@@ -70,7 +70,6 @@ def bidir_path_numpy(G, source: cython.int, target: cython.int, bulk_heuristic,
     G_succ: list[tuple[cnp.ndarray[cython.int], cnp.ndarray[cython.float]]] = G._arcs  # For speed-up
     potential_fwd: cnp.ndarray[cython.float]
     potential_rev: cnp.ndarray[cython.float]
-    # upbound: cython.float
     distances_fwd: np.ndarray[float, 1]
     distances_rev: np.ndarray[float, 1]
 
@@ -98,35 +97,32 @@ def bidir_path_numpy(G, source: cython.int, target: cython.int, bulk_heuristic,
     # track forward and reverse queues
     f_fwd: cython.float = potential_fwd_view[source]
     f_rev: cython.float = potential_rev_view[target]
-    queue_fwd = [(f_fwd, 0, source, -1)]
-    queue_rev = [(f_rev, 0, target, -1)]
+    queue_fwd: MinMaxHeap[astar_t] = MinMaxHeap[astar_t]()
+    queue_fwd.reserve(500)
+    queue_rev: MinMaxHeap[astar_t] = MinMaxHeap[astar_t]()
+    queue_rev.reserve(500)
     oldbound = upbound
 
     # track smallest node in both distance arrays
     smalldex: cython.int = -1
 
-    while queue_fwd and queue_rev:
-        if len(queue_rev) < len(queue_fwd):
+    while queue_fwd.size() > 0 and queue_rev.size() > 0:
+        if queue_rev.size() < queue_fwd.size():
             upbound, mindex, explored_rev = bidir_iteration(G_succ, diagnostics, queue_rev, explored_rev, distances_rev_view,
                                             distances_fwd_view, potential_rev, potential_fwd, upbound, f_fwd)
-            if queue_rev:
-                f_rev = queue_rev[0][0]
+            if queue_rev.size() > 0:
+                result = queue_rev.peekmin()
+                f_rev = result.augment
             if -1 != mindex:
                 smalldex = mindex
         else:
             upbound, mindex, explored_fwd = bidir_iteration(G_succ, diagnostics, queue_fwd, explored_fwd, distances_fwd_view,
                                               distances_rev_view, potential_fwd, potential_rev, upbound, f_rev)
-            if queue_fwd:
-                f_fwd = queue_fwd[0][0]
+            if queue_fwd.size() > 0:
+                result = queue_fwd.peekmin()
+                f_fwd = result.augment
             if -1 != mindex:
                 smalldex = mindex
-
-        if oldbound > upbound:
-            oldbound = upbound
-            queue_fwd = [item for item in queue_fwd if item[0] <= upbound]
-            queue_rev = [item for item in queue_rev if item[0] <= upbound]
-            heapify(queue_fwd)
-            heapify(queue_rev)
 
     if -1 == smalldex:
         raise nx.NetworkXNoPath(f"Node {target} not reachable from {source}")
@@ -146,12 +142,17 @@ def bidir_path_numpy(G, source: cython.int, target: cython.int, bulk_heuristic,
 @cython.initializedcheck(False)
 @cython.nonecheck(False)
 @cython.wraparound(False)
-def bidir_iteration(G_succ: list[tuple[list[cython.int], list[cython.float]]], diagnostics: cython.bint, queue: list[tuple],
+@cython.returns(tuple[cython.float, cython.int, umap[cython.int, cython.int]])
+def bidir_iteration(G_succ: list[tuple[list[cython.int], list[cython.float]]], diagnostics: cython.bint,
+                    queue: MinMaxHeap[astar_t],
                     explored: umap[cython.int, cython.int], distances: np.ndarray[cython.float],
                     distances_other: np.ndarray[cython.float], potentials: np.ndarray[cython.float],
                     potentials_other: np.ndarray[cython.float], upbound: cython.float, f_other: cython.float):
     # Pop the smallest item from queue.
-    _, dist, curnode, parent = heappop(queue)
+    result = queue.popmin()
+    dist = result.dist
+    curnode = result.curnode
+    parent = result.parent
     mindex = -1
 
     if 0 != explored.count(curnode):
@@ -189,7 +190,7 @@ def bidir_iteration(G_succ: list[tuple[list[cython.int], list[cython.float]]], d
         if act_wt + f_other - potentials_other[act_nod] > upbound:
             continue
         distances[act_nod] = act_wt
-        heappush(queue, (aug_wt, act_wt, act_nod, curnode))
+        queue.insert({'augment': aug_wt, 'dist': act_wt, 'curnode': act_nod, 'parent': curnode})
         rawbound = act_wt + distances_other[act_nod]
         if upbound > rawbound:
             upbound = rawbound
