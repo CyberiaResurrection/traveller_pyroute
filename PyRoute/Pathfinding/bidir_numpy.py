@@ -129,12 +129,12 @@ def bidir_path_numpy(G, source: cython.int, target: cython.int, bulk_heuristic,
                 if explored_rev[curnode] == -1:
                     continue
                 # We've found a bad path, just move on
-                qcost = distances_rev[curnode]
+                qcost = distances_rev_view[curnode]
                 if qcost <= dist:
                     continue
                 # If we've found a better path, update
                 # revis_continue += 1
-                distances_rev[curnode] = dist
+                distances_rev_view[curnode] = dist
                 assert 1 == explored_rev.count(curnode), "Node " + str(curnode) + " duplicated in explored dict"
 
             assert curnode != parent, "Node " + str(curnode) + " is ancestor of self"
@@ -148,16 +148,16 @@ def bidir_path_numpy(G, source: cython.int, target: cython.int, bulk_heuristic,
             for i in range(num_nodes):
                 act_nod = active_nodes[i]
                 act_wt = dist + active_costs[i]
-                if act_wt >= distances_rev[act_nod]:
+                if act_wt >= distances_rev_view[act_nod]:
                     continue
-                aug_wt = act_wt + potential_rev[act_nod]
+                aug_wt = act_wt + potential_rev_view[act_nod]
                 if aug_wt > upbound:
                     continue
-                if act_wt + f_fwd - potential_fwd[act_nod] > upbound:
+                if act_wt + f_fwd - potential_fwd_view[act_nod] > upbound:
                     continue
-                distances_rev[act_nod] = act_wt
+                distances_rev_view[act_nod] = act_wt
                 queue_rev.insert({'augment': aug_wt, 'dist': act_wt, 'curnode': act_nod, 'parent': curnode})
-                rawbound = act_wt + distances_fwd[act_nod]
+                rawbound = act_wt + distances_fwd_view[act_nod]
                 if upbound > rawbound:
                     upbound = rawbound
                     mindex = act_nod
@@ -179,12 +179,12 @@ def bidir_path_numpy(G, source: cython.int, target: cython.int, bulk_heuristic,
                 if explored_fwd[curnode] == -1:
                     continue
                 # We've found a bad path, just move on
-                qcost = distances_fwd[curnode]
+                qcost = distances_fwd_view[curnode]
                 if qcost <= dist:
                     continue
                 # If we've found a better path, update
                 # revis_continue += 1
-                distances_fwd[curnode] = dist
+                distances_fwd_view[curnode] = dist
                 assert 1 == explored_fwd.count(curnode), "Node " + str(curnode) + " duplicated in explored dict"
 
             assert curnode != parent, "Node " + str(curnode) + " is ancestor of self"
@@ -198,16 +198,16 @@ def bidir_path_numpy(G, source: cython.int, target: cython.int, bulk_heuristic,
             for i in range(num_nodes):
                 act_nod = active_nodes[i]
                 act_wt = dist + active_costs[i]
-                if act_wt >= distances_fwd[act_nod]:
+                if act_wt >= distances_fwd_view[act_nod]:
                     continue
-                aug_wt = act_wt + potential_fwd[act_nod]
+                aug_wt = act_wt + potential_fwd_view[act_nod]
                 if aug_wt > upbound:
                     continue
-                if act_wt + f_rev - potential_rev[act_nod] > upbound:
+                if act_wt + f_rev - potential_rev_view[act_nod] > upbound:
                     continue
-                distances_fwd[act_nod] = act_wt
+                distances_fwd_view[act_nod] = act_wt
                 queue_fwd.insert({'augment': aug_wt, 'dist': act_wt, 'curnode': act_nod, 'parent': curnode})
-                rawbound = act_wt + distances_rev[act_nod]
+                rawbound = act_wt + distances_rev_view[act_nod]
                 if upbound > rawbound:
                     upbound = rawbound
                     mindex = act_nod
