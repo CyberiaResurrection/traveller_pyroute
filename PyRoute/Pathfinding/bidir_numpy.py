@@ -163,7 +163,9 @@ def bidir_iteration(G_succ: list[tuple[list[cython.int], list[cython.float]]], d
         # If we've found a better path, update
         #revis_continue += 1
         distances[curnode] = dist
+        assert 1 == explored.count(curnode), "Node " + str(curnode) + " duplicated in explored dict"
 
+    assert curnode != parent, "Node " + str(curnode) + " is ancestor of self"
     explored[curnode] = parent
 
     active_nodes = G_succ[curnode][0]
@@ -214,6 +216,7 @@ def bidir_fix_explored(explored: umap[cython.int, cython.int], distances: cnp.nd
                 skipcost = act_wt
 
         if -1 != mindex:
+            assert smalldex != mindex, "Node " + str(mindex) + " will be ancestor of self"
             explored[smalldex] = mindex
 
     return explored
@@ -226,6 +229,7 @@ def bidir_fix_explored(explored: umap[cython.int, cython.int], distances: cnp.nd
 @cython.wraparound(False)
 def bidir_build_path(explored_fwd: umap[cython.int, cython.int], explored_rev: umap[cython.int, cython.int], smalldex: cython.int) -> list[cython.int]:
     path = [smalldex]
+    assert 0 != explored_fwd.count(smalldex), "Node " + str(smalldex) + " lacking forward ancestor"
     node = explored_fwd[smalldex]
     oldnode = -1
     while node != -1:
@@ -236,6 +240,7 @@ def bidir_build_path(explored_fwd: umap[cython.int, cython.int], explored_rev: u
         assert node != oldnode, "Node " + str(node) + " is ancestor of self"
     path.reverse()
 
+    assert 0 != explored_rev.count(smalldex), "Node " + str(smalldex) + " lacking reverse ancestor"
     node = explored_rev[smalldex]
     oldnode = -1
     while node != -1:
