@@ -82,7 +82,9 @@ def bidir_path_numpy(G, source: cython.int, target: cython.int, bulk_heuristic,
 
     # Maps explored nodes to parent closest to the source.
     explored_fwd: umap[cython.int, cython.int] = umap[cython.int, cython.int]()
+    explored_fwd.reserve(512)
     explored_rev: umap[cython.int, cython.int] = umap[cython.int, cython.int]()
+    explored_rev.reserve(512)
 
     # Traces lowest distance from source node found for each node
     num_nodes: cython.int = len(G_succ)
@@ -105,14 +107,14 @@ def bidir_path_numpy(G, source: cython.int, target: cython.int, bulk_heuristic,
 
     while queue_fwd and queue_rev:
         if len(queue_rev) < len(queue_fwd):
-            upbound, mindex = bidir_iteration(G_succ, diagnostics, queue_rev, explored_rev, distances_rev_view,
+            upbound, mindex, explored_rev = bidir_iteration(G_succ, diagnostics, queue_rev, explored_rev, distances_rev_view,
                                             distances_fwd_view, potential_rev, potential_fwd, upbound, f_fwd)
             if queue_rev:
                 f_rev = queue_rev[0][0]
             if -1 != mindex:
                 smalldex = mindex
         else:
-            upbound, mindex = bidir_iteration(G_succ, diagnostics, queue_fwd, explored_fwd, distances_fwd_view,
+            upbound, mindex, explored_fwd = bidir_iteration(G_succ, diagnostics, queue_fwd, explored_fwd, distances_fwd_view,
                                               distances_rev_view, potential_fwd, potential_rev, upbound, f_rev)
             if queue_fwd:
                 f_fwd = queue_fwd[0][0]
@@ -155,11 +157,11 @@ def bidir_iteration(G_succ: list[tuple[list[cython.int], list[cython.float]]], d
     if 0 != explored.count(curnode):
         # Do not override the parent of starting node
         if explored[curnode] == -1:
-            return upbound, mindex
+            return upbound, mindex, explored
         # We've found a bad path, just move on
         qcost = distances[curnode]
         if qcost <= dist:
-            return upbound, mindex
+            return upbound, mindex, explored
         # If we've found a better path, update
         #revis_continue += 1
         distances[curnode] = dist
@@ -193,7 +195,7 @@ def bidir_iteration(G_succ: list[tuple[list[cython.int], list[cython.float]]], d
             upbound = rawbound
             mindex = act_nod
 
-    return upbound, mindex
+    return upbound, mindex, explored
 
 @cython.cfunc
 @cython.infer_types(True)
@@ -250,7 +252,6 @@ def bidir_build_path(explored_fwd: umap[cython.int, cython.int], explored_rev: u
         node = explored_rev[node]
         assert node != oldnode, "Node " + str(node) + " is ancestor of self"
     return path
-
 
 #@cython.cfunc
 #@cython.infer_types(True)
