@@ -72,6 +72,7 @@ def bidir_path_numpy(G, source: cython.int, target: cython.int, bulk_heuristic,
     potential_rev: cnp.ndarray[cython.float]
     distances_fwd: cnp.ndarray[cython.float]
     distances_rev: cnp.ndarray[cython.float]
+    i: cython.int
 
     # pre-calc heuristics for all nodes to the target node
     potential_fwd = bulk_heuristic(target)
@@ -110,16 +111,102 @@ def bidir_path_numpy(G, source: cython.int, target: cython.int, bulk_heuristic,
 
     while queue_fwd.size() > 0 and queue_rev.size() > 0:
         if queue_rev.size() < queue_fwd.size():
-            upbound, mindex, explored_rev = bidir_iteration(G_succ, diagnostics, queue_rev, explored_rev, distances_rev_view,
-                                            distances_fwd_view, potential_rev, potential_fwd, upbound, f_fwd)
+            result = queue_rev.popmin()
+            dist = result.dist
+            curnode = result.curnode
+            parent = result.parent
+            mindex = -1
+
+            if 0 != explored_rev.count(curnode):
+                # Do not override the parent of starting node
+                if explored_rev[curnode] == -1:
+                    continue
+                # We've found a bad path, just move on
+                qcost = distances_rev[curnode]
+                if qcost <= dist:
+                    continue
+                # If we've found a better path, update
+                # revis_continue += 1
+                distances_rev[curnode] = dist
+                assert 1 == explored_rev.count(curnode), "Node " + str(curnode) + " duplicated in explored dict"
+
+            assert curnode != parent, "Node " + str(curnode) + " is ancestor of self"
+            explored_rev[curnode] = parent
+
+            active_nodes = G_succ[curnode][0]
+            active_costs = G_succ[curnode][1]
+
+            num_nodes = len(active_nodes)
+
+            for i in range(num_nodes):
+                act_nod = active_nodes[i]
+                act_wt = dist + active_costs[i]
+                if act_wt >= distances_rev[act_nod]:
+                    continue
+                aug_wt = act_wt + potential_rev[act_nod]
+                if aug_wt > upbound:
+                    continue
+                if act_wt + f_fwd - potential_fwd[act_nod] > upbound:
+                    continue
+                distances_rev[act_nod] = act_wt
+                queue_rev.insert({'augment': aug_wt, 'dist': act_wt, 'curnode': act_nod, 'parent': curnode})
+                rawbound = act_wt + distances_fwd[act_nod]
+                if upbound > rawbound:
+                    upbound = rawbound
+                    print("New mindex found: " + str(act_nod))
+                    mindex = act_nod
+
             if queue_rev.size() > 0:
                 result = queue_rev.peekmin()
                 f_rev = result.augment
             if -1 != mindex:
                 smalldex = mindex
         else:
-            upbound, mindex, explored_fwd = bidir_iteration(G_succ, diagnostics, queue_fwd, explored_fwd, distances_fwd_view,
-                                              distances_rev_view, potential_fwd, potential_rev, upbound, f_rev)
+            result = queue_fwd.popmin()
+            dist = result.dist
+            curnode = result.curnode
+            parent = result.parent
+            mindex = -1
+
+            if 0 != explored_fwd.count(curnode):
+                # Do not override the parent of starting node
+                if explored_fwd[curnode] == -1:
+                    continue
+                # We've found a bad path, just move on
+                qcost = distances_fwd[curnode]
+                if qcost <= dist:
+                    continue
+                # If we've found a better path, update
+                # revis_continue += 1
+                distances_fwd[curnode] = dist
+                assert 1 == explored_fwd.count(curnode), "Node " + str(curnode) + " duplicated in explored dict"
+
+            assert curnode != parent, "Node " + str(curnode) + " is ancestor of self"
+            explored_fwd[curnode] = parent
+
+            active_nodes = G_succ[curnode][0]
+            active_costs = G_succ[curnode][1]
+
+            num_nodes = len(active_nodes)
+
+            for i in range(num_nodes):
+                act_nod = active_nodes[i]
+                act_wt = dist + active_costs[i]
+                if act_wt >= distances_fwd[act_nod]:
+                    continue
+                aug_wt = act_wt + potential_fwd[act_nod]
+                if aug_wt > upbound:
+                    continue
+                if act_wt + f_rev - potential_rev[act_nod] > upbound:
+                    continue
+                distances_fwd[act_nod] = act_wt
+                queue_fwd.insert({'augment': aug_wt, 'dist': act_wt, 'curnode': act_nod, 'parent': curnode})
+                rawbound = act_wt + distances_rev[act_nod]
+                if upbound > rawbound:
+                    upbound = rawbound
+                    print("New mindex found: " + str(act_nod))
+                    mindex = act_nod
+
             if queue_fwd.size() > 0:
                 result = queue_fwd.peekmin()
                 f_fwd = result.augment
@@ -139,69 +226,6 @@ def bidir_path_numpy(G, source: cython.int, target: cython.int, bulk_heuristic,
     diag = {}
 
     return bestpath, diag
-
-@cython.cfunc
-@cython.infer_types(True)
-@cython.boundscheck(False)
-@cython.initializedcheck(False)
-@cython.nonecheck(False)
-@cython.wraparound(False)
-@cython.returns(tuple[cython.float, cython.int, umap[cython.int, cython.int]])
-def bidir_iteration(G_succ: list[tuple[list[cython.int], list[cython.float]]], diagnostics: cython.bint,
-                    queue: MinMaxHeap[astar_t],
-                    explored: umap[cython.int, cython.int], distances: np.ndarray[cython.float],
-                    distances_other: np.ndarray[cython.float], potentials: np.ndarray[cython.float],
-                    potentials_other: np.ndarray[cython.float], upbound: cython.float, f_other: cython.float):
-    # Pop the smallest item from queue.
-    result = queue.popmin()
-    dist = result.dist
-    curnode = result.curnode
-    parent = result.parent
-    mindex = -1
-
-    if 0 != explored.count(curnode):
-        # Do not override the parent of starting node
-        if explored[curnode] == -1:
-            return upbound, mindex, explored
-        # We've found a bad path, just move on
-        qcost = distances[curnode]
-        if qcost <= dist:
-            return upbound, mindex, explored
-        # If we've found a better path, update
-        #revis_continue += 1
-        distances[curnode] = dist
-        assert 1 == explored.count(curnode), "Node " + str(curnode) + " duplicated in explored dict"
-
-    assert curnode != parent, "Node " + str(curnode) + " is ancestor of self"
-    explored[curnode] = parent
-
-    active_nodes = G_succ[curnode][0]
-    active_costs = G_succ[curnode][1]
-
-    num_nodes = len(active_nodes)
-
-    # Now unconditionally queue _all_ nodes that are still active, worrying about filtering out the bound-busting
-    # neighbours later.
-    counter = 0
-    for i in range(num_nodes):
-        act_nod = active_nodes[i]
-        act_wt = dist + active_costs[i]
-        if act_wt >= distances[act_nod]:
-            continue
-        aug_wt = act_wt + potentials[act_nod]
-        if aug_wt > upbound:
-            continue
-        if act_wt + f_other - potentials_other[act_nod] > upbound:
-            continue
-        distances[act_nod] = act_wt
-        queue.insert({'augment': aug_wt, 'dist': act_wt, 'curnode': act_nod, 'parent': curnode})
-        rawbound = act_wt + distances_other[act_nod]
-        if upbound > rawbound:
-            upbound = rawbound
-            print("New mindex found: " + str(act_nod))
-            mindex = act_nod
-
-    return upbound, mindex, explored
 
 @cython.cfunc
 @cython.infer_types(True)
