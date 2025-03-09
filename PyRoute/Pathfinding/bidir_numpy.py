@@ -70,8 +70,8 @@ def bidir_path_numpy(G, source: cython.int, target: cython.int, bulk_heuristic,
     G_succ: list[tuple[cnp.ndarray[cython.int], cnp.ndarray[cython.float]]] = G._arcs  # For speed-up
     potential_fwd: cnp.ndarray[cython.float]
     potential_rev: cnp.ndarray[cython.float]
-    distances_fwd: np.ndarray[float, 1]
-    distances_rev: np.ndarray[float, 1]
+    distances_fwd: cnp.ndarray[cython.float]
+    distances_rev: cnp.ndarray[cython.float]
 
     # pre-calc heuristics for all nodes to the target node
     potential_fwd = bulk_heuristic(target)
