@@ -81,6 +81,9 @@ def bidir_path_numpy(G, source: cython.int, target: cython.int, bulk_heuristic,
     qcost: cython.float
     rawbound: cython.float
 
+    active_nodes: cnp.ndarray[cython.int]
+    active_costs: cnp.ndarray[cython.float]
+
     # pre-calc heuristics for all nodes to the target node
     potential_fwd = bulk_heuristic(target)
     potential_rev = bulk_heuristic(source)
@@ -240,8 +243,11 @@ def bidir_fix_explored(explored: umap[cython.int, cython.int], distances: cnp.nd
                        active_nodes: cnp.ndarray[cython.int], active_costs: cnp.ndarray[cython.float],
                        smalldex: cython.int) -> umap[cython.int, cython.int]:
     if 0 == explored.count(smalldex):
+        act_nod: cython.int
+        act_wt: cython.float
         skipcost = float64max
-        mindex = -1
+        mindex: cython.int = -1
+        i: cython.int
 
         for i in range(len(active_nodes)):
             act_nod = active_nodes[i]
