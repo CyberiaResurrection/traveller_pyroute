@@ -73,6 +73,13 @@ def bidir_path_numpy(G, source: cython.int, target: cython.int, bulk_heuristic,
     distances_fwd: cnp.ndarray[cython.float]
     distances_rev: cnp.ndarray[cython.float]
     i: cython.int
+    curnode: cython.int
+    mindex: cython.int
+    act_nod: cython.int
+    # act_wt: cython.float  # Commented out because this caused duplicate nodes in paths during testing
+    aug_wt: cython.float
+    qcost: cython.float
+    rawbound: cython.float
 
     # pre-calc heuristics for all nodes to the target node
     potential_fwd = bulk_heuristic(target)
