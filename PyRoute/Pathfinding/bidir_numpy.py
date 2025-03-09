@@ -153,7 +153,6 @@ def bidir_path_numpy(G, source: cython.int, target: cython.int, bulk_heuristic,
                 rawbound = act_wt + distances_fwd[act_nod]
                 if upbound > rawbound:
                     upbound = rawbound
-                    print("New mindex found: " + str(act_nod))
                     mindex = act_nod
 
             if queue_rev.size() > 0:
@@ -204,7 +203,6 @@ def bidir_path_numpy(G, source: cython.int, target: cython.int, bulk_heuristic,
                 rawbound = act_wt + distances_rev[act_nod]
                 if upbound > rawbound:
                     upbound = rawbound
-                    print("New mindex found: " + str(act_nod))
                     mindex = act_nod
 
             if queue_fwd.size() > 0:
@@ -212,9 +210,7 @@ def bidir_path_numpy(G, source: cython.int, target: cython.int, bulk_heuristic,
                 f_fwd = result.augment
             if -1 != mindex:
                 smalldex = mindex
-        print("Fwd: " + str(queue_fwd.size()) + ", Rev: " + str(queue_rev.size()))
 
-    print("Smalldex is " + str(smalldex))
     if -1 == smalldex:
         raise nx.NetworkXNoPath(f"Node {target} not reachable from {source}")
 
