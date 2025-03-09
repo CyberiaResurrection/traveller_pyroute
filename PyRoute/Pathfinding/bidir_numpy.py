@@ -99,8 +99,10 @@ def bidir_path_numpy(G, source: cython.int, target: cython.int, bulk_heuristic,
     f_rev: cython.float = potential_rev_view[target]
     queue_fwd: MinMaxHeap[astar_t] = MinMaxHeap[astar_t]()
     queue_fwd.reserve(500)
+    queue_fwd.insert({'augment': potential_fwd_view[source], 'dist': 0.0, 'curnode': source, 'parent': -1})
     queue_rev: MinMaxHeap[astar_t] = MinMaxHeap[astar_t]()
     queue_rev.reserve(500)
+    queue_rev.insert({'augment': potential_rev_view[target], 'dist': 0.0, 'curnode': target, 'parent': -1})
     oldbound = upbound
 
     # track smallest node in both distance arrays
@@ -123,7 +125,9 @@ def bidir_path_numpy(G, source: cython.int, target: cython.int, bulk_heuristic,
                 f_fwd = result.augment
             if -1 != mindex:
                 smalldex = mindex
+        print("Fwd: " + str(queue_fwd.size()) + ", Rev: " + str(queue_rev.size()))
 
+    print("Smalldex is " + str(smalldex))
     if -1 == smalldex:
         raise nx.NetworkXNoPath(f"Node {target} not reachable from {source}")
 
@@ -194,6 +198,7 @@ def bidir_iteration(G_succ: list[tuple[list[cython.int], list[cython.float]]], d
         rawbound = act_wt + distances_other[act_nod]
         if upbound > rawbound:
             upbound = rawbound
+            print("New mindex found: " + str(act_nod))
             mindex = act_nod
 
     return upbound, mindex, explored
