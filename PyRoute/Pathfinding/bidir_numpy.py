@@ -76,7 +76,7 @@ def bidir_path_numpy(G, source: cython.int, target: cython.int, bulk_heuristic,
     curnode: cython.int
     mindex: cython.int
     act_nod: cython.int
-    # act_wt: cython.float  # Commented out because this caused duplicate nodes in paths during testing
+    act_wt: cython.double  # This as cython.float caused duplicate nodes in paths during testing
     aug_wt: cython.float
     qcost: cython.float
     rawbound: cython.float
@@ -220,8 +220,8 @@ def bidir_path_numpy(G, source: cython.int, target: cython.int, bulk_heuristic,
     if -1 == smalldex:
         raise nx.NetworkXNoPath(f"Node {target} not reachable from {source}")
 
-    active_nodes: cnp.ndarray[cython.int] = G_succ[smalldex][0]
-    active_costs: cnp.ndarray[cython.float] = G_succ[smalldex][1]
+    active_nodes = G_succ[smalldex][0]
+    active_costs = G_succ[smalldex][1]
     explored_fwd = bidir_fix_explored(explored_fwd, distances_fwd_view, active_nodes, active_costs, smalldex)
     explored_rev = bidir_fix_explored(explored_rev, distances_rev_view, active_nodes, active_costs, smalldex)
     bestpath = bidir_build_path(explored_fwd, explored_rev, smalldex)
