@@ -18,7 +18,6 @@ import cython
 from cython.cimports.numpy import numpy as cnp
 from cython.cimports.minmaxheap import MinMaxHeap, astar_t
 from cython.cimports.unordered_map import unordered_map as umap
-from heapq import heappop, heappush, heapify
 
 import networkx as nx
 import numpy as np
@@ -286,14 +285,3 @@ def bidir_build_path(explored_fwd: umap[cython.int, cython.int], explored_rev: u
         path.append(node)
         node = explored_rev[node]
     return path
-
-#@cython.cfunc
-#@cython.infer_types(True)
-#cython.boundscheck(False)
-#@cython.initializedcheck(False)
-#@cython.nonecheck(False)
-#@cython.wraparound(False)
-#@cython.returns(tuple[list[cython.int], dict])
-#def astar_numpy_core(G_succ: list[tuple[list[int], list[float]]], diagnostics: bool,
-#                     distances: cnp.ndarray[cython.float], potentials: cnp.ndarray[cython.float], source: cython.int,
-#                     target: cython.int, upbound: cython.float):
