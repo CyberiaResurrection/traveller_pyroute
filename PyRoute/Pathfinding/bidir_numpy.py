@@ -223,6 +223,8 @@ def bidir_path_numpy(G, source: cython.int, target: cython.int, bulk_heuristic,
     if -1 == smalldex:
         raise nx.NetworkXNoPath(f"Node {target} not reachable from {source}")
 
+    explored_fwd[source] = -1
+    explored_rev[target] = -1
     active_nodes = G_succ[smalldex][0]
     active_costs = G_succ[smalldex][1]
     active_nodes_view: cython.long[:] = active_nodes
