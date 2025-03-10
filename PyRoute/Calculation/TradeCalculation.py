@@ -320,7 +320,7 @@ class TradeCalculation(RouteCalculation):
 
             if 2 * self.galaxy.max_jump_range < star.distance(target):
                 rawroute, diag = bidir_path_numpy(self.star_graph, star.index, target.index,
-                                                  self.shortest_path_tree.lower_bound_bulk,
+                                                  self.shortest_path_tree.lower_bound_bulk, upbound=upbound,
                                                   diagnostics=self.debug_flag)
             else:
                 rawroute, diag = astar_path_numpy(self.star_graph, star.index, target.index,
