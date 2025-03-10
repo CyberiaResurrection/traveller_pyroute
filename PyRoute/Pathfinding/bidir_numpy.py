@@ -273,26 +273,18 @@ def bidir_fix_explored(explored: umap[cython.int, cython.int], distances: cython
 @cython.wraparound(False)
 def bidir_build_path(explored_fwd: umap[cython.int, cython.int], explored_rev: umap[cython.int, cython.int], smalldex: cython.int) -> list[cython.int]:
     path = [smalldex]
-    assert 0 != explored_fwd.count(smalldex), "Node " + str(smalldex) + " lacking forward ancestor"
     node = explored_fwd[smalldex]
-    oldnode = -1
     while node != -1:
         assert node not in path, "Node " + str(node) + " duplicated in discovered path, " + str(path)
         path.append(node)
-        oldnode = node
         node = explored_fwd[node]
-        assert node != oldnode, "Node " + str(node) + " is ancestor of self"
     path.reverse()
 
-    assert 0 != explored_rev.count(smalldex), "Node " + str(smalldex) + " lacking reverse ancestor"
     node = explored_rev[smalldex]
-    oldnode = -1
     while node != -1:
         assert node not in path, "Node " + str(node) + " duplicated in discovered path, " + str(path)
         path.append(node)
-        oldnode = node
         node = explored_rev[node]
-        assert node != oldnode, "Node " + str(node) + " is ancestor of self"
     return path
 
 #@cython.cfunc
