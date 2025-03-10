@@ -138,9 +138,7 @@ def bidir_path_numpy(G, source: cython.int, target: cython.int, bulk_heuristic,
                 # If we've found a better path, update
                 # revis_continue += 1
                 distances_rev_view[curnode] = dist
-                assert 1 == explored_rev.count(curnode), "Node " + str(curnode) + " duplicated in explored dict"
 
-            assert curnode != parent, "Node " + str(curnode) + " is ancestor of self"
             explored_rev[curnode] = parent
 
             active_nodes = G_succ[curnode][0]
@@ -188,9 +186,7 @@ def bidir_path_numpy(G, source: cython.int, target: cython.int, bulk_heuristic,
                 # If we've found a better path, update
                 # revis_continue += 1
                 distances_fwd_view[curnode] = dist
-                assert 1 == explored_fwd.count(curnode), "Node " + str(curnode) + " duplicated in explored dict"
 
-            assert curnode != parent, "Node " + str(curnode) + " is ancestor of self"
             explored_fwd[curnode] = parent
 
             active_nodes = G_succ[curnode][0]
