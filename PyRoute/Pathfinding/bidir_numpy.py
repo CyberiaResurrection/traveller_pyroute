@@ -142,13 +142,15 @@ def bidir_path_numpy(G, source: cython.int, target: cython.int, bulk_heuristic,
             explored_rev[curnode] = parent
 
             active_nodes = G_succ[curnode][0]
+            active_nodes_view: cython.long[:] = active_nodes
             active_costs = G_succ[curnode][1]
+            active_costs_view: cython.double[:] = active_costs
 
-            num_nodes = len(active_nodes)
+            num_nodes = len(active_nodes_view)
 
             for i in range(num_nodes):
-                act_nod = active_nodes[i]
-                act_wt = dist + active_costs[i]
+                act_nod = active_nodes_view[i]
+                act_wt = dist + active_costs_view[i]
                 if act_wt >= distances_rev_view[act_nod]:
                     continue
                 aug_wt = act_wt + potential_rev_view[act_nod]
@@ -190,13 +192,15 @@ def bidir_path_numpy(G, source: cython.int, target: cython.int, bulk_heuristic,
             explored_fwd[curnode] = parent
 
             active_nodes = G_succ[curnode][0]
+            active_nodes_view: cython.long[:] = active_nodes
             active_costs = G_succ[curnode][1]
+            active_costs_view: cython.double[:] = active_costs
 
-            num_nodes = len(active_nodes)
+            num_nodes = len(active_nodes_view)
 
             for i in range(num_nodes):
-                act_nod = active_nodes[i]
-                act_wt = dist + active_costs[i]
+                act_nod = active_nodes_view[i]
+                act_wt = dist + active_costs_view[i]
                 if act_wt >= distances_fwd_view[act_nod]:
                     continue
                 aug_wt = act_wt + potential_fwd_view[act_nod]
