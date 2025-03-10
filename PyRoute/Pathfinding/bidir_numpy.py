@@ -226,8 +226,10 @@ def bidir_path_numpy(G, source: cython.int, target: cython.int, bulk_heuristic,
 
     active_nodes = G_succ[smalldex][0]
     active_costs = G_succ[smalldex][1]
-    explored_fwd = bidir_fix_explored(explored_fwd, distances_fwd_view, active_nodes, active_costs, smalldex)
-    explored_rev = bidir_fix_explored(explored_rev, distances_rev_view, active_nodes, active_costs, smalldex)
+    active_nodes_view: cython.long[:] = active_nodes
+    active_costs_view: cython.double[:] = active_costs
+    explored_fwd = bidir_fix_explored(explored_fwd, distances_fwd_view, active_nodes_view, active_costs_view, smalldex)
+    explored_rev = bidir_fix_explored(explored_rev, distances_rev_view, active_nodes_view, active_costs_view, smalldex)
     bestpath = bidir_build_path(explored_fwd, explored_rev, smalldex)
     diag = {}
 
@@ -239,17 +241,18 @@ def bidir_path_numpy(G, source: cython.int, target: cython.int, bulk_heuristic,
 @cython.initializedcheck(False)
 @cython.nonecheck(False)
 @cython.wraparound(False)
-def bidir_fix_explored(explored: umap[cython.int, cython.int], distances: cnp.ndarray[cython.float],
-                       active_nodes: cnp.ndarray[cython.int], active_costs: cnp.ndarray[cython.float],
+def bidir_fix_explored(explored: umap[cython.int, cython.int], distances: cython.double[:],
+                       active_nodes: cython.long[:], active_costs: cython.double[:],
                        smalldex: cython.int) -> umap[cython.int, cython.int]:
     if 0 == explored.count(smalldex):
         act_nod: cython.int
         act_wt: cython.float
-        skipcost = float64max
+        skipcost: cython.float = float64max
         mindex: cython.int = -1
         i: cython.int
+        num_nodes: cython.int = len(active_nodes)
 
-        for i in range(len(active_nodes)):
+        for i in range(num_nodes):
             act_nod = active_nodes[i]
             act_wt = distances[act_nod] + active_costs[i]
             if 0 != explored.count(act_nod) and skipcost > act_wt:
