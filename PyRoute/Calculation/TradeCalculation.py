@@ -26,7 +26,14 @@ except ModuleNotFoundError:
     from PyRoute.Pathfinding.astar_numpy_fallback import astar_path_numpy
 except ImportError:
     from PyRoute.Pathfinding.astar_numpy_fallback import astar_path_numpy
-from PyRoute.Pathfinding.bidir_numpy import bidir_path_numpy
+
+bidir_import = True
+try:
+    from PyRoute.Pathfinding.bidir_numpy import bidir_path_numpy
+except ModuleNotFoundError:
+    bidir_import = False
+except ImportError:
+    bidir_import = False
 from PyRoute.Star import Star
 
 
@@ -318,7 +325,7 @@ class TradeCalculation(RouteCalculation):
                 if target.index not in self.component_landmarks[comp_id]:
                     target, star = star, target
 
-            if 2 * self.galaxy.max_jump_range < star.distance(target):
+            if bidir_import and 2 * self.galaxy.max_jump_range < star.distance(target):
                 rawroute, diag = bidir_path_numpy(self.star_graph, star.index, target.index,
                                                   self.shortest_path_tree.lower_bound_bulk, upbound=upbound,
                                                   diagnostics=self.debug_flag)
