@@ -229,7 +229,15 @@ def bidir_path_numpy(G, source: cython.int, target: cython.int, bulk_heuristic,
     active_costs = G_succ[smalldex][1]
     active_nodes_view: cython.long[:] = active_nodes
     active_costs_view: cython.double[:] = active_costs
+    num_nodes = len(active_nodes_view)
     explored_fwd = bidir_fix_explored(explored_fwd, distances_fwd_view, active_nodes_view, active_costs_view, smalldex)
+    if 0 == explored_rev.count(smalldex):
+        fwd_parent: cython.long = explored_fwd[smalldex]
+        for i in range(num_nodes):
+            if active_nodes_view[i] == fwd_parent:
+                active_costs_view[i] = float64max
+                break
+
     explored_rev = bidir_fix_explored(explored_rev, distances_rev_view, active_nodes_view, active_costs_view, smalldex)
     bestpath = bidir_build_path(explored_fwd, explored_rev, smalldex)
     diag = {}
