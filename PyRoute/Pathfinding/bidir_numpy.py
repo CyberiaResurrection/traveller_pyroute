@@ -284,16 +284,16 @@ def bidir_build_path(explored_fwd: umap[cython.int, cython.int], explored_rev: u
     path = [smalldex]
     node = explored_fwd[smalldex]
     while node != -1:
-        assert node not in path, "Node " + str(node) + " duplicated in discovered path, " + str(path)
+        assert node not in path, "Node " + str(node) + " duplicated in discovered path, " + str(path) + ". Explored: " + str(explored_fwd)
         path.append(node)
         node = explored_fwd[node]
-        assert node != explored_fwd[node], "Node " + str(node) + " is own forward ancestor"
+        assert node != explored_fwd[node], "Node " + str(node) + " is own forward ancestor. Explored: " + str(explored_fwd)
     path.reverse()
 
     node = explored_rev[smalldex]
     while node != -1:
-        assert node not in path, "Node " + str(node) + " duplicated in discovered path, " + str(path)
+        assert node not in path, "Node " + str(node) + " duplicated in discovered path, " + str(path) + ". Explored: " + str(explored_rev)
         path.append(node)
         node = explored_rev[node]
-        assert node != explored_rev[node], "Node " + str(node) + " is own reverse ancestor"
+        assert node != explored_rev[node], "Node " + str(node) + " is own reverse ancestor. Explored: " + str(explored_rev)
     return path
