@@ -5,31 +5,23 @@ Created on Mar 11, 2025
 """
 import pytest
 
-from DistanceGraph import DistanceGraph
 from PyRoute.AreaItems.Galaxy import Galaxy
 from PyRoute.DataClasses.ReadSectorOptions import ReadSectorOptions
 from Tests.baseTest import baseTest
-goodimport = True
-
-try:
-    from PyRoute.Pathfinding.ApproximateShortestPathForestUnified import ApproximateShortestPathForestUnified
-except ModuleNotFoundError:
-    from PyRoute.Pathfinding.ApproximateShortestPathForestUnifiedFallback import ApproximateShortestPathForestUnified
-except ImportError:
-    from PyRoute.Pathfinding.ApproximateShortestPathForestUnifiedFallback import ApproximateShortestPathForestUnified
+good_import = True
 
 try:
     from PyRoute.Pathfinding.bidir_numpy import bidir_path_numpy
 except ModuleNotFoundError:
-    goodimport = False
+    good_import = False
 except ImportError:
-    goodimport = False
+    good_import = False
 
 
 class testBidirNumpy(baseTest):
 
     def setUp(self) -> None:
-        if not goodimport:
+        if not good_import:
             pytest.skip("Need bidir pathfinding imported")
 
     def testBidirectionalBlowup2(self):
@@ -44,9 +36,6 @@ class testBidirNumpy(baseTest):
                                       mp_threads=args.mp_threads, debug_flag=args.debug_flag, fix_pop=False,
                                       deep_space={}, map_type=args.map_type)
 
-        stardex = 13
-        targdex = 29
-        upbound = 112.6
         galaxy = Galaxy(min_btn=15, max_jump=4)
         galaxy.read_sectors(readparms)
         galaxy.output_path = args.output
