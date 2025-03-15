@@ -270,8 +270,9 @@ def bidir_fix_explored(explored: umap[cython.int, cython.int], distances: cython
             if 0 != explored.count(act_nod) and skipcost > act_wt:
                 #  If the active node is the opposite partner, skip it to avoid duplication
                 if act_nod != opposite_partner:
-                    mindex = act_nod
-                    skipcost = act_wt
+                    if -1 == opposite_partner or explored[act_nod] != opposite_partner:
+                        mindex = act_nod
+                        skipcost = act_wt
 
         if -1 != mindex:
             assert smalldex != mindex, "Node " + str(mindex) + " will be ancestor of self"
