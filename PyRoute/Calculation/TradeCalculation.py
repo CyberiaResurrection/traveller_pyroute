@@ -13,6 +13,7 @@ import networkx as nx
 from PyRoute.Pathfinding.DistanceGraph import DistanceGraph
 from PyRoute.Allies.AllyGen import AllyGen
 from PyRoute.Calculation.RouteCalculation import RouteCalculation
+from PyRoute.Star import Star
 try:
     from PyRoute.Pathfinding.ApproximateShortestPathForestUnified import ApproximateShortestPathForestUnified
 except ModuleNotFoundError:
@@ -34,7 +35,6 @@ except ModuleNotFoundError:
     bidir_import = False
 except ImportError:
     bidir_import = False
-from PyRoute.Star import Star
 
 
 class TradeCalculation(RouteCalculation):
