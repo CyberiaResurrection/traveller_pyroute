@@ -230,8 +230,13 @@ def bidir_path_numpy(G, source: cython.int, target: cython.int, bulk_heuristic,
     active_nodes_view: cython.long[:] = active_nodes
     active_costs_view: cython.double[:] = active_costs
 
-    explored_fwd = bidir_fix_explored(explored_fwd, distances_fwd_view, active_nodes_view, active_costs_view, smalldex)
-    explored_rev = bidir_fix_explored(explored_rev, distances_rev_view, active_nodes_view, active_costs_view, smalldex)
+    explored_fwd, small_fwd = bidir_fix_explored(explored_fwd, distances_fwd_view, active_nodes_view, active_costs_view,
+                                                 smalldex)
+    explored_rev, small_rev = bidir_fix_explored(explored_rev, distances_rev_view, active_nodes_view, active_costs_view,
+                                                 smalldex)
+    if -1 != small_fwd and -1 != small_rev:
+        assert small_fwd != small_rev, "Smalldex " + str(smalldex) + " has parent " + str(small_fwd)\
+                                       + " duplicated in both searches"
     bestpath = bidir_build_path(explored_fwd, explored_rev, smalldex)
     diag = {}
 
@@ -245,7 +250,7 @@ def bidir_path_numpy(G, source: cython.int, target: cython.int, bulk_heuristic,
 @cython.wraparound(False)
 def bidir_fix_explored(explored: umap[cython.int, cython.int], distances: cython.double[:],
                        active_nodes: cython.long[:], active_costs: cython.double[:],
-                       smalldex: cython.int) -> umap[cython.int, cython.int]:
+                       smalldex: cython.int) -> tuple[umap[cython.int, cython.int], cython.int]:
     if 0 == explored.count(smalldex):
         act_nod: cython.int
         act_wt: cython.float
@@ -267,7 +272,7 @@ def bidir_fix_explored(explored: umap[cython.int, cython.int], distances: cython
 
     assert 0 != explored.count(smalldex), "Pivot node " + str(smalldex) + " not added to explored dict " + str(explored)
 
-    return explored
+    return explored, explored[smalldex]
 
 @cython.cfunc
 @cython.infer_types(True)
