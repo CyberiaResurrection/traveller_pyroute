@@ -113,7 +113,6 @@ def bidir_path_numpy(G, source: cython.int, target: cython.int, bulk_heuristic,
     queue_rev: MinMaxHeap[astar_t] = MinMaxHeap[astar_t]()
     queue_rev.reserve(500)
     queue_rev.insert({'augment': potential_rev_view[target], 'dist': 0.0, 'curnode': target, 'parent': -1})
-    oldbound = upbound
 
     # track smallest node in both distance arrays
     smalldex: cython.int = -1
@@ -247,6 +246,7 @@ def bidir_path_numpy(G, source: cython.int, target: cython.int, bulk_heuristic,
 
     return bestpath, diag
 
+
 @cython.cfunc
 @cython.infer_types(True)
 @cython.boundscheck(False)
@@ -283,6 +283,7 @@ def bidir_fix_explored(explored: umap[cython.int, cython.int], distances: cython
                                                        + " must not have opposite partner as parent"
 
     return explored, explored[smalldex]
+
 
 @cython.cfunc
 @cython.infer_types(True)
