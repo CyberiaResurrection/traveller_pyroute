@@ -229,11 +229,16 @@ def bidir_path_numpy(G, source: cython.int, target: cython.int, bulk_heuristic,
     active_costs = G_succ[smalldex][1]
     active_nodes_view: cython.long[:] = active_nodes
     active_costs_view: cython.double[:] = active_costs
-
-    explored_fwd, small_fwd = bidir_fix_explored(explored_fwd, distances_fwd_view, active_nodes_view, active_costs_view,
-                                                 smalldex)
-    explored_rev, small_rev = bidir_fix_explored(explored_rev, distances_rev_view, active_nodes_view, active_costs_view,
-                                                 smalldex)
+    if 0 != explored_rev.count(smalldex):
+        explored_rev, small_rev = bidir_fix_explored(explored_rev, distances_rev_view, active_nodes_view, active_costs_view,
+                                                 smalldex, -1)
+        explored_fwd, small_fwd = bidir_fix_explored(explored_fwd, distances_fwd_view, active_nodes_view, active_costs_view,
+                                                 smalldex, small_rev)
+    else:
+        explored_fwd, small_fwd = bidir_fix_explored(explored_fwd, distances_fwd_view, active_nodes_view, active_costs_view,
+                                                 smalldex, -1)
+        explored_rev, small_rev = bidir_fix_explored(explored_rev, distances_rev_view, active_nodes_view, active_costs_view,
+                                                 smalldex, small_fwd)
     if -1 != small_fwd and -1 != small_rev:
         assert small_fwd != small_rev, "Smalldex " + str(smalldex) + " has parent " + str(small_fwd)\
                                        + " duplicated in both searches"
@@ -250,7 +255,7 @@ def bidir_path_numpy(G, source: cython.int, target: cython.int, bulk_heuristic,
 @cython.wraparound(False)
 def bidir_fix_explored(explored: umap[cython.int, cython.int], distances: cython.double[:],
                        active_nodes: cython.long[:], active_costs: cython.double[:],
-                       smalldex: cython.int) -> tuple[umap[cython.int, cython.int], cython.int]:
+                       smalldex: cython.int, opposite_partner: cython.int) -> tuple[umap[cython.int, cython.int], cython.int]:
     if 0 == explored.count(smalldex):
         act_nod: cython.int
         act_wt: cython.float
@@ -263,14 +268,19 @@ def bidir_fix_explored(explored: umap[cython.int, cython.int], distances: cython
             act_nod = active_nodes[i]
             act_wt = distances[act_nod] + active_costs[i]
             if 0 != explored.count(act_nod) and skipcost > act_wt:
-                mindex = act_nod
-                skipcost = act_wt
+                #  If the active node is the opposite partner, skip it to avoid duplication
+                if act_nod != opposite_partner:
+                    mindex = act_nod
+                    skipcost = act_wt
 
         if -1 != mindex:
             assert smalldex != mindex, "Node " + str(mindex) + " will be ancestor of self"
             explored[smalldex] = mindex
 
     assert 0 != explored.count(smalldex), "Pivot node " + str(smalldex) + " not added to explored dict " + str(explored)
+    if -1 != opposite_partner:
+        assert explored[smalldex] != opposite_partner, "Pivot node " + str(smalldex)\
+                                                       + " must not have opposite partner as parent"
 
     return explored, explored[smalldex]
 
