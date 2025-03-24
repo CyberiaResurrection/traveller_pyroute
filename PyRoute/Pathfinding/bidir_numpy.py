@@ -308,8 +308,8 @@ def bidir_fix_explored(explored: umap[cython.int, cython.int], distances: cython
         if -1 != mindex:
             assert smalldex != mindex, "Node " + str(mindex) + " will be ancestor of self"
             explored[smalldex] = mindex
-
-    assert 0 != explored.count(smalldex), "Pivot node " + str(smalldex) + " not added to explored dict " + str(explored)
+        else:
+            raise nx.NetworkXNoPath(f"Node {target} not reachable from {source}")
 
     if -1 != opposite_partner:
         assert explored[smalldex] != opposite_partner, "Pivot node " + str(smalldex)\
