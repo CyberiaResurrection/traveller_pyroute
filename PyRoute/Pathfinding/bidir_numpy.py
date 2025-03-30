@@ -180,6 +180,8 @@ def bidir_path_numpy(G, source: cython.int, target: cython.int, bulk_heuristic,
                         for k in range(upper_len):
                             delta = raw_dist - upper_costs[k] - distances_fwd_view[upper_nodes[k]]
                             if delta * delta < 1e-8:
+                                assert act_nod != upper_nodes[k], "Pivot node " + str(
+                                    act_nod) + " will have itself as ancestor"
                                 explored_fwd[act_nod] = upper_nodes[k]
 
             if queue_rev.size() > 0:
@@ -240,6 +242,8 @@ def bidir_path_numpy(G, source: cython.int, target: cython.int, bulk_heuristic,
                         for k in range(upper_len):
                             delta = raw_dist - upper_costs[k] - distances_rev_view[upper_nodes[k]]
                             if delta * delta < 1e-8:
+                                assert act_nod != upper_nodes[k], "Pivot node " + str(
+                                    act_nod) + " will have itself as ancestor"
                                 explored_rev[act_nod] = upper_nodes[k]
 
             if queue_fwd.size() > 0:
