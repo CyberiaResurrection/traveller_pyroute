@@ -132,6 +132,7 @@ def bidir_path_numpy(G, source: cython.int, target: cython.int, bulk_heuristic,
             dist = result.dist
             curnode = result.curnode
             parent = result.parent
+            assert curnode != parent, "Rev search: Node " + str(curnode) + " has itself for a parent"
             mindex = -1
 
             if 0 != explored_rev.count(curnode):
@@ -191,6 +192,7 @@ def bidir_path_numpy(G, source: cython.int, target: cython.int, bulk_heuristic,
             dist = result.dist
             curnode = result.curnode
             parent = result.parent
+            assert curnode != parent, "Fwd search: Node " + str(curnode) + " has itself for a parent"
             mindex = -1
 
             if 0 != explored_fwd.count(curnode):
