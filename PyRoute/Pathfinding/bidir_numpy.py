@@ -118,6 +118,14 @@ def bidir_path_numpy(G, source: cython.int, target: cython.int, bulk_heuristic,
     # track smallest node in both distance arrays
     smalldex: cython.int = -1
 
+    # Type explored-backfill vars
+    k: cython.int
+    raw_dist: cython.float
+    delta: cython.float
+    upper_nodes: cnp.ndarray[cython.int]
+    upper_costs: cnp.ndarray[cython.float]
+    upper_len: cython.int
+
     while queue_fwd.size() > 0 and queue_rev.size() > 0:
         if queue_rev.size() < queue_fwd.size():
             result = queue_rev.popmin()
@@ -163,6 +171,15 @@ def bidir_path_numpy(G, source: cython.int, target: cython.int, bulk_heuristic,
                 if upbound > rawbound:
                     upbound = rawbound
                     mindex = act_nod
+                    if 0 == explored_fwd.count(act_nod):
+                        raw_dist = distances_fwd_view[act_nod]
+                        upper_nodes = G_succ[act_nod][0]
+                        upper_costs = G_succ[act_nod][1]
+                        upper_len = len(upper_nodes)
+                        for k in range(upper_len):
+                            delta = raw_dist - upper_costs[k] - distances_fwd_view[upper_nodes[k]]
+                            if delta * delta < 1e-8:
+                                explored_fwd[act_nod] = upper_nodes[k]
 
             if queue_rev.size() > 0:
                 result = queue_rev.peekmin()
@@ -213,6 +230,15 @@ def bidir_path_numpy(G, source: cython.int, target: cython.int, bulk_heuristic,
                 if upbound > rawbound:
                     upbound = rawbound
                     mindex = act_nod
+                    if 0 == explored_rev.count(act_nod):
+                        raw_dist = distances_rev_view[act_nod]
+                        upper_nodes = G_succ[act_nod][0]
+                        upper_costs = G_succ[act_nod][1]
+                        upper_len = len(upper_nodes)
+                        for k in range(upper_len):
+                            delta = raw_dist - upper_costs[k] - distances_rev_view[upper_nodes[k]]
+                            if delta * delta < 1e-8:
+                                explored_rev[act_nod] = upper_nodes[k]
 
             if queue_fwd.size() > 0:
                 result = queue_fwd.peekmin()
