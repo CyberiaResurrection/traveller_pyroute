@@ -27,6 +27,7 @@ cnp.import_array()
 
 float64max = np.finfo(np.float64).max
 ROOT_NODE: cython.int = -1
+MAX_BACKFILL_DEPTH: cython.int = 5
 
 @cython.cdivision(True)
 def _calc_branching_factor(nodes_queued: cython.int, path_len: cython.int):
@@ -120,6 +121,7 @@ def bidir_path_numpy(G, source: cython.int, target: cython.int, bulk_heuristic,
 
     # Type explored-backfill vars
     k: cython.int
+    depth: cython.int
     raw_dist: cython.float
     delta: cython.float
     upper_nodes: cnp.ndarray[cython.int]
@@ -172,7 +174,8 @@ def bidir_path_numpy(G, source: cython.int, target: cython.int, bulk_heuristic,
                 if upbound > rawbound:
                     upbound = rawbound
                     mindex = act_nod
-                    if 0 == explored_fwd.count(act_nod):
+                    depth = 0
+                    while 0 == explored_fwd.count(act_nod) and depth < MAX_BACKFILL_DEPTH:
                         raw_dist = distances_fwd_view[act_nod]
                         upper_nodes = G_succ[act_nod][0]
                         upper_costs = G_succ[act_nod][1]
@@ -183,6 +186,9 @@ def bidir_path_numpy(G, source: cython.int, target: cython.int, bulk_heuristic,
                                 assert act_nod != upper_nodes[k], "Pivot node " + str(
                                     act_nod) + " will have itself as ancestor"
                                 explored_fwd[act_nod] = upper_nodes[k]
+                                act_nod = upper_nodes[k]
+                                break
+                        depth += 1
 
             if queue_rev.size() > 0:
                 result = queue_rev.peekmin()
@@ -233,8 +239,8 @@ def bidir_path_numpy(G, source: cython.int, target: cython.int, bulk_heuristic,
                 rawbound = act_wt + distances_rev_view[act_nod]
                 if upbound > rawbound:
                     upbound = rawbound
-                    mindex = act_nod
-                    if 0 == explored_rev.count(act_nod):
+                    depth = 0
+                    while 0 == explored_rev.count(act_nod) and depth < MAX_BACKFILL_DEPTH:
                         raw_dist = distances_rev_view[act_nod]
                         upper_nodes = G_succ[act_nod][0]
                         upper_costs = G_succ[act_nod][1]
@@ -245,6 +251,9 @@ def bidir_path_numpy(G, source: cython.int, target: cython.int, bulk_heuristic,
                                 assert act_nod != upper_nodes[k], "Pivot node " + str(
                                     act_nod) + " will have itself as ancestor"
                                 explored_rev[act_nod] = upper_nodes[k]
+                                act_nod = upper_nodes[k]
+                                break
+                        depth += 1
 
             if queue_fwd.size() > 0:
                 result = queue_fwd.peekmin()
