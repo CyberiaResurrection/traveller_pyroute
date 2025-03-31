@@ -273,35 +273,6 @@ def bidir_path_numpy(G, source: cython.int, target: cython.int, bulk_heuristic,
     active_costs = G_succ[smalldex][1]
     active_nodes_view: cython.long[:] = active_nodes
     active_costs_view: cython.double[:] = active_costs
-    if 0 != explored_fwd.count(smalldex) and 0 != explored_rev.count(smalldex) and explored_fwd[smalldex] == explored_rev[smalldex]:
-        common_nodes: uset[cython.int] = uset[cython.int]()
-        mindex = ROOT_NODE
-        upper_bound: cython.float = float64max
-        path_len: cython.float
-        for key in explored_fwd:
-            if 0 != explored_rev.count(key.first):
-                common_nodes.insert(key.first)
-        for key in explored_rev:
-            if 0 != explored_fwd.count(key.first):
-                common_nodes.insert(key.first)
-
-        for ukey in common_nodes:
-            path_len = distances_fwd_view[ukey] + distances_rev_view[ukey]
-            if ukey != smalldex and upper_bound > path_len:
-                if explored_fwd[ukey] != explored_rev[ukey]:
-                    upper_bound = path_len
-                    mindex = ukey
-
-        if ROOT_NODE == mindex:
-            raise nx.NetworkXNoPath(f"Node {target} not reachable from {source}")
-
-        smalldex = mindex
-        active_nodes = G_succ[smalldex][0]
-        active_costs = G_succ[smalldex][1]
-        active_nodes_view = active_nodes
-        active_costs_view = active_costs
-
-    bidir_check_explored(explored_fwd, explored_rev)
 
     if 0 != explored_rev.count(smalldex):
         explored_rev, small_rev = bidir_fix_explored(explored_rev, distances_rev_view, active_nodes_view, active_costs_view,
