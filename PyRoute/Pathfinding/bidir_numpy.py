@@ -383,18 +383,22 @@ def bidir_build_path(explored_fwd: umap[cython.int, cython.int], explored_rev: u
     path = [smalldex]
     node = explored_fwd[smalldex]
     while node != ROOT_NODE:
-        assert node not in path, "Node " + str(node) + " duplicated in discovered path, " + str(path) + ". Explored: " + str(explored_fwd)
+        assert node not in path, "Node " + str(node) + " duplicated in discovered path, " + str(path) +\
+                                 ".\n Explored fwd: " + str(explored_fwd) + "\n Explored rev: " + str(explored_rev)
         path.append(node)
-        assert 0 != explored_fwd.count(node), "Node " + str(node) + " lacking parent in forward search. Explored: " + str(explored_fwd)
+        assert 0 != explored_fwd.count(node), "Node " + str(node) + " lacking parent in forward search." +\
+                                              ".\n Explored fwd: " + str(explored_fwd) + "\n Explored rev: " + str(explored_rev)
         node = explored_fwd[node]
-        assert node != explored_fwd[node], "Node " + str(node) + " is own forward ancestor. Explored: " + str(explored_fwd)
+        assert node != explored_fwd[node], "Node " + str(node) + " is own forward ancestor.\n Explored: " + str(explored_fwd)
     path.reverse()
 
     node = explored_rev[smalldex]
     while node != ROOT_NODE:
-        assert node not in path, "Node " + str(node) + " duplicated in discovered path, " + str(path) + ". Explored: " + str(explored_rev)
+        assert node not in path, "Node " + str(node) + " duplicated in discovered path, " + str(path) +\
+                                 ".\n Explored fwd: " + str(explored_fwd) + "\n Explored rev: " + str(explored_rev)
         path.append(node)
-        assert 0 != explored_rev.count(node), "Node " + str(node) + " lacking parent in reverse search. Explored: " + str(explored_rev)
+        assert 0 != explored_rev.count(node), "Node " + str(node) + " lacking parent in reverse search." +\
+                                              ".\n Explored fwd: " + str(explored_fwd) + "\n Explored rev: " + str(explored_rev)
         node = explored_rev[node]
-        assert node != explored_rev[node], "Node " + str(node) + " is own reverse ancestor. Explored: " + str(explored_rev)
+        assert node != explored_rev[node], "Node " + str(node) + " is own reverse ancestor.\n Explored: " + str(explored_rev)
     return path
