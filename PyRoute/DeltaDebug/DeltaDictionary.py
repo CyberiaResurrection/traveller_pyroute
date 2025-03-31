@@ -124,7 +124,8 @@ class DeltaDictionary(dict):
 
     def write_files(self, output_dir):
         for sector_name in self:
-            self[sector_name].write_file(output_dir)
+            if 0 != len(self[sector_name].lines):
+                self[sector_name].write_file(output_dir)
 
     def skip_void_subsectors(self):
         # skip void subsectors unconditionally - all they do is take up space in subsector reduction
