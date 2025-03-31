@@ -135,6 +135,7 @@ def bidir_path_numpy(G, source: cython.int, target: cython.int, bulk_heuristic,
             curnode = result.curnode
             parent = result.parent
             assert curnode != parent, "Rev search: Node " + str(curnode) + " has itself for a parent"
+            assert curnode != ROOT_NODE, "Current node must not be root node"
             mindex = ROOT_NODE
 
             if 0 != explored_rev.count(curnode):
@@ -201,6 +202,7 @@ def bidir_path_numpy(G, source: cython.int, target: cython.int, bulk_heuristic,
             curnode = result.curnode
             parent = result.parent
             assert curnode != parent, "Fwd search: Node " + str(curnode) + " has itself for a parent"
+            assert curnode != ROOT_NODE, "Current node must not be root node"
             mindex = ROOT_NODE
 
             if 0 != explored_fwd.count(curnode):
@@ -299,6 +301,8 @@ def bidir_path_numpy(G, source: cython.int, target: cython.int, bulk_heuristic,
         active_nodes_view = active_nodes
         active_costs_view = active_costs
 
+    bidir_check_explored(explored_fwd, explored_rev)
+
     if 0 != explored_rev.count(smalldex):
         explored_rev, small_rev = bidir_fix_explored(explored_rev, distances_rev_view, active_nodes_view, active_costs_view,
                                                  smalldex, ROOT_NODE, source, target)
@@ -312,6 +316,8 @@ def bidir_path_numpy(G, source: cython.int, target: cython.int, bulk_heuristic,
     if ROOT_NODE != small_fwd and ROOT_NODE!= small_rev:
         assert small_fwd != small_rev, "Smalldex " + str(smalldex) + " has parent " + str(small_fwd)\
                                        + " duplicated in both searches"
+
+    bidir_check_explored(explored_fwd, explored_rev)
     bestpath = bidir_build_path(explored_fwd, explored_rev, smalldex)
     diag = {}
 
@@ -367,6 +373,8 @@ def bidir_fix_explored(explored: umap[cython.int, cython.int], distances: cython
 @cython.nonecheck(False)
 @cython.wraparound(False)
 def bidir_check_explored(explored_fwd: umap[cython.int, cython.int], explored_rev: umap[cython.int, cython.int]):
+    assert 0 == explored_fwd.count(ROOT_NODE), "Root node should not be in forward search"
+    assert 0 == explored_rev.count(ROOT_NODE), "Root node should not be in reverse search"
     for item in explored_fwd:
         assert item.first != item.second, "Node " + str(item.first) + " will be ancestor of self in fwd search"
     for item in explored_rev:
