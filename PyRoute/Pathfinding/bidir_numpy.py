@@ -257,6 +257,7 @@ def bidir_path_numpy(G, source: cython.int, target: cython.int, bulk_heuristic,
 
     explored_fwd[source] = -1
     explored_rev[target] = -1
+    bidir_check_explored(explored_fwd, explored_rev)
     active_nodes = G_succ[smalldex][0]
     active_costs = G_succ[smalldex][1]
     active_nodes_view: cython.long[:] = active_nodes
@@ -348,6 +349,19 @@ def bidir_fix_explored(explored: umap[cython.int, cython.int], distances: cython
                                                        + " must not have opposite partner as parent"
 
     return explored, explored[smalldex]
+
+
+@cython.cfunc
+@cython.infer_types(True)
+@cython.boundscheck(False)
+@cython.initializedcheck(False)
+@cython.nonecheck(False)
+@cython.wraparound(False)
+def bidir_check_explored(explored_fwd: umap[cython.int, cython.int], explored_rev: umap[cython.int, cython.int]):
+    for item in explored_fwd:
+        assert item.first != item.second, "Node " + str(item.first) + " will be ancestor of self in fwd search"
+    for item in explored_rev:
+        assert item.first != item.second, "Node " + str(item.first) + " will be ancestor of self in rev search"
 
 
 @cython.cfunc
