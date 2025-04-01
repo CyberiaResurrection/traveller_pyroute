@@ -28,6 +28,7 @@ cnp.import_array()
 float64max = np.finfo(np.float64).max
 ROOT_NODE: cython.int = -1
 MAX_BACKFILL_DEPTH: cython.int = 5
+MAX_BUILD_DEPTH: cython.int = 1
 
 @cython.cdivision(True)
 def _calc_branching_factor(nodes_queued: cython.int, path_len: cython.int):
@@ -358,9 +359,11 @@ def bidir_check_explored(explored_fwd: umap[cython.int, cython.int], explored_re
 @cython.initializedcheck(False)
 @cython.nonecheck(False)
 @cython.wraparound(False)
-def bidir_build_path(explored_fwd: umap[cython.int, cython.int], explored_rev: umap[cython.int, cython.int], smalldex: cython.int) -> list[cython.int]:
+def bidir_build_path(explored_fwd: umap[cython.int, cython.int], explored_rev: umap[cython.int, cython.int],
+                     smalldex: cython.int, build_depth: cython.int = 0) -> list[cython.int]:
     path = [smalldex]
     node = explored_fwd[smalldex]
+    inpath: cython.bint
     while node != ROOT_NODE:
         assert node not in path, "Node " + str(node) + " duplicated in discovered path, " + str(path) +\
                                  ".\n Explored fwd: " + str(explored_fwd) + "\n Explored rev: " + str(explored_rev)
@@ -373,8 +376,11 @@ def bidir_build_path(explored_fwd: umap[cython.int, cython.int], explored_rev: u
 
     node = explored_rev[smalldex]
     while node != ROOT_NODE:
-        assert node not in path, "Node " + str(node) + " duplicated in discovered path, " + str(path) +\
-                                 ".\n Explored fwd: " + str(explored_fwd) + "\n Explored rev: " + str(explored_rev)
+        inpath = node in path
+        if build_depth < MAX_BUILD_DEPTH and inpath:
+            return bidir_build_path(explored_fwd, explored_rev, node, build_depth + 1)
+        assert not inpath, "Node " + str(node) + " duplicated in discovered path, " + str(path) +\
+                           ".\n Explored fwd: " + str(explored_fwd) + "\n Explored rev: " + str(explored_rev)
         path.append(node)
         assert 0 != explored_rev.count(node), "Node " + str(node) + " lacking parent in reverse search." +\
                                               ".\n Explored fwd: " + str(explored_fwd) + "\n Explored rev: " + str(explored_rev)
