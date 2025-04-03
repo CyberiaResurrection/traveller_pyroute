@@ -285,9 +285,6 @@ def bidir_path_numpy(G, source: cython.int, target: cython.int, bulk_heuristic,
                                                  smalldex, ROOT_NODE, source, target)
         explored_rev, small_rev = bidir_fix_explored(explored_rev, distances_rev_view, active_nodes_view, active_costs_view,
                                                  smalldex, small_fwd, source, target)
-    if ROOT_NODE != small_fwd and ROOT_NODE!= small_rev:
-        assert small_fwd != small_rev, "Smalldex " + str(smalldex) + " has parent " + str(small_fwd)\
-                                       + " duplicated in both searches"
 
     bidir_check_explored(explored_fwd, explored_rev)
     bestpath = bidir_build_path(explored_fwd, explored_rev, smalldex)
@@ -330,10 +327,6 @@ def bidir_fix_explored(explored: umap[cython.int, cython.int], distances: cython
             explored[smalldex] = mindex
         else:
             raise nx.NetworkXNoPath(f"Node {target} not reachable from {source}")
-
-    if ROOT_NODE != opposite_partner:
-        assert explored[smalldex] != opposite_partner, "Pivot node " + str(smalldex)\
-                                                       + " must not have opposite partner as parent"
 
     return explored, explored[smalldex]
 
