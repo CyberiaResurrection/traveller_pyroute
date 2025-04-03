@@ -26,8 +26,8 @@ import numpy as np
 cnp.import_array()
 
 float64max = np.finfo(np.float64).max
-ROOT_NODE: cython.int = -1
-MAX_BACKFILL_DEPTH: cython.int = 5
+_ROOT_NODE: cython.int = -1
+_MAX_BACKFILL_DEPTH: cython.int = 5
 MAX_BUILD_DEPTH: cython.int = 1
 
 @cython.cdivision(True)
@@ -70,6 +70,8 @@ def _calc_branching_factor(nodes_queued: cython.int, path_len: cython.int):
 def bidir_path_numpy(G, source: cython.int, target: cython.int, bulk_heuristic,
                      upbound: cython.float = float64max, diagnostics: cython.bint = False):
     G_succ: list[tuple[cnp.ndarray[cython.int], cnp.ndarray[cython.float]]] = G._arcs  # For speed-up
+    ROOT_NODE: cython.int = _ROOT_NODE
+    MAX_BACKFILL_DEPTH: cython.int = _MAX_BACKFILL_DEPTH
     potential_fwd: cnp.ndarray[cython.float]
     potential_rev: cnp.ndarray[cython.float]
     distances_fwd: cnp.ndarray[cython.float]
@@ -125,9 +127,10 @@ def bidir_path_numpy(G, source: cython.int, target: cython.int, bulk_heuristic,
     depth: cython.int
     raw_dist: cython.float
     delta: cython.float
-    upper_nodes: cnp.ndarray[cython.int]
-    upper_costs: cnp.ndarray[cython.float]
+    upper_nodes: cython.long[:]
+    upper_costs: cython.double[:]
     upper_len: cython.int
+    other_nod: cython.int
 
     while queue_fwd.size() > 0 and queue_rev.size() > 0:
         if queue_rev.size() < queue_fwd.size():
@@ -136,7 +139,6 @@ def bidir_path_numpy(G, source: cython.int, target: cython.int, bulk_heuristic,
             curnode = result.curnode
             parent = result.parent
             assert curnode != parent, "Rev search: Node " + str(curnode) + " has itself for a parent"
-            assert curnode != ROOT_NODE, "Current node must not be root node"
             mindex = ROOT_NODE
 
             if 0 != explored_rev.count(curnode):
@@ -153,10 +155,8 @@ def bidir_path_numpy(G, source: cython.int, target: cython.int, bulk_heuristic,
 
             explored_rev[curnode] = parent
 
-            active_nodes = G_succ[curnode][0]
-            active_nodes_view: cython.long[:] = active_nodes
-            active_costs = G_succ[curnode][1]
-            active_costs_view: cython.double[:] = active_costs
+            active_nodes_view: cython.long[:] = G_succ[curnode][0]
+            active_costs_view: cython.double[:] = G_succ[curnode][1]
 
             num_nodes = len(active_nodes_view)
 
@@ -183,12 +183,11 @@ def bidir_path_numpy(G, source: cython.int, target: cython.int, bulk_heuristic,
                         upper_costs = G_succ[act_nod][1]
                         upper_len = len(upper_nodes)
                         for k in range(upper_len):
-                            delta = raw_dist - upper_costs[k] - distances_fwd_view[upper_nodes[k]]
+                            other_nod = upper_nodes[k]
+                            delta = raw_dist - upper_costs[k] - distances_fwd_view[other_nod]
                             if delta * delta < 1e-8:
-                                assert act_nod != upper_nodes[k], "Pivot node " + str(
-                                    act_nod) + " will have itself as ancestor"
-                                explored_fwd[act_nod] = upper_nodes[k]
-                                act_nod = upper_nodes[k]
+                                explored_fwd[act_nod] = other_nod
+                                act_nod = other_nod
                                 break
                         depth += 1
 
@@ -203,7 +202,6 @@ def bidir_path_numpy(G, source: cython.int, target: cython.int, bulk_heuristic,
             curnode = result.curnode
             parent = result.parent
             assert curnode != parent, "Fwd search: Node " + str(curnode) + " has itself for a parent"
-            assert curnode != ROOT_NODE, "Current node must not be root node"
             mindex = ROOT_NODE
 
             if 0 != explored_fwd.count(curnode):
@@ -220,10 +218,8 @@ def bidir_path_numpy(G, source: cython.int, target: cython.int, bulk_heuristic,
 
             explored_fwd[curnode] = parent
 
-            active_nodes = G_succ[curnode][0]
-            active_nodes_view: cython.long[:] = active_nodes
-            active_costs = G_succ[curnode][1]
-            active_costs_view: cython.double[:] = active_costs
+            active_nodes_view: cython.long[:] = G_succ[curnode][0]
+            active_costs_view: cython.double[:] = G_succ[curnode][1]
 
             num_nodes = len(active_nodes_view)
 
@@ -249,12 +245,11 @@ def bidir_path_numpy(G, source: cython.int, target: cython.int, bulk_heuristic,
                         upper_costs = G_succ[act_nod][1]
                         upper_len = len(upper_nodes)
                         for k in range(upper_len):
-                            delta = raw_dist - upper_costs[k] - distances_rev_view[upper_nodes[k]]
+                            other_nod = upper_nodes[k]
+                            delta = raw_dist - upper_costs[k] - distances_rev_view[other_nod]
                             if delta * delta < 1e-8:
-                                assert act_nod != upper_nodes[k], "Pivot node " + str(
-                                    act_nod) + " will have itself as ancestor"
-                                explored_rev[act_nod] = upper_nodes[k]
-                                act_nod = upper_nodes[k]
+                                explored_rev[act_nod] = other_nod
+                                act_nod = other_nod
                                 break
                         depth += 1
 
@@ -269,20 +264,18 @@ def bidir_path_numpy(G, source: cython.int, target: cython.int, bulk_heuristic,
 
     explored_fwd[source] = ROOT_NODE
     explored_rev[target] = ROOT_NODE
-    bidir_check_explored(explored_fwd, explored_rev)
-    active_nodes = G_succ[smalldex][0]
-    active_costs = G_succ[smalldex][1]
-    active_nodes_view: cython.long[:] = active_nodes
-    active_costs_view: cython.double[:] = active_costs
+
+    active_nodes_view: cython.long[:] = G_succ[smalldex][0]
+    active_costs_view: cython.double[:] = G_succ[smalldex][1]
 
     if 0 != explored_rev.count(smalldex):
         explored_rev, small_rev = bidir_fix_explored(explored_rev, distances_rev_view, active_nodes_view, active_costs_view,
-                                                 smalldex, ROOT_NODE, source, target)
+                                                     smalldex, ROOT_NODE, source, target)
         explored_fwd, small_fwd = bidir_fix_explored(explored_fwd, distances_fwd_view, active_nodes_view, active_costs_view,
                                                  smalldex, small_rev, source, target)
     else:
         explored_fwd, small_fwd = bidir_fix_explored(explored_fwd, distances_fwd_view, active_nodes_view, active_costs_view,
-                                                 smalldex, ROOT_NODE, source, target)
+                                                     smalldex, ROOT_NODE, source, target)
         explored_rev, small_rev = bidir_fix_explored(explored_rev, distances_rev_view, active_nodes_view, active_costs_view,
                                                  smalldex, small_fwd, source, target)
 
@@ -308,7 +301,7 @@ def bidir_fix_explored(explored: umap[cython.int, cython.int], distances: cython
         act_nod: cython.int
         act_wt: cython.float
         skipcost: cython.float = float64max
-        mindex: cython.int = ROOT_NODE
+        mindex: cython.int = _ROOT_NODE
         i: cython.int
         num_nodes: cython.int = len(active_nodes)
 
@@ -318,12 +311,11 @@ def bidir_fix_explored(explored: umap[cython.int, cython.int], distances: cython
             if 0 != explored.count(act_nod) and skipcost > act_wt:
                 #  If the active node is the opposite partner, skip it to avoid duplication
                 if act_nod != opposite_partner:
-                    if ROOT_NODE == opposite_partner or explored[act_nod] != opposite_partner:
+                    if _ROOT_NODE == opposite_partner or explored[act_nod] != opposite_partner:
                         mindex = act_nod
                         skipcost = act_wt
 
-        if ROOT_NODE != mindex:
-            assert smalldex != mindex, "Node " + str(mindex) + " will be ancestor of self"
+        if _ROOT_NODE != mindex:
             explored[smalldex] = mindex
         else:
             raise nx.NetworkXNoPath(f"Node {target} not reachable from {source}")
@@ -338,8 +330,6 @@ def bidir_fix_explored(explored: umap[cython.int, cython.int], distances: cython
 @cython.nonecheck(False)
 @cython.wraparound(False)
 def bidir_check_explored(explored_fwd: umap[cython.int, cython.int], explored_rev: umap[cython.int, cython.int]):
-    assert 0 == explored_fwd.count(ROOT_NODE), "Root node should not be in forward search"
-    assert 0 == explored_rev.count(ROOT_NODE), "Root node should not be in reverse search"
     for item in explored_fwd:
         assert item.first != item.second, "Node " + str(item.first) + " will be ancestor of self in fwd search"
     for item in explored_rev:
@@ -357,26 +347,22 @@ def bidir_build_path(explored_fwd: umap[cython.int, cython.int], explored_rev: u
     path = [smalldex]
     node = explored_fwd[smalldex]
     inpath: cython.bint
+    ROOT_NODE: cython.int = _ROOT_NODE
+    explor_str: str = ".\n Explored fwd: " + str(explored_fwd) + "\n Explored rev: " + str(explored_rev)
     while node != ROOT_NODE:
-        assert node not in path, "Node " + str(node) + " duplicated in discovered path, " + str(path) +\
-                                 ".\n Explored fwd: " + str(explored_fwd) + "\n Explored rev: " + str(explored_rev)
+        assert node not in path, "Node " + str(node) + " duplicated in discovered path, " + str(path) + explor_str
         path.append(node)
-        assert 0 != explored_fwd.count(node), "Node " + str(node) + " lacking parent in forward search." +\
-                                              ".\n Explored fwd: " + str(explored_fwd) + "\n Explored rev: " + str(explored_rev)
+        assert 0 != explored_fwd.count(node), "Node " + str(node) + " lacking parent in forward search." + explor_str
         node = explored_fwd[node]
-        assert node != explored_fwd[node], "Node " + str(node) + " is own forward ancestor.\n Explored: " + str(explored_fwd)
     path.reverse()
 
     node = explored_rev[smalldex]
     while node != ROOT_NODE:
         inpath = node in path
-        if build_depth < MAX_BUILD_DEPTH and inpath:
+        if inpath and build_depth < MAX_BUILD_DEPTH:
             return bidir_build_path(explored_fwd, explored_rev, node, build_depth + 1)
-        assert not inpath, "Node " + str(node) + " duplicated in discovered path, " + str(path) +\
-                           ".\n Explored fwd: " + str(explored_fwd) + "\n Explored rev: " + str(explored_rev)
+        assert not inpath, "Node " + str(node) + " duplicated in discovered path, " + str(path) + explor_str
         path.append(node)
-        assert 0 != explored_rev.count(node), "Node " + str(node) + " lacking parent in reverse search." +\
-                                              ".\n Explored fwd: " + str(explored_fwd) + "\n Explored rev: " + str(explored_rev)
+        assert 0 != explored_rev.count(node), "Node " + str(node) + " lacking parent in reverse search." + explor_str
         node = explored_rev[node]
-        assert node != explored_rev[node], "Node " + str(node) + " is own reverse ancestor.\n Explored: " + str(explored_rev)
     return path
