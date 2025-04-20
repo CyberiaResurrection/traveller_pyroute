@@ -18,7 +18,6 @@ import cython
 from cython.cimports.numpy import numpy as cnp
 from cython.cimports.minmaxheap import MinMaxHeap, astar_t
 from cython.cimports.unordered_map import unordered_map as umap
-from cython.cimports.libcpp.unordered_set import unordered_set as uset
 
 import networkx as nx
 import numpy as np
@@ -29,6 +28,7 @@ float64max = np.finfo(np.float64).max
 _ROOT_NODE: cython.int = -1
 _MAX_BACKFILL_DEPTH: cython.int = 5
 MAX_BUILD_DEPTH: cython.int = 1
+
 
 @cython.cdivision(True)
 def _calc_branching_factor(nodes_queued: cython.int, path_len: cython.int):
@@ -84,9 +84,6 @@ def bidir_path_numpy(G, source: cython.int, target: cython.int, bulk_heuristic,
     aug_wt: cython.float
     qcost: cython.float
     rawbound: cython.float
-
-    active_nodes: cnp.ndarray[cython.int]
-    active_costs: cnp.ndarray[cython.float]
 
     # pre-calc heuristics for all nodes to the target node
     potential_fwd = bulk_heuristic(target)
