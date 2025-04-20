@@ -283,7 +283,6 @@ class RouteCalculation(object):
     def multilateral_balance_pass(self):
         pass
 
-
     def multilateral_balance_trade_volume(self):
         pass
 
