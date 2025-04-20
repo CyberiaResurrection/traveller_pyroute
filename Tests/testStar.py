@@ -832,7 +832,7 @@ class TestStar(unittest.TestCase):
         star1.is_well_formed()
 
         parse_line = star1.parse_to_line()
-        foo = 1
+        self.assertTrue(isinstance(parse_line, str))
 
     def testParseUnknownTL(self):
         line = '0101 Raktegham            C529767-?                                      - K - 921   K3 A0 V       '

@@ -276,5 +276,6 @@ class testDeltaStar(unittest.TestCase):
                 actual = old_star.parse_to_line()
                 self.assertEqual(expected, actual, "Unexpected PBG canonicalisation result")
 
+
 if __name__ == '__main__':
     unittest.main()
