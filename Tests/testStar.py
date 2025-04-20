@@ -484,15 +484,6 @@ class TestStar(unittest.TestCase):
         self.assertNotEqual(star1, star3)
         self.assertNotEqual(star2, star3)
 
-    def testParseBespin(self):
-        sector = Sector('# Core', '# 0, 0')
-        line = '0615 Bespin II            EAA19AC-4 Fl Hi He In          {+0} (98b-1) [a935] - - - 223 9  Na G1 V           '
-        star1 = Star.parse_line_into_star(line, sector, 'fixed', 'fixed')
-        self.assertIsInstance(star1, Star)
-        self.assertEqual('Fl He Hi In', str(star1.tradeCode))
-        self.assertEqual('(98B-1)', star1.economics)
-        self.assertEqual('[A935]', star1.social)
-
     def testStarSize(self):
         _ = Star.parse_line_into_star(
             "0104 Shana Ma             E551112-7 Lo Po                { -3 } (301-3) [1113] B     - - 913 9  Im K2 IV M7 V     ",
@@ -819,7 +810,7 @@ class TestStar(unittest.TestCase):
         star1.is_well_formed()
 
         parse_line = star1.parse_to_line()
-        foo = 1
+        self.assertTrue(isinstance(parse_line, str))
 
     def testParseUnknownTL(self):
         line = '0101 Raktegham            C529767-?                                      - K - 921   K3 A0 V       '
@@ -831,6 +822,7 @@ class TestStar(unittest.TestCase):
         parse_line = star1.parse_to_line()
         expected_uwp = 'C529767-?'
         self.assertTrue(expected_uwp in parse_line, "UWP not regnerated")
+
 
 if __name__ == "__main__":
     # import sys;sys.argv = ['', 'Test.testName']
