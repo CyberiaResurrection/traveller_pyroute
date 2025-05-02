@@ -7,6 +7,7 @@ cdef extern from "_minmaxheap.h" namespace "minmaxheap":
 	cdef struct astar_t:
 		double augment;
 		double cost;
+		int dist;
 		int curnode;
 		int parent;
 
