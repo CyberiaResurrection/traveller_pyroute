@@ -23,7 +23,8 @@ class DistanceGraph(DistanceBase):
             (
                 np.array(graph.adj[u], dtype=int),
                 np.array([data['weight'] for data in list(graph.adj[u].values())], dtype=float),
-                {v: k for (k, v) in enumerate(list(graph.adj[u].keys()))}
+                {v: k for (k, v) in enumerate(list(graph.adj[u].keys()))},
+                np.array([data['distance'] for data in list(graph.adj[u].values())], dtype=int)
             )
             for u in self._nodes
         ]
