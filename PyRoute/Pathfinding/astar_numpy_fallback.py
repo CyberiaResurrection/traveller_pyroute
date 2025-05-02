@@ -23,6 +23,7 @@ import networkx as nx
 import numpy as np
 
 float64max = np.finfo(np.float64).max
+int64max = np.iinfo(np.int64).max
 
 
 def _calc_branching_factor(nodes_queued, path_len):
@@ -52,7 +53,7 @@ def _calc_branching_factor(nodes_queued, path_len):
     return round(new, 3)
 
 
-def astar_path_numpy(G, source, target, bulk_heuristic, min_cost=None, upbound=float64max, diagnostics=False) -> tuple[list, dict]:
+def astar_path_numpy(G, source, target, bulk_heuristic, min_cost=None, upbound=None, distbound=None, diagnostics=False) -> tuple[list, dict]::
 
     G_succ = G._arcs  # For speed-up
 
@@ -61,10 +62,10 @@ def astar_path_numpy(G, source, target, bulk_heuristic, min_cost=None, upbound=f
     if potentials is None:
         raise ValueError("Bulk heuristic function cannot be None")
 
-    # The queue stores priority, cost to reach, node,  and parent.
+    # The queue stores priority, cost to reach, distance to reach, node,  and parent.
     # Uses Python heapq to keep in priority order.
     # The nodes themselves, being integers, are directly comparable.
-    queue = [(potentials[source], 0, source, None)]
+    queue = [(potentials[source], 0.0, 0, source, None)]
 
     # Maps explored nodes to parent closest to the source.
     explored = {}
@@ -73,9 +74,12 @@ def astar_path_numpy(G, source, target, bulk_heuristic, min_cost=None, upbound=f
     floatinf = float('inf')
     upbound = floatinf if upbound is None else upbound
     assert upbound != floatinf, "Supplied upbound must not be infinite"
+    distbound = int64max if distbound is None else distbound
     # Traces lowest distance from source node found for each node
     costs = np.ones(len(G)) * floatinf
     costs[source] = 0
+    distances = np.ones(len(G), dtype=int) * distbound
+    distances[source] = 0
 
     # pre-calc the minimum-cost edge on each node
     min_cost = np.zeros(len(G)) if min_cost is None else min_cost
@@ -95,7 +99,7 @@ def astar_path_numpy(G, source, target, bulk_heuristic, min_cost=None, upbound=f
 
     while queue:
         # Pop the smallest item from queue.
-        _, cost, curnode, parent = heappop(queue)
+        _, cost, dist, curnode, parent = heappop(queue)
         node_counter += 1
 
         if curnode == target:
@@ -126,12 +130,13 @@ def astar_path_numpy(G, source, target, bulk_heuristic, min_cost=None, upbound=f
             # Skip bad paths that were enqueued before finding a better one
             qcost = costs[curnode]
             if qcost <= cost:
-                queue = [item for item in queue if not (item[1] > costs[item[2]])]
+                queue = [item for item in queue if not (item[1] > costs[item[3]])]
                 heapify(queue)
                 continue
             # If we've found a better path, update
             revis_continue += 1
             costs[curnode] = cost
+            distances[curnode] = dist
 
         explored[curnode] = parent
 
@@ -139,6 +144,7 @@ def astar_path_numpy(G, source, target, bulk_heuristic, min_cost=None, upbound=f
         active_nodes = raw_nodes[0]
         active_weights = cost + raw_nodes[1]
         augmented_weights = active_weights + potentials[active_nodes]
+        active_dists = dist + raw_nodes[2]
 
         # Even if we have the target node as a candidate neighbour, of itself, that's _no_ guarantee that the target
         # as neighbour will give a better upper bound.
@@ -149,6 +155,7 @@ def astar_path_numpy(G, source, target, bulk_heuristic, min_cost=None, upbound=f
             continue
         active_weights = active_weights[keep]
         augmented_weights = augmented_weights[keep]
+        active_dists = active_dists[keep]
 
         if target in active_nodes:
             num_neighbours = len(active_nodes)
@@ -165,7 +172,7 @@ def astar_path_numpy(G, source, target, bulk_heuristic, min_cost=None, upbound=f
                 if 0 < len(queue):
                     # While we're taking a brush-hook to queue, rip out items whose dist value exceeds enqueued value
                     # or is too close to upbound
-                    queue = [item for item in queue if item[1] <= upper_limit[item[2]]]
+                    queue = [item for item in queue if item[1] <= upper_limit[item[3]]]
                     # Finally, dedupe the queue after cleaning all bound-busts out and 2 or more elements are left.
                     # Empty or single-element sets cannot require deduplication, and are already heaps themselves.
                     if 1 < len(queue):
@@ -183,6 +190,7 @@ def astar_path_numpy(G, source, target, bulk_heuristic, min_cost=None, upbound=f
             # its augmented weight is _equal_ to upbound
             keep = augmented_weights < upbound
             active_nodes = active_nodes[keep]
+            active_dists = active_dists[keep]
 
             # if there _was_ one neighbour to process, that was the target, so neighbour list is now empty.
             # Likewise, if the new upper bound has emptied the neighbour list, go around.
@@ -192,31 +200,33 @@ def astar_path_numpy(G, source, target, bulk_heuristic, min_cost=None, upbound=f
 
             active_weights = active_weights[keep]
             augmented_weights = augmented_weights[keep]
+            active_dists = active_dists[keep]
 
         # Now unconditionally queue _all_ nodes that are still active, worrying about filtering out the bound-busting
         # neighbours later.
         costs[active_nodes] = active_weights
         upper_limit[active_nodes] = active_weights
+        distances[active_nodes] = active_dists
         num_nodes = len(active_nodes)
 
         queue_counter += num_nodes
 
         if 1 == num_nodes:
-            heappush(queue, (augmented_weights[0], active_weights[0], active_nodes[0], curnode))
+            heappush(queue, (augmented_weights[0], active_weights[0], active_dists[0], active_nodes[0], curnode))
         elif 2 == num_nodes:
-            heappush(queue, (augmented_weights[0], active_weights[0], active_nodes[0], curnode))
-            heappush(queue, (augmented_weights[1], active_weights[1], active_nodes[1], curnode))
+            heappush(queue, (augmented_weights[0], active_weights[0], active_dists[0], active_nodes[0], curnode))
+            heappush(queue, (augmented_weights[1], active_weights[1], active_dists[1], active_nodes[1], curnode))
         elif 3 == num_nodes:
-            heappush(queue, (augmented_weights[0], active_weights[0], active_nodes[0], curnode))
-            heappush(queue, (augmented_weights[1], active_weights[1], active_nodes[1], curnode))
-            heappush(queue, (augmented_weights[2], active_weights[2], active_nodes[2], curnode))
+            heappush(queue, (augmented_weights[0], active_weights[0], active_dists[0], active_nodes[0], curnode))
+            heappush(queue, (augmented_weights[1], active_weights[1], active_dists[1], active_nodes[1], curnode))
+            heappush(queue, (augmented_weights[2], active_weights[2], active_dists[2], active_nodes[2], curnode))
         elif 4 == num_nodes:
-            heappush(queue, (augmented_weights[0], active_weights[0], active_nodes[0], curnode))
-            heappush(queue, (augmented_weights[1], active_weights[1], active_nodes[1], curnode))
-            heappush(queue, (augmented_weights[2], active_weights[2], active_nodes[2], curnode))
-            heappush(queue, (augmented_weights[3], active_weights[3], active_nodes[3], curnode))
+            heappush(queue, (augmented_weights[0], active_weights[0], active_dists[0], active_nodes[0], curnode))
+            heappush(queue, (augmented_weights[1], active_weights[1], active_dists[1], active_nodes[1], curnode))
+            heappush(queue, (augmented_weights[2], active_weights[2], active_dists[2], active_nodes[2], curnode))
+            heappush(queue, (augmented_weights[3], active_weights[3], active_dists[3], active_nodes[3], curnode))
         else:
             for i in range(num_nodes):
-                heappush(queue, (augmented_weights[i], active_weights[i], active_nodes[i], curnode))
+                heappush(queue, (augmented_weights[i], active_weights[i], active_dists[i], active_nodes[i], curnode))
 
     raise nx.NetworkXNoPath(f"Node {target} not reachable from {source}")

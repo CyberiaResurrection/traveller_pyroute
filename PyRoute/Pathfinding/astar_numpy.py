@@ -26,6 +26,7 @@ import numpy as np
 cnp.import_array()
 
 float64max = np.finfo(np.float64).max
+int64max = np.iinfo(np.int64).max
 
 
 @cython.cdivision(True)
@@ -71,6 +72,7 @@ def astar_path_numpy(G, source: cython.int, target: cython.int, bulk_heuristic,
     potentials: cnp.ndarray[cython.float]
     upbound: cython.float
     costs: cnp.ndarray[cython.float]
+    distbound: cython.long = int64max
     G_succ = G._arcs  # For speed-up
 
     # pre-calc heuristics for all nodes to the target node
@@ -78,10 +80,13 @@ def astar_path_numpy(G, source: cython.int, target: cython.int, bulk_heuristic,
     if potentials is None:
         raise ValueError("Bulk heuristic function cannot be None")
 
-    # Traces lowest distance from source node found for each node
+    # Traces lowest cost from source node found for each node
     costs = np.ones(len(G_succ), dtype=float) * upbound
+    # Traces lowest distance from source node found for each node
+    distances = np.ones(len(G_succ), dtype=int) * distbound
 
-    bestpath, diag = astar_numpy_core(G_succ, diagnostics, costs, potentials, source, target, upbound)
+    bestpath, diag = astar_numpy_core(G_succ, diagnostics, costs, distances, potentials, source, target, upbound,
+                                      distbound)
 
     if 0 == len(bestpath):
         raise nx.NetworkXNoPath(f"Node {target} not reachable from {source}")
@@ -96,13 +101,17 @@ def astar_path_numpy(G, source: cython.int, target: cython.int, bulk_heuristic,
 @cython.wraparound(False)
 @cython.returns(tuple[list[cython.int], dict])
 def astar_numpy_core(G_succ: list[tuple[cnp.ndarray[cython.int], cnp.ndarray[cython.float]]], diagnostics: cython.bint,
-                     costs: cnp.ndarray[cython.float], potentials: cnp.ndarray[cython.float], source: cython.int,
-                     target: cython.int, upbound: cython.float) -> tuple[list, dict]:
+                     costs: cnp.ndarray[cython.float], distances: cnp.ndarray[cython.long],
+                     potentials: cnp.ndarray[cython.float], source: cython.int, target: cython.int,
+                     upbound: cython.float, distbound: cython.long) -> tuple[list, dict]:
     costs_view: cython.double[:] = costs
     costs_view[source] = 0.0
+    distances_view: cython.long[:] = distances
+    distances_view[source] = 0
     potentials_view: cython.double[:] = potentials
     active_nodes_view: cython.long[:]
     active_costs_view: cython.double[:]
+    active_dists_view: cython.long[:]
 
     node_counter: cython.int = 0
     queue_counter: cython.int = 0
@@ -118,8 +127,10 @@ def astar_numpy_core(G_succ: list[tuple[cnp.ndarray[cython.int], cnp.ndarray[cyt
 
     act_nod: cython.int
     act_wt: cython.float
+    act_dist: cython.int
 
-    dist: cython.float
+    cost: cython.float
+    dist: cython.int
     curnode: cython.int
     parent: cython.int
     counter: cython.int
@@ -132,12 +143,13 @@ def astar_numpy_core(G_succ: list[tuple[cnp.ndarray[cython.int], cnp.ndarray[cyt
     # The nodes themselves, being integers, are directly comparable.
     queue: MinMaxHeap[astar_t] = MinMaxHeap[astar_t]()
     queue.reserve(500)
-    queue.insert({'augment': potentials_view[source], 'cost': 0.0, 'curnode': source, 'parent': -1})
+    queue.insert({'augment': potentials_view[source], 'cost': 0.0, 'dist': 0, 'curnode': source, 'parent': -1})
 
     while 0 < queue.size():
         # Pop the smallest item from queue.
         result = queue.popmin()
-        dist = result.cost
+        cost = result.cost
+        dist = result.dist
         curnode = result.curnode
         parent = result.parent
         node_counter += 1
@@ -169,16 +181,18 @@ def astar_numpy_core(G_succ: list[tuple[cnp.ndarray[cython.int], cnp.ndarray[cyt
 
             # We've found a bad path, just move on
             qcost = costs_view[curnode]
-            if qcost <= dist:
+            if qcost <= cost:
                 continue
             # If we've found a better path, update
             revis_continue += 1
-            costs_view[curnode] = dist
+            costs_view[curnode] = cost
+            distances_view[curnode] = dist
 
         explored[curnode] = parent
 
         active_nodes_view = G_succ[curnode][0]
         active_costs_view = G_succ[curnode][1]
+        active_dists_view = G_succ[curnode][2]
 
         targdex = -1
 
@@ -187,11 +201,12 @@ def astar_numpy_core(G_succ: list[tuple[cnp.ndarray[cython.int], cnp.ndarray[cyt
             act_nod = active_nodes_view[i]
             if act_nod == target:
                 targdex = i
-                nu_upbound = dist + active_costs_view[targdex]
+                nu_upbound = cost + active_costs_view[targdex]
                 if nu_upbound < upbound:
                     upbound = nu_upbound
                     new_upbounds += 1
                     costs_view[target] = upbound
+                    distances_view[target] = dist + active_dists_view[targdex]
                 break
 
         # Now unconditionally queue _all_ nodes that are still active, worrying about filtering out the bound-busting
@@ -199,14 +214,17 @@ def astar_numpy_core(G_succ: list[tuple[cnp.ndarray[cython.int], cnp.ndarray[cyt
         counter = 0
         for i in range(num_nodes):
             act_nod = active_nodes_view[i]
-            act_wt = dist + active_costs_view[i]
+            act_wt = cost + active_costs_view[i]
             if act_wt > costs_view[act_nod]:
                 continue
             aug_wt = act_wt + potentials_view[act_nod]
             if aug_wt > upbound:
                 continue
+            aug_dist = dist + distances_view[act_nod]
+            if aug_dist > distbound:
+                continue
             costs_view[act_nod] = act_wt
-            queue.insert({'augment': aug_wt, 'cost': act_wt, 'curnode': act_nod, 'parent': curnode})
+            queue.insert({'augment': aug_wt, 'cost': act_wt, 'dist': aug_dist, 'curnode': act_nod, 'parent': curnode})
             counter += 1
 
         if 0 == counter:
