@@ -21,6 +21,7 @@ namespace minmaxheap {
     typedef struct astar_t {
         double augment;
         double cost;
+        int dist;
         int curnode;
         int parent;
         bool operator>(astar_t const& other) {
@@ -30,6 +31,9 @@ namespace minmaxheap {
             if (this->augment == other.augment && this->cost > other.cost) {
                 return true;
             }
+            if (this->augment == other.augment && this->cost == other.cost and this->dist > other.dist) {
+                return true;
+            }
             return false;
         }
         bool operator<(astar_t const& other) {
@@ -37,6 +41,9 @@ namespace minmaxheap {
                 return true;
             }
             if (this->augment == other.augment && this->cost < other.cost) {
+                return true;
+            }
+            if (this->augment == other.augment && this->cost == other.cost and this->dist < other.dist) {
                 return true;
             }
             return false;
