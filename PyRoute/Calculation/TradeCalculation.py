@@ -323,9 +323,12 @@ class TradeCalculation(RouteCalculation):
                     target.index not in self.component_landmarks[comp_id]:
                 target, star = star, target
 
+            distbound = self.max_route_length(star, target)
+            if float('inf') == distbound:
+                distbound = np.iinfo(np.int64).max
             rawroute, diag = astar_path_numpy(self.star_graph, star.index, target.index,
                                               self.shortest_path_tree.lower_bound_bulk, upbound=upbound,
-                                              diagnostics=self.debug_flag)
+                                              diagnostics=self.debug_flag, distbound=distbound)
 
             if self.debug_flag:
                 moshdex = np.where(self.pathfinding_data['branch_factor'] == -1.0)[0][0]
