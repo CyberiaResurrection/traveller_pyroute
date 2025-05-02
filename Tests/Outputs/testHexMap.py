@@ -603,7 +603,7 @@ class testHexMap(baseTest):
             array2 = np.array(image2)
 
             mse = np.mean((array1 - array2) ** 2)
-            self.assertTrue(0.341 > mse, "Image difference " + str(mse) + " above threshold for " + full)
+            self.assertTrue(0.34 > mse, "Image difference " + str(mse) + " above threshold for " + full)
 
             graphMap = SubsectorMap(galaxy, args.routes, galaxy.output_path)
             graphMap.write_maps()
