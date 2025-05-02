@@ -132,12 +132,12 @@ def astar_numpy_core(G_succ: list[tuple[cnp.ndarray[cython.int], cnp.ndarray[cyt
     # The nodes themselves, being integers, are directly comparable.
     queue: MinMaxHeap[astar_t] = MinMaxHeap[astar_t]()
     queue.reserve(500)
-    queue.insert({'augment': potentials_view[source], 'dist': 0.0, 'curnode': source, 'parent': -1})
+    queue.insert({'augment': potentials_view[source], 'cost': 0.0, 'curnode': source, 'parent': -1})
 
     while 0 < queue.size():
         # Pop the smallest item from queue.
         result = queue.popmin()
-        dist = result.dist
+        dist = result.cost
         curnode = result.curnode
         parent = result.parent
         node_counter += 1
@@ -206,7 +206,7 @@ def astar_numpy_core(G_succ: list[tuple[cnp.ndarray[cython.int], cnp.ndarray[cyt
             if aug_wt > upbound:
                 continue
             distances_view[act_nod] = act_wt
-            queue.insert({'augment': aug_wt, 'dist': act_wt, 'curnode': act_nod, 'parent': curnode})
+            queue.insert({'augment': aug_wt, 'cost': act_wt, 'curnode': act_nod, 'parent': curnode})
             counter += 1
 
         if 0 == counter:
