@@ -6,7 +6,7 @@ from libcpp.vector cimport vector
 cdef extern from "_minmaxheap.h" namespace "minmaxheap":
 	cdef struct astar_t:
 		double augment;
-		double dist;
+		double cost;
 		int curnode;
 		int parent;
 
