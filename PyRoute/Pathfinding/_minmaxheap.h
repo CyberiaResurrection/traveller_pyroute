@@ -20,14 +20,14 @@ inline int uint64_log2(uint64_t n)
 namespace minmaxheap {
     typedef struct astar_t {
         double augment;
-        double dist;
+        double cost;
         int curnode;
         int parent;
         bool operator>(astar_t const& other) {
             if (this->augment > other.augment) {
                 return true;
             }
-            if (this->augment == other.augment && this->dist > other.dist) {
+            if (this->augment == other.augment && this->cost > other.cost) {
                 return true;
             }
             return false;
@@ -36,7 +36,7 @@ namespace minmaxheap {
             if (this->augment < other.augment) {
                 return true;
             }
-            if (this->augment == other.augment && this->dist < other.dist) {
+            if (this->augment == other.augment && this->cost < other.cost) {
                 return true;
             }
             return false;
