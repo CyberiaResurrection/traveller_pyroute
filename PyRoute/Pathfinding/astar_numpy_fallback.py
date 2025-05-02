@@ -74,8 +74,8 @@ def astar_path_numpy(G, source, target, bulk_heuristic, min_cost=None, upbound=f
     upbound = floatinf if upbound is None else upbound
     assert upbound != floatinf, "Supplied upbound must not be infinite"
     # Traces lowest distance from source node found for each node
-    distances = np.ones(len(G)) * floatinf
-    distances[source] = 0
+    costs = np.ones(len(G)) * floatinf
+    costs[source] = 0
 
     # pre-calc the minimum-cost edge on each node
     min_cost = np.zeros(len(G)) if min_cost is None else min_cost
@@ -95,7 +95,7 @@ def astar_path_numpy(G, source, target, bulk_heuristic, min_cost=None, upbound=f
 
     while queue:
         # Pop the smallest item from queue.
-        _, dist, curnode, parent = heappop(queue)
+        _, cost, curnode, parent = heappop(queue)
         node_counter += 1
 
         if curnode == target:
@@ -124,20 +124,20 @@ def astar_path_numpy(G, source, target, bulk_heuristic, min_cost=None, upbound=f
                 continue
 
             # Skip bad paths that were enqueued before finding a better one
-            qcost = distances[curnode]
-            if qcost <= dist:
-                queue = [item for item in queue if not (item[1] > distances[item[2]])]
+            qcost = costs[curnode]
+            if qcost <= cost:
+                queue = [item for item in queue if not (item[1] > costs[item[2]])]
                 heapify(queue)
                 continue
             # If we've found a better path, update
             revis_continue += 1
-            distances[curnode] = dist
+            costs[curnode] = cost
 
         explored[curnode] = parent
 
         raw_nodes = G_succ[curnode]
         active_nodes = raw_nodes[0]
-        active_weights = dist + raw_nodes[1]
+        active_weights = cost + raw_nodes[1]
         augmented_weights = active_weights + potentials[active_nodes]
 
         # Even if we have the target node as a candidate neighbour, of itself, that's _no_ guarantee that the target
@@ -157,7 +157,7 @@ def astar_path_numpy(G, source, target, bulk_heuristic, min_cost=None, upbound=f
 
             upbound = ncost
             new_upbounds += 1
-            distances[target] = ncost
+            costs[target] = ncost
             up_threshold = upbound - min_cost
             upper_limit = np.minimum(upper_limit, up_threshold)
             if 0 < len(queue):
@@ -195,7 +195,7 @@ def astar_path_numpy(G, source, target, bulk_heuristic, min_cost=None, upbound=f
 
         # Now unconditionally queue _all_ nodes that are still active, worrying about filtering out the bound-busting
         # neighbours later.
-        distances[active_nodes] = active_weights
+        costs[active_nodes] = active_weights
         upper_limit[active_nodes] = active_weights
         num_nodes = len(active_nodes)
 
