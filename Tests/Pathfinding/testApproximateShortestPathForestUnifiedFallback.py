@@ -281,3 +281,35 @@ class testApproximateShortestPathForestUnifiedFallback(baseTest):
         except ValueError as e:
             msg = str(e)
         self.assertEqual(exp_msg, msg)
+
+    def test_lower_bound_bulk_1(self) -> None:
+        args = self._make_args()
+        sourcefile = self.unpack_filename('DeltaFiles/Zarushagar-Ibara.sec')
+        readparms = ReadSectorOptions(sectors=[sourcefile], pop_code=args.pop_code, ru_calc=args.ru_calc,
+                                      route_reuse=args.route_reuse, trade_choice=args.routes, route_btn=args.route_btn,
+                                      mp_threads=args.mp_threads, debug_flag=args.debug_flag, fix_pop=False,
+                                      deep_space={}, map_type=args.map_type)
+
+        galaxy = Galaxy(min_btn=15, max_jump=1)
+        galaxy.read_sectors(readparms)
+
+        galaxy.generate_routes()
+        galaxy.trade.calculate_components()
+        landmarks, component_landmarks = galaxy.trade.get_landmarks()
+        shortest_path_tree = ApproximateShortestPathForestUnified(0, galaxy.stars, 0.1, sources=landmarks)
+        lobound = shortest_path_tree.lower_bound_bulk(2)
+        self.assertEqual(418.1817855834961, lobound[0])
+        self.assertEqual(float('inf'), lobound[1])
+        self.assertEqual(0.0, lobound[2])
+        self.assertEqual(21.81818389892578, lobound[3])
+        self.assertEqual(45.45454788208008, lobound[4])
+        self.assertEqual(369.0908737182617, lobound[5])
+
+        lobound = shortest_path_tree.lower_bound_bulk(1)
+        self.assertEqual(dtype('float64'), lobound.dtype)
+        self.assertEqual(0.0, lobound[0])
+        self.assertEqual(0.0, lobound[1])
+        self.assertEqual(0.0, lobound[2])
+        self.assertEqual(0.0, lobound[3])
+        self.assertEqual(0.0, lobound[4])
+        self.assertEqual(0.0, lobound[5])
