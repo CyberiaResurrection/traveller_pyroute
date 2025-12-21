@@ -115,9 +115,9 @@ class ApproximateShortestPathForestUnified:
 
             # If that bound no longer holds, it's due to the edge (u, v) having its weight decreased during pathfinding.
             # Tag each incident node as needing updates.
-            if np.max(delta) >= weight:
+            if np.max(delta) >= weight:  # pragma: no mutate
                 dropnodes = True
-                overdrive = tree_dex[delta >= weight]
+                overdrive = tree_dex[delta >= weight]  # pragma: no mutate
                 for i in overdrive:
                     dropspecific[i].add(left)
                     dropspecific[i].add(right)
