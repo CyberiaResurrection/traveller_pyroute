@@ -605,4 +605,41 @@ class testApproximateShortestPathForestUnifiedFallback(baseTest):
         zero_label = shortest_path_tree._max_labels[0, :]
         self.assertEqual([138.18182373046875, 319.0909118652344, 132.72727966308594, 167.27273559570312, 155.4545440673828],
                          zero_label.tolist())
->>>>>>> 0e7f8ee31 (Squash more timeout mutants in ApproximateShortestPathForestUnifiedFallback)
+
+    def test_dijkstra_1(self) -> None:
+        args = self._make_args()
+        sourcefile = self.unpack_filename('DeltaFiles/Zarushagar-Ibara.sec')
+        readparms = ReadSectorOptions(sectors=[sourcefile], pop_code=args.pop_code, ru_calc=args.ru_calc,
+                                      route_reuse=args.route_reuse, trade_choice=args.routes, route_btn=args.route_btn,
+                                      mp_threads=args.mp_threads, debug_flag=args.debug_flag, fix_pop=False,
+                                      deep_space={}, map_type=args.map_type)
+
+        galaxy = Galaxy(min_btn=15, max_jump=6)
+        galaxy.read_sectors(readparms)
+        galaxy.generate_routes()
+        galaxy.trade.calculate_components()
+        shortest_path_tree = ApproximateShortestPathForestUnified(0, galaxy.stars, 0.1)
+
+        nu_distances = np.ones((shortest_path_tree._graph_len)) * float('+inf')
+        nu_max = np.ones((shortest_path_tree._graph_len)) * float('+inf')
+        nu_min_cost = shortest_path_tree._graph.min_cost(0)
+        seeds = [0]
+        nu_distances[0] = 0
+        nu_weight = 54 / 1.2
+
+        nu_distances, nu_max = shortest_path_tree._dijkstra(nu_distances, nu_max, nu_min_cost, seeds)
+        shortest_path_tree.lighten_edge(0, 5, nu_weight)
+        nu_distances, nu_max = shortest_path_tree._dijkstra(nu_distances, nu_max, nu_min_cost, seeds)
+        raw_max = [173.63636363636363, 286.3636363636364, 326.3636363636364, 326.3636363636364, 326.3636363636364,
+                   200.90909090909088, 286.3636363636364, 326.3636474609375, 246.3636474609375, 599.090909090909,
+                   573.6363636363636, 642.7272727272727, 326.3636363636364, 326.3636474609375, 246.36363636363637,
+                   286.3636474609375, 427.2727355957031, 427.27272727272725, 357.27272727272725, 246.3636474609375,
+                   286.3636474609375, 356.3636363636364, 357.2727355957031, 326.3636474609375, 427.27272727272725,
+                   326.3636474609375, 326.3636363636364, 246.36363636363637, 326.3636363636364, 326.3636474609375,
+                   286.3636474609375, 246.3636474609375, 286.3636474609375, 286.3636474609375, 326.3636474609375,
+                   326.3636474609375, 326.3636474609375]
+
+        exp_max = np.array(raw_max)
+        delta = abs(exp_max - nu_max)
+        delta[np.isnan(delta)] = 0
+        self.assertTrue((delta < 0.0001).all())
