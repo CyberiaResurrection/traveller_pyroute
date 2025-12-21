@@ -40,6 +40,7 @@ class ApproximateShortestPathForestUnified:
     def lower_bound(self, source, target) -> float:
         raw = np.abs(self._distances[source, :] - self._distances[target, :])
         raw = raw[~np.isinf(raw)]
+        raw = raw[~np.isnan(raw)]
         if 0 == len(raw):
             return 0
         return np.max(raw)
@@ -76,9 +77,9 @@ class ApproximateShortestPathForestUnified:
         return result, result.all(), result.any()
 
     def update_edges(self, edges: list[tuple[int, int]]) -> None:
-        dropnodes = set()
+        dropnodes = False  # pragma: no mutate
         dropspecific = []
-        tree_dex = np.array(list(range(self._num_trees)), dtype=int)
+        tree_dex = np.array(list(range(self._num_trees)))
         i: int
         min_cost: np.ndarray[float]
         shelf: tuple[np.ndarray[int], np.ndarray[float]]
@@ -89,9 +90,10 @@ class ApproximateShortestPathForestUnified:
             targdex: int = None  # deliberately invalid target index to trip an IndexError as fall-back  # pragma: no mutate
             left = item[0]
             right = item[1]
-            leftdist = self._distances[left, :]
-            rightdist = self._distances[right, :]
-            rightdist[np.isinf(rightdist)] = 0
+            leftdist = self._distances[left, :].copy()
+            rightdist = self._distances[right, :].copy()
+            leftdist[np.isinf(leftdist)] = 0  # pragma: no mutate
+            rightdist[np.isinf(rightdist)] = 0  # pragma: no mutate
             shelf = self._graph._arcs[left]
             for i in range(len(shelf[0])):
                 if shelf[0][i] == right:
@@ -113,20 +115,15 @@ class ApproximateShortestPathForestUnified:
 
             # If that bound no longer holds, it's due to the edge (u, v) having its weight decreased during pathfinding.
             # Tag each incident node as needing updates.
-            maxdelta = delta[0]
-            for i in range(1, len(delta)):
-                maxdelta = max(maxdelta, delta[i])
-
-            if maxdelta >= weight:
-                dropnodes.add(left)
-                dropnodes.add(right)
+            if np.max(delta) >= weight:
+                dropnodes = True
                 overdrive = tree_dex[delta >= weight]
                 for i in overdrive:
                     dropspecific[i].add(left)
                     dropspecific[i].add(right)
 
         # if no nodes are to be dropped, nothing to do - bail out
-        if 0 == len(dropnodes):
+        if not dropnodes:
             return
 
         # Now we're updating at least one tree, grab the current min-cost vector to feed into implicit-dijkstra
@@ -136,7 +133,7 @@ class ApproximateShortestPathForestUnified:
         # dijkstra to update the approx-SP tree/forest.  Some nodes in dropnodes may well be SP descendants of others,
         # but it wasn't worth the time or complexity cost to filter them out here.
         for i in range(self._num_trees):
-            if 0 == len(dropspecific[i]):
+            if 0 == len(dropspecific[i]):  # pragma: no mutate
                 continue
             distances = self._distances[:, i]
             seeds = dropspecific[i]
