@@ -91,7 +91,7 @@ class ApproximateShortestPathForestUnified:
         for _ in range(self._num_trees):
             dropspecific.append(set())
         for item in edges:
-            targdex: int = 'a'  # deliberately invalid target index to trip an IndexError as fall-back
+            targdex: int = None  # deliberately invalid target index to trip an IndexError as fall-back  # pragma: no mutate
             left = item[0]
             right = item[1]
             leftdist = self._distances[left, :]
