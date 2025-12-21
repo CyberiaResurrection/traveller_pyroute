@@ -9,7 +9,7 @@ from typing import Any
 import numpy as np
 from PyRoute.Star import Star
 from PyRoute.Pathfinding.DistanceGraph import DistanceGraph
-from PyRoute.Pathfinding.single_source_dijkstra import implicit_shortest_path_dijkstra_distance_graph, explicit_shortest_path_dijkstra_distance_graph
+from PyRoute.Pathfinding.single_source_dijkstra import implicit_shortest_path_dijkstra_distance_graph
 
 float64max = np.finfo(np.float64).max
 
@@ -35,11 +35,9 @@ class ApproximateShortestPathForestUnified:
         for i in range(self._num_trees):
             raw_seeds = self._seeds[i] if isinstance(self._seeds[i], list) else list(self._seeds[i].values())
             self._distances[raw_seeds, i] = 0
-            result = implicit_shortest_path_dijkstra_distance_graph(self._graph, self._source,
-                                                                                   self._distances[:, i],
-                                                                                   seeds=raw_seeds,
-                                                                                   min_cost=min_cost,  # pragma: no mutate
-                                                                                   divisor=self._divisor)
+            distances = self._distances[:, i]
+            max_labels = None
+            result = self._dijkstra(distances, max_labels, min_cost, raw_seeds)
             self._distances[:, i], self._max_labels[:, i], _ = result
 
     def lower_bound(self, source, target) -> float:
@@ -143,11 +141,11 @@ class ApproximateShortestPathForestUnified:
         for i in range(self._num_trees):
             if 0 == len(dropspecific[i]):
                 continue
-            self._distances[:, i], _, self._max_labels[:, i], _ = explicit_shortest_path_dijkstra_distance_graph(
-                                                                  self._graph, self._source,
-                                                                  distance_labels=self._distances[:, i],
-                                                                  seeds=dropspecific[i], divisor=self._divisor,
-                                                                  min_cost=min_cost, max_labels=self._max_labels[:, i])
+            distances = self._distances[:, i]
+            seeds = dropspecific[i]
+            max_labels = self._max_labels[:, i]
+            result = self._dijkstra(distances, max_labels, min_cost, seeds)
+            self._distances[:, i], self._max_labels[:, i], _ = result
 
     def expand_forest(self, nu_seeds) -> None:
         raw_seeds = nu_seeds if isinstance(nu_seeds, list) else list(nu_seeds.values())
@@ -155,13 +153,7 @@ class ApproximateShortestPathForestUnified:
         nu_distances[raw_seeds] = 0
         max_labels = None
         min_cost = None
-        result = implicit_shortest_path_dijkstra_distance_graph(
-                                                                self._graph, self._source,
-                                                                distance_labels=nu_distances,
-                                                                seeds=raw_seeds,
-                                                                divisor=self._divisor,
-                                                                min_cost=min_cost,
-                                                                max_labels=max_labels)
+        result = self._dijkstra(nu_distances, max_labels, min_cost, raw_seeds)
         nu_distances, nu_max_labels, _ = result
         result = np.zeros((self._graph_len, 1), dtype=float)
         result[:, 0] = list(nu_distances)
@@ -170,6 +162,16 @@ class ApproximateShortestPathForestUnified:
         self._distances = np.append(self._distances, result, 1)
         self._max_labels = np.append(self._distances, maxresult, 1)
         self._num_trees += 1
+
+    def _dijkstra(self, distances, max_labels, min_cost, seeds):
+        result = implicit_shortest_path_dijkstra_distance_graph(
+            self._graph, self._source,
+            distance_labels=distances,
+            seeds=seeds,
+            divisor=self._divisor,
+            min_cost=min_cost,  # pragma: no mutate
+            max_labels=max_labels)  # pragma: no mutate
+        return result
 
     def _get_sources(self, graph, source, sources):
         seeds = None  # pragma: no mutate
