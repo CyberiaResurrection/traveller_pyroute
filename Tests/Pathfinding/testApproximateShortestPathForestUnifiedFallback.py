@@ -538,3 +538,71 @@ class testApproximateShortestPathForestUnifiedFallback(baseTest):
         with patch.object(shortest_path_tree, '_dijkstra', return_value=retval) as mock_dijkstra:
             shortest_path_tree.update_edges(edges)
             mock_dijkstra.assert_called()
+
+    def test_expand_forest_1(self) -> None:
+        args = self._make_args()
+        sourcefile = self.unpack_filename('DeltaFiles/Zarushagar-Ibara.sec')
+        readparms = ReadSectorOptions(sectors=[sourcefile], pop_code=args.pop_code, ru_calc=args.ru_calc,
+                                      route_reuse=args.route_reuse, trade_choice=args.routes, route_btn=args.route_btn,
+                                      mp_threads=args.mp_threads, debug_flag=args.debug_flag, fix_pop=False,
+                                      deep_space={}, map_type=args.map_type)
+
+        galaxy = Galaxy(min_btn=15, max_jump=4)
+        galaxy.read_sectors(readparms)
+        galaxy.generate_routes()
+        galaxy.trade.calculate_components()
+        landmarks, component_landmarks = galaxy.trade.get_landmarks()
+        shortest_path_tree = ApproximateShortestPathForestUnified(0, galaxy.stars, 0.1, sources=landmarks)
+        self.assertEqual(4, shortest_path_tree.num_trees)
+        zero_label = shortest_path_tree._max_labels[0, :]
+        self.assertEqual([138.18182373046875, 319.0909118652344, 132.72727966308594, 167.27273559570312], zero_label.tolist())
+
+        shortest_path_tree.expand_forest([11])
+        self.assertEqual(5, shortest_path_tree.num_trees)
+
+        zero_dist = shortest_path_tree.distances[0, :]
+        five_dist = shortest_path_tree.distances[5, :]
+        eleven_dist = shortest_path_tree.distances[11, :]
+        self.assertEqual([180.0, 328.18182373046875, 157.27273559570312, 0.0, 150.00001525878906], zero_dist.tolist())
+        self.assertEqual([131.8181915283203, 280.0, 109.09091186523438, 49.090911865234375, 105.45455169677734], five_dist.tolist())
+        self.assertEqual([107.2727279663086, 176.3636474609375, 150.0, 150.0, 0.0],
+                         eleven_dist.tolist())
+
+        zero_label = shortest_path_tree._max_labels[0, :]
+        self.assertEqual([138.18182373046875, 319.0909118652344, 132.72727966308594, 167.27273559570312, 155.4545440673828],
+                         zero_label.tolist())
+
+    def test_expand_forest_2(self) -> None:
+        args = self._make_args()
+        sourcefile = self.unpack_filename('DeltaFiles/Zarushagar-Ibara.sec')
+        readparms = ReadSectorOptions(sectors=[sourcefile], pop_code=args.pop_code, ru_calc=args.ru_calc,
+                                      route_reuse=args.route_reuse, trade_choice=args.routes, route_btn=args.route_btn,
+                                      mp_threads=args.mp_threads, debug_flag=args.debug_flag, fix_pop=False,
+                                      deep_space={}, map_type=args.map_type)
+
+        galaxy = Galaxy(min_btn=15, max_jump=4)
+        galaxy.read_sectors(readparms)
+        galaxy.generate_routes()
+        galaxy.trade.calculate_components()
+        landmarks, component_landmarks = galaxy.trade.get_landmarks()
+        shortest_path_tree = ApproximateShortestPathForestUnified(0, galaxy.stars, 0.1, sources=landmarks)
+        self.assertEqual(4, shortest_path_tree.num_trees)
+        zero_label = shortest_path_tree._max_labels[0, :]
+        self.assertEqual([138.18182373046875, 319.0909118652344, 132.72727966308594, 167.27273559570312], zero_label.tolist())
+
+        nu_seeds = {0: 11}
+        shortest_path_tree.expand_forest(nu_seeds)
+        self.assertEqual(5, shortest_path_tree.num_trees)
+
+        zero_dist = shortest_path_tree.distances[0, :]
+        five_dist = shortest_path_tree.distances[5, :]
+        eleven_dist = shortest_path_tree.distances[11, :]
+        self.assertEqual([180.0, 328.18182373046875, 157.27273559570312, 0.0, 150.00001525878906], zero_dist.tolist())
+        self.assertEqual([131.8181915283203, 280.0, 109.09091186523438, 49.090911865234375, 105.45455169677734], five_dist.tolist())
+        self.assertEqual([107.2727279663086, 176.3636474609375, 150.0, 150.0, 0.0],
+                         eleven_dist.tolist())
+
+        zero_label = shortest_path_tree._max_labels[0, :]
+        self.assertEqual([138.18182373046875, 319.0909118652344, 132.72727966308594, 167.27273559570312, 155.4545440673828],
+                         zero_label.tolist())
+>>>>>>> 0e7f8ee31 (Squash more timeout mutants in ApproximateShortestPathForestUnifiedFallback)

@@ -42,8 +42,8 @@ class DeltaGalaxy(Galaxy):
 
             # once all that's done, load up the stars
             for line in sector.lines:
-                if line.startswith('#') or len(line) < 20:
-                    continue
+                if line.startswith('#') or len(line) < 20:  # pragma: no mutate
+                    continue  # pragma: no mutate
                 star = Star.parse_line_into_star(line, sec, pop_code, ru_calc)
                 if star:
                     star_counter = self.add_star_to_galaxy(star, star_counter, sec)

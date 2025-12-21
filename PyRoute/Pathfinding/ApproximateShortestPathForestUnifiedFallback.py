@@ -143,18 +143,15 @@ class ApproximateShortestPathForestUnified:
 
     def expand_forest(self, nu_seeds) -> None:
         raw_seeds = nu_seeds if isinstance(nu_seeds, list) else list(nu_seeds.values())
-        nu_distances = np.ones((self._graph_len)) * float('+inf')
+        nu_distances = np.ones((self._graph_len)) * float('+inf')  # pragma: no mutate
         nu_distances[raw_seeds] = 0
-        max_labels = None
-        min_cost = None
-        result = self._dijkstra(nu_distances, max_labels, min_cost, raw_seeds)
-        nu_distances, nu_max_labels, _ = result
-        result = np.zeros((self._graph_len, 1), dtype=float)
+        nu_distances, nu_max_labels, _ = self._dijkstra(nu_distances, None, None, raw_seeds)
+        result = np.zeros((self._graph_len, 1))
         result[:, 0] = list(nu_distances)
-        maxresult = np.zeros((self._graph_len, 1), dtype=float)
+        maxresult = np.zeros((self._graph_len, 1))
         maxresult[:, 0] = list(nu_max_labels)
         self._distances = np.append(self._distances, result, 1)
-        self._max_labels = np.append(self._distances, maxresult, 1)
+        self._max_labels = np.append(self._max_labels, maxresult, 1)
         self._num_trees += 1
 
     def _dijkstra(self, distances, max_labels, min_cost, seeds):
