@@ -153,10 +153,16 @@ class ApproximateShortestPathForestUnified:
         raw_seeds = nu_seeds if isinstance(nu_seeds, list) else list(nu_seeds.values())
         nu_distances = np.ones((self._graph_len)) * float('+inf')
         nu_distances[raw_seeds] = 0
-        nu_distances, nu_max_labels, _ = implicit_shortest_path_dijkstra_distance_graph(self._graph, self._source,
-                                                                nu_distances,
+        max_labels = None
+        min_cost = None
+        result = implicit_shortest_path_dijkstra_distance_graph(
+                                                                self._graph, self._source,
+                                                                distance_labels=nu_distances,
                                                                 seeds=raw_seeds,
-                                                                divisor=self._divisor)
+                                                                divisor=self._divisor,
+                                                                min_cost=min_cost,
+                                                                max_labels=max_labels)
+        nu_distances, nu_max_labels, _ = result
         result = np.zeros((self._graph_len, 1), dtype=float)
         result[:, 0] = list(nu_distances)
         maxresult = np.zeros((self._graph_len, 1), dtype=float)
