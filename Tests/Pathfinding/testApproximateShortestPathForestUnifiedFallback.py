@@ -6,6 +6,7 @@ Created on Dec 21, 2025
 import logging
 
 from numpy import dtype
+import numpy as np
 
 from PyRoute import Star
 from PyRoute.AreaItems.Galaxy import Galaxy
@@ -313,3 +314,25 @@ class testApproximateShortestPathForestUnifiedFallback(baseTest):
         self.assertEqual(0.0, lobound[3])
         self.assertEqual(0.0, lobound[4])
         self.assertEqual(0.0, lobound[5])
+
+    def test_triangle_upbound_1(self) -> None:
+        float64max = np.finfo(np.float64).max
+
+        args = self._make_args()
+        sourcefile = self.unpack_filename('DeltaFiles/Zarushagar-Ibara.sec')
+        readparms = ReadSectorOptions(sectors=[sourcefile], pop_code=args.pop_code, ru_calc=args.ru_calc,
+                                      route_reuse=args.route_reuse, trade_choice=args.routes, route_btn=args.route_btn,
+                                      mp_threads=args.mp_threads, debug_flag=args.debug_flag, fix_pop=False,
+                                      deep_space={}, map_type=args.map_type)
+
+        galaxy = Galaxy(min_btn=15, max_jump=1)
+        galaxy.read_sectors(readparms)
+
+        galaxy.generate_routes()
+        galaxy.trade.calculate_components()
+        landmarks, component_landmarks = galaxy.trade.get_landmarks()
+        shortest_path_tree = ApproximateShortestPathForestUnified(0, galaxy.stars, 0.1, sources=landmarks)
+        upbound = shortest_path_tree.triangle_upbound(0, 2)
+        self.assertEqual(508.99997825622563, upbound)
+        upbound = shortest_path_tree.triangle_upbound(1, 2)
+        self.assertEqual(float64max / 2, upbound)
