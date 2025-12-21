@@ -27,10 +27,10 @@ class ApproximateShortestPathForestUnified:
         self._seeds = seeds
         self._num_trees = num_trees
         self._graph_len = len(self._graph)
-        self._distances = np.ones((self._graph_len, self._num_trees), dtype=float, order='F') * float('+inf')
-        self._max_labels = np.ones((self._graph_len, self._num_trees), dtype=float) * float('+inf')
+        self._distances = np.ones((self._graph_len, self._num_trees), order='F') * float('+inf')    # pragma: no mutate
+        self._max_labels = np.ones((self._graph_len, self._num_trees)) * float('+inf')  # pragma: no mutate
 
-        min_cost = self._graph.min_cost(list(range(self._graph_len)), 0)
+        min_cost = self._graph.min_cost(self._source, True)  # pragma: no mutate
         # spin up initial distances
         for i in range(self._num_trees):
             raw_seeds = self._seeds[i] if isinstance(self._seeds[i], list) else list(self._seeds[i].values())
@@ -38,7 +38,7 @@ class ApproximateShortestPathForestUnified:
             result = implicit_shortest_path_dijkstra_distance_graph(self._graph, self._source,
                                                                                    self._distances[:, i],
                                                                                    seeds=raw_seeds,
-                                                                                   min_cost=min_cost,
+                                                                                   min_cost=min_cost,  # pragma: no mutate
                                                                                    divisor=self._divisor)
             self._distances[:, i], self._max_labels[:, i], _ = result
 
@@ -164,12 +164,14 @@ class ApproximateShortestPathForestUnified:
         self._num_trees += 1
 
     def _get_sources(self, graph, source, sources):
-        seeds = None
+        seeds = None  # pragma: no mutate
         num_trees = 1
         if isinstance(source, Star) and source.component is None:
             raise ValueError(
                 "Source node " + str(source) + " has undefined component.  Has calculate_components() been run?")
         if isinstance(source, int):
+            if source not in graph.nodes:
+                raise ValueError("Source node # " + str(source) + " not in source graph")
             if 'star' not in graph.nodes[source]:
                 raise ValueError("Source node # " + str(source) + " does not have star attribute")
             if graph.nodes[source]['star'].component is None:
@@ -179,10 +181,12 @@ class ApproximateShortestPathForestUnified:
             seeds = [[source]]
         if sources is not None:
             for src in sources:
-                if isinstance(src, Star) and sources[src].component is None:
+                if isinstance(src, Star) and src.component is None:
                     raise ValueError("Source node " + str(
-                        sources[src]) + " has undefined component.  Has calculate_components() been run?")
+                        src) + " has undefined component.  Has calculate_components() been run?")
                 if isinstance(src, int):
+                    if src not in graph.nodes:
+                        raise ValueError("Source node # " + str(src) + " not in source graph")
                     if 'star' not in graph.nodes[src]:
                         raise ValueError("Source node # " + str(src) + " does not have star attribute")
                     if graph.nodes[src]['star'].component is None:

@@ -39,7 +39,9 @@ class DistanceGraph(DistanceBase):
                 self._min_indirect[i] = min(self._min_cost[node_neighbours])
 
     def min_cost(self, target: int, indirect: bool = False) -> np.ndarray:
-        min_cost = copy.deepcopy(self._min_cost)
+        if not isinstance(target, int):
+            raise ValueError("Target node must be integer")
+        min_cost = copy.deepcopy(self._min_cost)  # pragma: no mutate
         min_cost[target] = 0
 
         if indirect is not True:
