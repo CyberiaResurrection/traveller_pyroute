@@ -164,6 +164,10 @@ class ApproximateShortestPathForestUnified:
         self._num_trees += 1
 
     def _dijkstra(self, distances, max_labels, min_cost, seeds):
+        assert isinstance(distances, np.ndarray)
+        assert isinstance(max_labels, (np.ndarray, type(None)))
+        assert isinstance(min_cost, (np.ndarray, type(None)))
+        assert isinstance(seeds, (list, set))
         result = implicit_shortest_path_dijkstra_distance_graph(
             self._graph, self._source,
             distance_labels=distances,
