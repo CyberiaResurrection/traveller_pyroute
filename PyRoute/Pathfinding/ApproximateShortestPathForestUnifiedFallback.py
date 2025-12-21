@@ -135,11 +135,7 @@ class ApproximateShortestPathForestUnified:
         for i in range(self._num_trees):
             if 0 == len(dropspecific[i]):  # pragma: no mutate
                 continue
-            distances = self._distances[:, i]
-            seeds = dropspecific[i]
-            max_labels = self._max_labels[:, i]
-            result = self._dijkstra(distances, max_labels, min_cost, seeds)
-            self._distances[:, i], self._max_labels[:, i], _ = result
+            self._distances[:, i], self._max_labels[:, i], _ = self._dijkstra(self._distances[:, i], self._max_labels[:, i], min_cost, dropspecific[i])
 
     def expand_forest(self, nu_seeds) -> None:
         raw_seeds = nu_seeds if isinstance(nu_seeds, list) else list(nu_seeds.values())
@@ -164,7 +160,7 @@ class ApproximateShortestPathForestUnified:
             distance_labels=distances,
             seeds=seeds,
             divisor=self._divisor,
-            min_cost=min_cost,  # pragma: no mutate
+            # min_cost=min_cost,  # pragma: no mutate
             max_labels=max_labels)  # pragma: no mutate
         return result
 

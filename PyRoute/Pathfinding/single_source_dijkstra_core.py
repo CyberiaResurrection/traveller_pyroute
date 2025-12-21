@@ -63,7 +63,6 @@ def dijkstra_core(arcs: cython.list[tuple[cnp.ndarray[cython.int], cnp.ndarray[c
 
     while 0 < heap.size():
         result = heap.popmin()
-        diagnostics['nodes_processed'] += 1
         dist_tail = result.act_wt
         tail = result.act_nod
 

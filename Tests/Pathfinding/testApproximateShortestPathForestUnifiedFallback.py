@@ -305,7 +305,7 @@ class testApproximateShortestPathForestUnifiedFallback(baseTest):
 
         dijkstra_patch = 'PyRoute.Pathfinding.ApproximateShortestPathForestUnifiedFallback.ApproximateShortestPathForestUnified._dijkstra'
 
-        retval = (None, None)
+        retval = (None, None, None)
         with patch(dijkstra_patch, return_value=retval) as mock_method:
             ApproximateShortestPathForestUnified(0, galaxy.stars, 0.1)
             mock_method.assert_called_once()
@@ -499,7 +499,7 @@ class testApproximateShortestPathForestUnifiedFallback(baseTest):
         landmarks, component_landmarks = galaxy.trade.get_landmarks()
         shortest_path_tree = ApproximateShortestPathForestUnified(0, galaxy.stars, 0.1, sources=landmarks)
         galaxy.stars[0][1]['weight'] = 21.5
-        retval = (shortest_path_tree._distances[:, 0], shortest_path_tree._max_labels[:, 0])
+        retval = (shortest_path_tree._distances[:, 0], shortest_path_tree._max_labels[:, 0], None)
         shortest_path_tree.lighten_edge(0, 1, galaxy.stars[0][1]['weight'])
         with patch.object(shortest_path_tree, '_dijkstra', return_value=retval) as mock_method:
             edges = [(1, 0)]
@@ -622,22 +622,40 @@ class testApproximateShortestPathForestUnifiedFallback(baseTest):
 
         nu_distances = np.ones((shortest_path_tree._graph_len)) * float('+inf')
         nu_max = np.ones((shortest_path_tree._graph_len)) * float('+inf')
-        nu_min_cost = shortest_path_tree._graph.min_cost(0)
-        seeds = [0]
+        nu_min_cost = shortest_path_tree._graph.min_cost(0, indirect=True)
+        seeds = [0, 36]
         nu_distances[0] = 0
+        nu_distances[36] = 0
         nu_weight = 54 / 1.2
 
-        nu_distances, nu_max = shortest_path_tree._dijkstra(nu_distances, nu_max, nu_min_cost, seeds)
+        nu_distances, nu_max, diagnostics = shortest_path_tree._dijkstra(nu_distances, nu_max, nu_min_cost, seeds)
+        self.assertEqual({'nodes_exceeded': 44, 'nodes_min_exceeded': 0, 'nodes_processed': 37, 'nodes_queued': 81,
+                          'nodes_tailed': 929}, diagnostics)
         shortest_path_tree.lighten_edge(0, 5, nu_weight)
-        nu_distances, nu_max = shortest_path_tree._dijkstra(nu_distances, nu_max, nu_min_cost, seeds)
-        raw_max = [173.63636363636363, 286.3636363636364, 326.3636363636364, 326.3636363636364, 326.3636363636364,
-                   200.90909090909088, 286.3636363636364, 326.3636474609375, 246.3636474609375, 599.090909090909,
-                   573.6363636363636, 642.7272727272727, 326.3636363636364, 326.3636474609375, 246.36363636363637,
-                   286.3636474609375, 427.2727355957031, 427.27272727272725, 357.27272727272725, 246.3636474609375,
-                   286.3636474609375, 356.3636363636364, 357.2727355957031, 326.3636474609375, 427.27272727272725,
-                   326.3636474609375, 326.3636363636364, 246.36363636363637, 326.3636363636364, 326.3636474609375,
-                   286.3636474609375, 246.3636474609375, 286.3636474609375, 286.3636474609375, 326.3636474609375,
-                   326.3636474609375, 326.3636474609375]
+        nu_distances, nu_max, diagnostics = shortest_path_tree._dijkstra(nu_distances, nu_max, nu_min_cost, seeds)
+        self.assertEqual({'nodes_exceeded': 1, 'nodes_min_exceeded': 0, 'nodes_processed': 6, 'nodes_queued': 7,
+                          'nodes_tailed': 146}, diagnostics)
+        raw_dist = [0.0, 142.72727966308594, 140.90908813476562, 140.90908813476562, 148.18182373046875,
+                    40.90909194946289, 106.36363983154297, 130.0, 64.54545593261719, 108.18182373046875,
+                    110.0, 104.54545593261719, 104.54545593261719, 130.0, 83.63636779785156,
+                    86.36363983154297, 110.90909576416016, 80.90909576416016, 79.09091186523438, 155.4545440673828,
+                    152.72727966308594, 111.81818389892578, 63.6363639831543, 103.63636779785156, 43.6363639831543,
+                    92.7272720336914, 40.90909194946289, 125.45455169677734, 63.6363639831543, 92.7272720336914,
+                    153.63636779785156, 104.54545593261719, 81.81818389892578, 63.6363639831543, 40.90909194946289,
+                    47.272727966308594, 0]
+        exp_dist = np.array(raw_dist)
+        delta = abs(exp_dist - nu_distances)
+        delta[np.isnan(delta)] = 0
+        self.assertTrue((delta < 0.0001).all())
+
+        raw_max = [167.27273559570312, 167.27273559570312, 153.63636779785156, 153.63636779785156, 153.63636779785156,
+                   155.4545440673828, 155.4545440673828, 153.63636779785156, 155.4545440673828, 167.27273559570312,
+                   167.27273559570312, 192.72727966308594, 153.63636779785156, 153.63636779785156, 155.4545440673828,
+                   167.27273559570312, 167.27273559570312, 192.72727966308594, 192.72727966308594, 152.72727966308594,
+                   167.27273559570312, 167.27273559570312, 245.45455932617188, 192.72727966308594, 243.63636779785156,
+                   192.72727966308594, 245.45455932617188, 167.27273559570312, 180.0, 192.72727966308594,
+                   148.18182373046875, 167.27273559570312, 167.27273559570312, 167.27273559570312, 167.27273559570312,
+                   167.27273559570312, 167.27273559570312]
 
         exp_max = np.array(raw_max)
         delta = abs(exp_max - nu_max)

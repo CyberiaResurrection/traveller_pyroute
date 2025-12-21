@@ -29,7 +29,6 @@ def dijkstra_core(arcs, distance_labels, divisor, seeds, max_neighbour_labels, m
 
     while heap:
         dist_tail, tail = heapq.heappop(heap)
-        diagnostics['nodes_processed'] += 1
 
         if dist_tail > distance_labels[tail] or dist_tail + min_cost[tail] > max_neighbour_labels[tail]:  # pragma: no mutate
             # Since we've just dequeued a bad node (distance exceeding its current label, or too close to max-label),
