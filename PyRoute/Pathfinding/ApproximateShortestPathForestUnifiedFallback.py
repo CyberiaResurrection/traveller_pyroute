@@ -67,7 +67,7 @@ class ApproximateShortestPathForestUnified:
 
     def triangle_upbound(self, source: int, target: int) -> float:
         raw = self._distances[source, :] + self._distances[target, :]
-        raw = raw[raw != float('+inf')]
+        raw = raw[raw != float('+inf')]  # pragma: no mutate
 
         if 0 == len(raw):
             return float64max / 2
@@ -84,7 +84,6 @@ class ApproximateShortestPathForestUnified:
         dropnodes = set()
         dropspecific = []
         tree_dex = np.array(list(range(self._num_trees)), dtype=int)
-        targdex: int = -1
         i: int
         min_cost: np.ndarray[float]
         shelf: tuple[np.ndarray[int], np.ndarray[float]]
@@ -92,16 +91,19 @@ class ApproximateShortestPathForestUnified:
         for _ in range(self._num_trees):
             dropspecific.append(set())
         for item in edges:
+            targdex: int = 'a'  # deliberately invalid target index to trip an IndexError as fall-back
             left = item[0]
             right = item[1]
             leftdist = self._distances[left, :]
             rightdist = self._distances[right, :]
             rightdist[np.isinf(rightdist)] = 0
             shelf = self._graph._arcs[left]
-            for i in range(len(shelf)):
+            for i in range(len(shelf[0])):
                 if shelf[0][i] == right:
                     targdex = i
                     break
+            if not isinstance(targdex, int):
+                raise ValueError("Selected target index out of range")
             weight = shelf[1][targdex]
             delta = abs(leftdist - rightdist)
             # Given distance labels, L, on nodes u and v, assuming u's label being smaller,

@@ -122,7 +122,6 @@ class ApproximateShortestPathForestUnified:
         dropnodes = set()
         dropspecific = []
         tree_dex = list(range(self._num_trees))
-        targdex: cython.int = -1
         i: cython.int
         min_cost: cnp.ndarray[cython.float]
         shelf: tuple[cnp.ndarray[cython.int], cnp.ndarray[cython.float]]
@@ -132,16 +131,19 @@ class ApproximateShortestPathForestUnified:
         for _ in tree_dex:
             dropspecific.append([])
         for item in edges:
+            targdex: cython.int = -1
             left = item[0]
             right = item[1]
             leftdist = self._distances[left, :]
             rightdist = self._distances[right, :]
 
             shelf = arcs[left]
-            for i in range(len(shelf)):
+            for i in range(len(shelf[0])):
                 if shelf[0][i] == right:
                     targdex = i
                     break
+            if 0 > targdex:
+                raise ValueError("Selected target index out of range")
             weight = shelf[1][targdex]
             weight_sq = weight * weight
             # Given distance labels, L, on nodes u and v, assuming u's label being smaller,
