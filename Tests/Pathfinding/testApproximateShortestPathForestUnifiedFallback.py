@@ -4,6 +4,7 @@ Created on Dec 21, 2025
 @author: CyberiaResurrection
 """
 import logging
+from unittest.mock import patch
 
 from numpy import dtype
 import numpy as np
@@ -287,6 +288,32 @@ class testApproximateShortestPathForestUnifiedFallback(baseTest):
         except ValueError as e:
             msg = str(e)
         self.assertEqual(exp_msg, msg)
+
+    def test_init_11(self) -> None:
+        args = self._make_args()
+        sourcefile = self.unpack_filename('DeltaFiles/Zarushagar-Ibara.sec')
+        readparms = ReadSectorOptions(sectors=[sourcefile], pop_code=args.pop_code, ru_calc=args.ru_calc,
+                                      route_reuse=args.route_reuse, trade_choice=args.routes, route_btn=args.route_btn,
+                                      mp_threads=args.mp_threads, debug_flag=args.debug_flag, fix_pop=False,
+                                      deep_space={}, map_type=args.map_type)
+
+        galaxy = Galaxy(min_btn=15, max_jump=4)
+        galaxy.read_sectors(readparms)
+
+        galaxy.generate_routes()
+        galaxy.trade.calculate_components()
+
+        dijkstra_patch = 'PyRoute.Pathfinding.ApproximateShortestPathForestUnifiedFallback.ApproximateShortestPathForestUnified._dijkstra'
+
+        retval = (None, None)
+        with patch(dijkstra_patch, return_value=retval) as mock_method:
+            ApproximateShortestPathForestUnified(0, galaxy.stars, 0.1)
+            mock_method.assert_called_once()
+            calls = mock_method.call_args.args
+            self.assertIsNone(calls[1])
+            self.assertIsNotNone(calls[2])
+            self.assertIsInstance(calls[2], np.ndarray)
+            self.assertEqual([0], calls[3])
 
     def test_lower_bound_bulk_1(self) -> None:
         args = self._make_args()

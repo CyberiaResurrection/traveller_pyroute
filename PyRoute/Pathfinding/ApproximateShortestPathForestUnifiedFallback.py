@@ -35,10 +35,7 @@ class ApproximateShortestPathForestUnified:
         for i in range(self._num_trees):
             raw_seeds = self._seeds[i] if isinstance(self._seeds[i], list) else list(self._seeds[i].values())
             self._distances[raw_seeds, i] = 0
-            distances = self._distances[:, i]
-            max_labels = None
-            result = self._dijkstra(distances, max_labels, min_cost, raw_seeds)
-            self._distances[:, i], self._max_labels[:, i], _ = result
+            self._distances[:, i], self._max_labels[:, i], _ = self._dijkstra(self._distances[:, i], None, min_cost, raw_seeds)
 
     def lower_bound(self, source, target) -> float:
         raw = np.abs(self._distances[source, :] - self._distances[target, :])
