@@ -276,7 +276,11 @@ class StatCalculation(object):
 
     @staticmethod
     def trade_to_btn(trade) -> int:
-        if trade == 0:
+        if trade < 1:
             return 0
-        raw_btn = round(math.log(trade, 10), 2)
-        return int(raw_btn)
+        trade = int(trade)
+        baselog = int(math.log10(trade))
+        mult = trade * pow(10, -1 * baselog)
+        if 5.0 > mult:
+            return 2 * baselog
+        return 2 * baselog + 1
