@@ -1,0 +1,58 @@
+"""
+Created on Aug 23, 2025
+
+@author: CyberiaResurrection
+"""
+from PyRoute import StatCalculation
+from PyRoute.Calculation.RouteCalculation import RouteCalculation
+from Tests.baseTest import baseTest
+
+
+class testRouteCalculation(baseTest):
+
+    def setUp(self) -> None:
+        self.reset_logging()
+
+    def test_calc_trade_round_trip_with_trade_to_btn(self) -> None:
+        for btn in range(30):
+            with self.subTest(btn):
+                trade = RouteCalculation.calc_trade(btn)
+                new_btn = StatCalculation.trade_to_btn(trade)
+
+                self.assertEqual(btn, new_btn, "BTN " + str(btn) + " does not round trip thru trade " + str(trade))
+
+    def test_trade_to_btn_round_trip_with_calc_trade(self) -> None:
+        cases = [
+            (-1, 0, 0),
+            (4, 0, 0),
+            (5, 1, 5),
+            (6, 1, 5),
+            (9, 1, 5),
+            (10, 2, 10),
+            (11, 2, 10),
+            (49, 2, 10),
+            (50, 3, 50),
+            (51, 3, 50),
+            (99, 3, 50),
+            (100, 4, 100),
+            (101, 4, 100),
+            (499, 4, 100),
+            (500, 5, 500),
+            (501, 5, 500),
+            (999, 5, 500),
+            (1000, 6, 1000),
+            (1001, 6, 1000),
+            (4999, 6, 1000),
+            (5000, 7, 5000),
+            (5001, 7, 5000),
+            (9999, 7, 5000),
+            (10000, 8, 10000),
+            (10001, 8, 10000)
+        ]
+
+        for cred_in, btn_in, cred_out in cases:
+            with self.subTest(cred_in):
+                btn_check = StatCalculation.trade_to_btn(cred_in)
+                self.assertEqual(btn_in, btn_check, "Unexpected received BTN")
+                cred_check = RouteCalculation.calc_trade(btn_check)
+                self.assertEqual(cred_out, cred_check, "Unexpected credit value")
