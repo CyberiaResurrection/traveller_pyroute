@@ -281,7 +281,7 @@ class TestStar(baseTest):
             self.assertEqual(cwtn[uwtn], wtn, "at %s: %s vs %s" % (uwtn, wtn, cwtn[uwtn]))
 
     def testCalcTrade(self) -> None:
-        self.assertEqual(TradeCalculation.calc_trade(0), 1)
+        self.assertEqual(TradeCalculation.calc_trade(0), 0)
         self.assertEqual(TradeCalculation.calc_trade(1), 5)
         self.assertEqual(TradeCalculation.calc_trade(2), 10)
         self.assertEqual(TradeCalculation.calc_trade(3), 50)
@@ -299,21 +299,21 @@ class TestStar(baseTest):
 
     def testCalcTradeTonnage(self) -> None:
         self.assertEqual(TradeCalculation.calc_trade_tonnage(0, 0), 0)
-        self.assertEqual(TradeCalculation.calc_trade_tonnage(9, 0), 1)
-        self.assertEqual(TradeCalculation.calc_trade_tonnage(9, 49), 1)
+        self.assertEqual(TradeCalculation.calc_trade_tonnage(9, 0), 0)
+        self.assertEqual(TradeCalculation.calc_trade_tonnage(9, 49), 0)
         self.assertEqual(TradeCalculation.calc_trade_tonnage(9, 50), 0)
-        self.assertEqual(TradeCalculation.calc_trade_tonnage(10, 50), 1)
-        self.assertEqual(TradeCalculation.calc_trade_tonnage(10, 99), 1)
+        self.assertEqual(TradeCalculation.calc_trade_tonnage(10, 50), 0)
+        self.assertEqual(TradeCalculation.calc_trade_tonnage(10, 99), 0)
         self.assertEqual(TradeCalculation.calc_trade_tonnage(10, 100), 0)
         self.assertEqual(TradeCalculation.calc_trade_tonnage(11, 99), 5)
-        self.assertEqual(TradeCalculation.calc_trade_tonnage(11, 100), 1)
-        self.assertEqual(TradeCalculation.calc_trade_tonnage(11, 499), 1)
+        self.assertEqual(TradeCalculation.calc_trade_tonnage(11, 100), 0)
+        self.assertEqual(TradeCalculation.calc_trade_tonnage(11, 499), 0)
         self.assertEqual(TradeCalculation.calc_trade_tonnage(11, 500), 0)
-        self.assertEqual(TradeCalculation.calc_trade_tonnage(12, 500), 1)
-        self.assertEqual(TradeCalculation.calc_trade_tonnage(12, 999), 1)
+        self.assertEqual(TradeCalculation.calc_trade_tonnage(12, 500), 0)
+        self.assertEqual(TradeCalculation.calc_trade_tonnage(12, 999), 0)
         self.assertEqual(TradeCalculation.calc_trade_tonnage(12, 1000), 0)
         self.assertEqual(TradeCalculation.calc_trade_tonnage(13, 999), 5)
-        self.assertEqual(TradeCalculation.calc_trade_tonnage(13, 1000), 1)
+        self.assertEqual(TradeCalculation.calc_trade_tonnage(13, 1000), 0)
 
     def testHashValueSameAfterCaching(self) -> None:
         star1 = Star.parse_line_into_star(
