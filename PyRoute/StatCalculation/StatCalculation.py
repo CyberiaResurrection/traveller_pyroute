@@ -280,7 +280,21 @@ class StatCalculation(object):
             return 0
         trade = int(trade)
         baselog = int(math.log10(trade))
-        mult = trade * pow(10, -1 * baselog)
+        if 15 < baselog:
+            # handle cases where t < 10 ** baselog yet no floating-point difference under IEEE754 double precision
+            if pow(10, baselog) > trade:
+                baselog -= 1
+                mult = 5.0
+            # handle cases where t < 5 * 10 ** baselog yet no floating-point difference under IEEE754 double precision
+            elif 5 * pow(10, baselog) > trade:
+                mult = 4.999
+            else:
+                mult = 5.0
+        else:
+            mult = trade * pow(10, -1 * baselog)
+        if 1.0 > mult + 1e-16:  # needed for BTN 29/30 disambiguation
+            baselog -= 1
+            mult *= 10
         if 5.0 > mult:
             return 2 * baselog
         return 2 * baselog + 1
