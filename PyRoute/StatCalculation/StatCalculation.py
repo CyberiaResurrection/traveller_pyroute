@@ -37,7 +37,7 @@ class StatCalculation(object):
         self.logger.info('Calculating statistics for {:d} worlds'.format(len(self.galaxy.stars)))
         for sector in self.galaxy.sectors.values():
             for star in sector.worlds:
-                star.starportSize = max(self.trade_to_btn(star.tradeIn + star.tradeOver) - 5, 0)
+                star.starportSize = max(self.trade_to_btn(star.tradeIn + star.tradeOver) - 10, 0) // 2
                 star.uwpCodes['Starport Size'] = star.starportSize
                 # Budget in MCr
                 star.starportBudget = \

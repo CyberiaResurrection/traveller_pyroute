@@ -92,9 +92,7 @@ class testStatCalcRegression(baseTest):
                                         'O:Troj-3215': 1, 'Oc': 2, 'Pa': 10, 'Ph': 6, 'Pi': 9, 'Po': 20, 'Pr': 6,
                                         'Pz': 9, 'Ri': 9, 'RsA': 1, 'RsB': 1, 'Tapa2': 1, 'Tapa3': 1, 'Tapa4': 1,
                                         'Tapa6': 1, 'Tapa8': 1, 'Va': 15, 'Wa': 3})
-        expected['port_size'].update({0: 10, 3: 1, 4: 3, 5: 5, 6: 3, 7: 12, 8: 17, 9: 22, 10: 18, 11: 17, 12: 7, 13: 3,
-                                      14: 1, 15: 2, 16: 1, 'A': 22, 'B': 61, 'C': 18, 'D': 11,
-                                      'E': 8, 'X': 2})
+        expected['port_size'].update({0: 22, 1: 29, 2: 40, 3: 24, 4: 4, 5: 3, 'A': 22, 'B': 61, 'C': 18, 'D': 11, 'E': 8, 'X': 2})
         expected['primary_count'].update({'A': 3, 'F': 23, 'G': 43, 'K': 31, 'M': 22})
         expected['star_count'][1] = 74
         expected['star_count'][2] = 46

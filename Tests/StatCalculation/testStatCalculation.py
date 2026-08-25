@@ -425,12 +425,10 @@ class testStatCalculation(baseTest):
 
         exp_port_size = NoNoneDefaultDict(int)
         exp_port_size[0] = 9
-        exp_port_size[10] = 3
-        exp_port_size[11] = 4
-        exp_port_size[12] = 6
-        exp_port_size[13] = 5
-        exp_port_size[14] = 4
-        exp_port_size[15] = 6
+        exp_port_size[2] = 3
+        exp_port_size[3] = 10
+        exp_port_size[4] = 9
+        exp_port_size[5] = 6
         exp_port_size['A'] = 6
         exp_port_size['B'] = 22
         exp_port_size['C'] = 4
@@ -506,10 +504,10 @@ class testStatCalculation(baseTest):
                                      18: 1435.0, 19: 0, 20: 26.0, 21: 0, 22: 93.0, 23: 20.0, 24: 787.0, 25: 0,
                                      26: 1854.0, 27: 8.0, 28: 0, 29: 0, 30: 0, 31: 1.0, 32: 11.0, 33: 17.0, 34: 1309.0,
                                      35: 773.0, 36: 0}
-        expected_starport_sizes = {0: 13, 1: 10, 2: 13, 3: 13, 4: 12, 5: 13, 6: 12, 7: 11, 8: 14, 9: 14, 10: 0, 11: 14,
-                                   12: 11, 13: 0, 14: 11, 15: 13, 16: 0, 17: 15, 18: 15, 19: 0, 20: 12, 21: 0, 22: 14,
-                                   23: 12, 24: 15, 25: 0, 26: 15, 27: 11, 28: 10, 29: 0, 30: 0, 31: 10, 32: 12, 33: 12,
-                                   34: 15, 35: 15, 36: 0}
+        expected_starport_sizes = {0: 4, 1: 2, 2: 4, 3: 4, 4: 3, 5: 4, 6: 3, 7: 3, 8: 4, 9: 4, 10: 0, 11: 4,
+                                   12: 3, 13: 0, 14: 3, 15: 4, 16: 0, 17: 5, 18: 5, 19: 0, 20: 3, 21: 0, 22: 4,
+                                   23: 3, 24: 5, 25: 0, 26: 5, 27: 3, 28: 2, 29: 0, 30: 0, 31: 2, 32: 3, 33: 3,
+                                   34: 5, 35: 5, 36: 0}
         for starnum in expected_starport_budgets:
             budget_star = galaxy.stars.nodes[starnum]['star']
             self.assertEqual(expected_starport_budgets[starnum], budget_star.starportBudget,
