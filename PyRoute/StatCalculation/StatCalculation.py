@@ -37,7 +37,7 @@ class StatCalculation(object):
         self.logger.info('Calculating statistics for {:d} worlds'.format(len(self.galaxy.stars)))
         for sector in self.galaxy.sectors.values():
             for star in sector.worlds:
-                star.starportSize = max(self.trade_to_btn(star.tradeIn + star.tradeOver) - 5, 0)
+                star.starportSize = max(self.trade_to_btn(star.tradeIn + star.tradeOver) - 10, 0) // 2
                 star.uwpCodes['Starport Size'] = star.starportSize
                 # Budget in MCr
                 star.starportBudget = \
@@ -276,7 +276,18 @@ class StatCalculation(object):
 
     @staticmethod
     def trade_to_btn(trade) -> int:
-        if trade == 0:
+        if trade < 1:
             return 0
-        raw_btn = round(math.log(trade, 10), 2)
-        return int(raw_btn)
+        trade = int(trade)
+        baselog = int(math.log10(trade))
+        baseten = pow(10, baselog)
+        # handle cases where t < 10 ** baselog yet no floating-point difference under IEEE754 double precision
+        if baseten > trade:
+            baselog -= 1
+            return 2 * baselog + 1
+        # handle cases where t < 5 * 10 ** baselog
+        elif 5 * baseten > trade:
+            return 2 * baselog
+        # handle cases where t >= 5 * 10 ** baselog
+        else:
+            return 2 * baselog + 1

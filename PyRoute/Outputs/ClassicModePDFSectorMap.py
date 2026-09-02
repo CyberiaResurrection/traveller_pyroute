@@ -134,8 +134,9 @@ class ClassicModePDFSectorMap(PDFMap, SectorMap):
         trade = StatCalculation.trade_to_btn(data['trade']) - self.galaxy.min_btn
         if trade < 0:
             return None
+        trade = trade // 2
         if trade > 6:
-            logging.getLogger('PyRoute.Outputs.ClassicModePDFSectorMap').warning("trade calculated over %d" % (self.galaxy.min_btn + 6))
+            logging.getLogger('PyRoute.Outputs.ClassicModePDFSectorMap').warning("trade calculated over %d" % (self.galaxy.min_btn + 13))
             trade = 6
         trade_colour = trade_colours[trade]
         trade_string = "rgb" + str(trade_colour)

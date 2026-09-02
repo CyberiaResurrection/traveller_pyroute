@@ -213,6 +213,8 @@ class RouteCalculation(object):
         """
         Convert the BTN trade number to a credit value.
         """
+        if 0 == btn:
+            return 0
         trade = 10 ** ((btn - 1) // 2) * 5 if btn & 1 else 10 ** (btn // 2)
 
         return trade
