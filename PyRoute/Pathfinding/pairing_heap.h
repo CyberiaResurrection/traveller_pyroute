@@ -7,8 +7,8 @@ struct Item {
   double key = std::numeric_limits<double>::quiet_NaN();
   double augment = std::numeric_limits<double>::quiet_NaN();
   double dist = std::numeric_limits<double>::quiet_NaN();
-  long curnode = std::numeric_limits<long>::quiet_NaN()
-  long parent = std::numeric_limits<long>::quiet_NaN()
+  long curnode = std::numeric_limits<long>::quiet_NaN();
+  long parent_node = std::numeric_limits<long>::quiet_NaN();
   Item *child = nullptr;
   Item *sibling = nullptr;
   // For nonroots, points back at the `child` or `sibling` field that points at
@@ -45,10 +45,13 @@ public:
   Item DeleteMin(void);
 
   // Requires `key <= x->key`.
-  void DecreaseKey(Item x, double key);
+  void DecreaseKey(Item x, double augment, double dist);
 
   // O(n); for tests.
   std::size_t CountWhileCheckingInvariant() const;
+
+  // Is heap empty?
+  bool IsEmpty();
 
 private:
   Item *root_ = nullptr;

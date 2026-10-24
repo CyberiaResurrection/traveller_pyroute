@@ -1,11 +1,14 @@
 # distutils: language = c++
 # Thanks to @GamesByDavidE for providing this code
 
-from libcpp.vector cimport vector
+from libcpp cimport bool
 
-cdef extern from "pairing_heap.h" namespace "pairing_heap":
+cdef extern from "pairing_heap.h" namespace "":
     cdef struct Item:
-        double key;
+        double augment;
+        double dist;
+        int curnode;
+        int parent_node;
         Item *child;
         Item *sibling;
         Item *parent;
@@ -15,3 +18,4 @@ cdef extern from "pairing_heap.h" namespace "pairing_heap":
         void Insert(Item)
         Item DeleteMin()
         DecreaseKey(Item, double, double)
+        bool IsEmpty()

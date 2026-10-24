@@ -102,7 +102,7 @@ Item PairingHeap::DeleteMin() {
   return min;
 }
 
-void PairingHeap::DecreaseKey(Item x, double key, double augment, double dist) {
+void PairingHeap::DecreaseKey(Item x, double augment, double dist) {
   assert(root_ != nullptr);
   assert(IsRootOfTree(root_));
   assert(!std::isnan(augment));
@@ -121,6 +121,10 @@ void PairingHeap::DecreaseKey(Item x, double key, double augment, double dist) {
   Detach(parent);
   Attach(parent, Detach(&x->sibling));
   root_ = Link(root_, x);
+}
+
+bool PairingHeap::IsEmpty() {
+    return root_ == nullptr
 }
 
 namespace {
