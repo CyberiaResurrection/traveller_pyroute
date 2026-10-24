@@ -10,6 +10,7 @@ sources = [
     "single_source_dijkstra_core.py",
     "ApproximateShortestPathForestUnified.py",
     "minmaxheap.pyx",
+    "pairing_heap.pyx",
     "TradeCalculationRawRoutes.py",
 ]
 

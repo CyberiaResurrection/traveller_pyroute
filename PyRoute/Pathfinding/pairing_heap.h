@@ -1,0 +1,41 @@
+#pragma once
+#include <cstddef>
+#include <limits>
+
+// Heap item. Put extra fields here as needed.
+struct Item {
+  double key = std::numeric_limits<double>::quiet_NaN();
+  Item *child = nullptr;
+  Item *sibling = nullptr;
+  // For nonroots, points back at the `child` or `sibling` field that points at
+  // this.
+  Item *parent = nullptr;
+};
+
+// Pairing heap. Caller owns the items.
+class PairingHeap {
+public:
+  explicit PairingHeap() = default;
+
+  PairingHeap(const PairingHeap &) = delete;
+  PairingHeap &operator=(const PairingHeap &) = delete;
+  PairingHeap(PairingHeap &&) = default;
+  PairingHeap &operator=(PairingHeap &&) = default;
+
+  // Inserts the item `x`. Caller must not mutate the key or pointers directly
+  // as long as this heap contains `x`.
+  void Insert(Item x);
+
+  // Removes and returns one of the contained items with the minimum key. It
+  // will have null tree pointers.
+  Item DeleteMin(void);
+
+  // Requires `key <= x->key`.
+  void DecreaseKey(Item x, double key);
+
+  // O(n); for tests.
+  std::size_t CountWhileCheckingInvariant() const;
+
+private:
+  Item *root_ = nullptr;
+};
