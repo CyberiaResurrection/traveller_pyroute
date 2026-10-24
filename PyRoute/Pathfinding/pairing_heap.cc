@@ -32,7 +32,7 @@ Item Link(Item x, Item y) {
   assert(x != y);
   assert(IsRootOfTree(x));
   assert(IsRootOfTree(y));
-  if (y->key < x->key) {
+  if (y < x) {
     std::swap(x, y);
   }
   Attach(&y->sibling, Detach(&x->child));
@@ -102,12 +102,16 @@ Item PairingHeap::DeleteMin() {
   return min;
 }
 
-void PairingHeap::DecreaseKey(Item x, double key) {
+void PairingHeap::DecreaseKey(Item x, double key, double augment, double dist) {
   assert(root_ != nullptr);
   assert(IsRootOfTree(root_));
-  assert(!std::isnan(key));
-  assert(key <= x->key);
-  x->key = key;
+  assert(!std::isnan(augment));
+  assert(!std::isnan(dist));
+  assert(augment <= x->augment)
+  if augment == x->augment:
+    assert(dist <= x->dist)
+  x->augment = augment;
+  x->dist = dist;
   Item parent = x->parent;
   if (parent == nullptr) {
     assert(x == root_);
