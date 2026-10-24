@@ -5,11 +5,25 @@
 // Heap item. Put extra fields here as needed.
 struct Item {
   double key = std::numeric_limits<double>::quiet_NaN();
+  double augment = std::numeric_limits<double>::quiet_NaN();
+  double dist = std::numeric_limits<double>::quiet_NaN();
+  long curnode = std::numeric_limits<long>::quiet_NaN()
+  long parent = std::numeric_limits<long>::quiet_NaN()
   Item *child = nullptr;
   Item *sibling = nullptr;
   // For nonroots, points back at the `child` or `sibling` field that points at
   // this.
   Item *parent = nullptr;
+  bool operator>(Item const& other) const {
+    if (this->augment > other.augment) { return true; }
+    if (this->augment < other.augment) { return false; }
+    return this->dist > other.dist;
+  }
+  bool operator<(Item const& other) const {
+    if (this->augment < other.augment) { return true; }
+    if (this->augment > other.augment) { return false; }
+    return this->dist < other.dist;
+  }
 };
 
 // Pairing heap. Caller owns the items.
