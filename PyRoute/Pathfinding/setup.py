@@ -40,9 +40,9 @@ extensions = cythonize(
 )
 
 if sys.platform == "win32":
-    compile_args = ["/O2", "/DNDEBUG"]
+    compile_args = ["/O2"]
 else:
-    compile_args = ["-O3", "-DNDEBUG"]
+    compile_args = ["-O3"]
 
     # Enable only for a binary used on the same machine/CPU.
     if os.environ.get("CYTHON_NATIVE") == "1":
