@@ -18,5 +18,5 @@ cdef extern from "pairing_heap.h" namespace "":
         PairingHeap()
         void Insert(Item)
         Item DeleteMin()
-        DecreaseKey(Item, double, double)
+        void DecreaseKey(Item, double, double)
         bool IsEmpty()
