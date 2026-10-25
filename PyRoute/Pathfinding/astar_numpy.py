@@ -139,7 +139,7 @@ def astar_numpy_core(G_succ: cython.list[cython.tuple[cnp.ndarray[cython.int], c
     # The queue stores priority, cost to reach, node, and parent.
     # Comparisons are handled by astar_t directly.
     #queue: MinMaxHeap[astar_t] = MinMaxHeap[astar_t]()
-    queue: PairingHeap = PairingHeap()
+    queue = cython.declare(PairingHeap)
     queue.Insert({'augment': potentials_view[source], 'dist': 0.0, 'curnode': source, 'parent_node': ROOT_NODE})
 
     #while 0 < queue.size():

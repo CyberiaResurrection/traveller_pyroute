@@ -12,11 +12,12 @@ cdef extern from "pairing_heap.h" namespace "":
         long parent_node;
         Item *child;
         Item *sibling;
-        Item *parent;
+        Item **parent;
 
     cdef cppclass PairingHeap:
         PairingHeap()
-        void Insert(Item)
+        Item *Insert(Item)
         Item DeleteMin()
-        void DecreaseKey(Item, double, double)
+        void DecreaseKey(Item *, double, double)
+        size_t CountWhileCheckingInvariant()
         bool IsEmpty()
