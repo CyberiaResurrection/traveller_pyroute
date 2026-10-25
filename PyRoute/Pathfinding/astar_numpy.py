@@ -1,4 +1,5 @@
 # distutils: language = c++
+# distutils: sources = _pairing_heap.cc
 # cython: profile=True
 """
 Created on Feb 22, 2024
