@@ -17,12 +17,16 @@ struct Item {
   bool operator>(Item const& other) const {
     if (this->augment > other.augment) { return true; }
     if (this->augment < other.augment) { return false; }
-    return this->dist > other.dist;
+    if (this->dist > other.dist) { return true; }
+    if (this->dist < other.dist) { return false; }
+    return this->curnode > other.curnode;
   }
   bool operator<(Item const& other) const {
     if (this->augment < other.augment) { return true; }
     if (this->augment > other.augment) { return false; }
-    return this->dist < other.dist;
+    if (this->dist < other.dist) { return true; }
+    if (this->dist > other.dist) { return false; }
+    return this->curnode < other.curnode;
   }
 };
 
