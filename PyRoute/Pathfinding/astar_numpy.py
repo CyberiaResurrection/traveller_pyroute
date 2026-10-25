@@ -18,7 +18,8 @@ Compared to the ancestral networkx version of astar_path, this code:
 """
 import cython
 from cython.cimports.numpy import numpy as cnp
-from cython.cimports.minmaxheap import MinMaxHeap, astar_t
+# from cython.cimports.minmaxheap import MinMaxHeap, astar_t
+from cython.cimports.pairing_heap import PairingHeap, Item
 
 import networkx as nx
 import numpy as np
@@ -137,15 +138,17 @@ def astar_numpy_core(G_succ: cython.list[cython.tuple[cnp.ndarray[cython.int], c
 
     # The queue stores priority, cost to reach, node, and parent.
     # Comparisons are handled by astar_t directly.
-    queue: MinMaxHeap[astar_t] = MinMaxHeap[astar_t]()
-    queue.insert({'augment': potentials_view[source], 'dist': 0.0, 'curnode': source, 'parent': ROOT_NODE})
+    #queue: MinMaxHeap[astar_t] = MinMaxHeap[astar_t]()
+    queue: PairingHeap = PairingHeap()
+    queue.Insert({'augment': potentials_view[source], 'dist': 0.0, 'curnode': source, 'parent_node': ROOT_NODE})
 
-    while 0 < queue.size():
+    #while 0 < queue.size():
+    while not queue.IsEmpty():
         # Pop the smallest item from queue.
-        result: astar_t = queue.popmin()
+        result: Item = queue.DeleteMin()
         dist = result.dist
         curnode = result.curnode
-        parent = result.parent
+        parent = result.parent_node
         node_counter += 1
 
         if curnode == target:
@@ -200,7 +203,7 @@ def astar_numpy_core(G_succ: cython.list[cython.tuple[cnp.ndarray[cython.int], c
             if aug_wt > upbound:
                 continue
             distances_view[act_nod] = act_wt
-            queue.insert({'augment': aug_wt, 'dist': act_wt, 'curnode': act_nod, 'parent': curnode})
+            queue.Insert({'augment': aug_wt, 'dist': act_wt, 'curnode': act_nod, 'parent_node': curnode})
             counter += 1
             if target == act_nod:
                 upbound = aug_wt

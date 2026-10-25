@@ -73,7 +73,6 @@ Item LinkAll(Item x) {
 } // namespace
 
 void PairingHeap::Insert(Item x) {
-  assert(!std::isnan(x->key));
   x->child = nullptr;
   x->sibling = nullptr;
   x->parent = nullptr;
