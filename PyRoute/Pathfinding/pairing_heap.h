@@ -66,7 +66,7 @@ public:
   Item DeleteMin(void);
 
   // Requires (augment, dist) to be no greater than x's current values.
-  void DecreaseKey(Item *x, double augment, double dist);
+  void DecreaseKey(Item *x, double augment, double dist, long nu_parent);
 
   // O(n); for tests.
   std::size_t CountWhileCheckingInvariant() const;

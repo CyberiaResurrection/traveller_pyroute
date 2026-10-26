@@ -126,7 +126,7 @@ Item PairingHeap::DeleteMin() {
   return result;
 }
 
-void PairingHeap::DecreaseKey(Item *x, double augment, double dist) {
+void PairingHeap::DecreaseKey(Item *x, double augment, double dist, long nu_parent) {
   assert(root_ != nullptr);
   assert(IsRootOfTree(root_));
   assert(!std::isnan(augment));
@@ -135,6 +135,7 @@ void PairingHeap::DecreaseKey(Item *x, double augment, double dist) {
   assert(augment < x->augment || dist <= x->dist);
   x->augment = augment;
   x->dist = dist;
+  x->parent_node = nu_parent;
   Item **parent = x->parent;
   if (parent == nullptr) {
     assert(x == root_);

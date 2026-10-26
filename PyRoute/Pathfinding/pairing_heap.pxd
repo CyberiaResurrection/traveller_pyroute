@@ -18,6 +18,6 @@ cdef extern from "pairing_heap.h" namespace "":
         PairingHeap()
         Item *Insert(Item)
         Item DeleteMin()
-        void DecreaseKey(Item *, double, double)
+        void DecreaseKey(Item *, double, double, long)
         size_t CountWhileCheckingInvariant()
         bool IsEmpty()

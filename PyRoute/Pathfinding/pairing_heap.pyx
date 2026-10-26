@@ -33,12 +33,12 @@ cdef class PairingHeapHarness:
         del self.handles[item.curnode]
         return item.augment, item.dist, item.curnode, item.parent_node
 
-    def decrease_key(self, long curnode, double augment, double dist):
+    def decrease_key(self, long curnode, double augment, double dist, long nu_parent):
         cdef Item *node = <Item *> <size_t> self.handles[curnode]
         # Check DecreaseKey's precondition here, as the C++ asserts are compiled out.
         if augment > node.augment or (augment == node.augment and dist > node.dist):
             raise ValueError(f"({augment}, {dist}) is not a decrease from ({node.augment}, {node.dist})")
-        self.heap.DecreaseKey(node, augment, dist)
+        self.heap.DecreaseKey(node, augment, dist, nu_parent)
 
     def is_empty(self):
         return self.heap.IsEmpty()
