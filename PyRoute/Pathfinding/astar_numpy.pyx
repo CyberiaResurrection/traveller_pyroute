@@ -222,14 +222,18 @@ cdef tuple astar_numpy_core(
                 continue
 
             distances_view[act_nod] = act_wt
-            item = queue.Insert({
-                'augment': aug_wt,
-                'dist': act_wt,
-                'curnode': act_nod,
-                'parent_node': curnode
-            })
-            current_nodes[act_nod] = <size_t> item
-            counter += 1
+            if act_nod in current_nodes:
+                item = <Item*> current_nodes[act_nod]
+                queue.DecreaseKey(item, aug_wt, act_wt, curnode)
+            else:
+                item = queue.Insert({
+                    'augment': aug_wt,
+                    'dist': act_wt,
+                    'curnode': act_nod,
+                    'parent_node': curnode
+                })
+                current_nodes[act_nod] = <size_t> item
+                counter += 1
 
             if target == act_nod:
                 upbound = aug_wt
