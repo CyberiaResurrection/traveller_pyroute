@@ -129,6 +129,7 @@ cdef tuple astar_numpy_core(
     cdef list path = []
     cdef dict diag = {}
     cdef dict explored = {}
+    cdef dict current_nodes = {}
     cdef PairingHeap queue
     cdef Item* item
     cdef Item result
@@ -141,12 +142,14 @@ cdef tuple astar_numpy_core(
         'curnode': source,
         'parent_node': ROOT_NODE
     })
+    current_nodes[source] = <size_t> item
 
     while not queue.IsEmpty():
         result = queue.DeleteMin()
         dist = result.dist
         curnode = result.curnode
         parent = result.parent_node
+        del current_nodes[curnode]
         node_counter += 1
 
         if curnode == target:
@@ -225,6 +228,7 @@ cdef tuple astar_numpy_core(
                 'curnode': act_nod,
                 'parent_node': curnode
             })
+            current_nodes[act_nod] = <size_t> item
             counter += 1
 
             if target == act_nod:
