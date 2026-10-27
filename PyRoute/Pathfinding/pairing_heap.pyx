@@ -45,3 +45,62 @@ cdef class PairingHeapHarness:
 
     def count_checking_invariant(self):
         return self.heap.CountWhileCheckingInvariant()
+
+
+cdef class ItemWrapper:
+    cdef Item* _ptr
+
+    def __cinit__(self):
+        # The pointer is assigned by the Cython factory below.
+        self._ptr = NULL
+
+    # Deliberately no __dealloc__ that frees _ptr.
+
+    property augment:
+        def __get__(self):
+            self._check_valid()
+            return self._ptr.augment
+
+        def __set__(self, double value):
+            self._check_valid()
+            self._ptr.augment = value
+
+    property dist:
+        def __get__(self):
+            self._check_valid()
+            return self._ptr.dist
+
+        def __set__(self, double value):
+            self._check_valid()
+            self._ptr.dist = value
+
+    property curnode:
+        def __get__(self):
+            self._check_valid()
+            return self._ptr.curnode
+
+        def __set__(self, long value):
+            self._check_valid()
+            self._ptr.curnode = value
+
+    property parent_node:
+        def __get__(self):
+            self._check_valid()
+            return self._ptr.parent_node
+
+        def __set__(self, long value):
+            self._check_valid()
+            self._ptr.parent_node = value
+
+    cdef void _check_valid(self):
+        if self._ptr == NULL:
+            raise ReferenceError("Item pointer is NULL")
+
+
+cdef ItemWrapper wrap_item(Item*ptr):
+    cdef ItemWrapper wrapper
+    if ptr == NULL:
+        raise ValueError("Cannot wrap a NULL Item pointer")
+    wrapper = ItemWrapper()
+    wrapper._ptr = ptr
+    return wrapper

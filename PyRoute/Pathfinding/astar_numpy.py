@@ -20,7 +20,7 @@ Compared to the ancestral networkx version of astar_path, this code:
 import cython
 from cython.cimports.numpy import numpy as cnp
 # from cython.cimports.minmaxheap import MinMaxHeap, astar_t
-from cython.cimports.pairing_heap import PairingHeap, Item
+from cython.cimports.pairing_heap import PairingHeap, Item, ItemWrapper, wrap_item
 
 import networkx as nx
 import numpy as np
@@ -137,7 +137,7 @@ def astar_numpy_core(G_succ: cython.list[cython.tuple[cnp.ndarray[cython.int], c
     # Maps explored nodes to parent closest to the source.
     explored: cython.dict[cython.int, cython.int] = {}
     # Tracks items by node id
-    current_nodes: cython.dict[cython.int, Item] = {}
+    current_nodes: cython.dict[cython.int, ItemWrapper] = {}
     item = cython.declare(cython.pointer(Item))
 
     # The queue stores priority, cost to reach, node, and parent.
@@ -145,6 +145,7 @@ def astar_numpy_core(G_succ: cython.list[cython.tuple[cnp.ndarray[cython.int], c
     #queue: MinMaxHeap[astar_t] = MinMaxHeap[astar_t]()
     queue = cython.declare(PairingHeap)
     item = queue.Insert({'augment': potentials_view[source], 'dist': 0.0, 'curnode': source, 'parent_node': ROOT_NODE})
+    current_nodes[source] = wrap_item(item)
 
     #while 0 < queue.size():
     while not queue.IsEmpty():
@@ -154,6 +155,7 @@ def astar_numpy_core(G_succ: cython.list[cython.tuple[cnp.ndarray[cython.int], c
         curnode = result.curnode
         parent = result.parent_node
         node_counter += 1
+        del current_nodes[curnode]
 
         if curnode == target:
             path.append(curnode)
@@ -207,8 +209,12 @@ def astar_numpy_core(G_succ: cython.list[cython.tuple[cnp.ndarray[cython.int], c
             if aug_wt > upbound:
                 continue
             distances_view[act_nod] = act_wt
-            item = queue.Insert({'augment': aug_wt, 'dist': act_wt, 'curnode': act_nod, 'parent_node': curnode})
-            counter += 1
+            if act_nod in current_nodes:
+                queue.DecreaseKey(current_nodes[act_nod], aug_wt, act_wt, curnode)
+            else:
+                item = queue.Insert({'augment': aug_wt, 'dist': act_wt, 'curnode': act_nod, 'parent_node': curnode})
+                current_nodes[act_nod] = wrap_item(item)
+                counter += 1
             if target == act_nod:
                 upbound = aug_wt
                 new_upbounds += 1
