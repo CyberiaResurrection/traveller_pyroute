@@ -123,7 +123,7 @@ class testDistanceGraph(baseTest):
                 self.assertEqual(expected[i], actual[i])
 
         distgraph.lighten_edge(1, 10, 24)
-        expected = (np.array([2, 6, 10, 11], dtype=np.int64), np.array([46.0, 48.0, 24, 48], dtype=np.float64), {2: 0, 6: 1, 10: 2, 11: 3}, np.array([2, 2, 2, 2], dtype=np.float64))
+        expected = (np.array([10, 2, 6, 11], dtype=np.int64), np.array([24, 46.0, 48.0, 48], dtype=np.float64), {2: 1, 6: 2, 10: 0, 11: 3}, np.array([2, 2, 2, 2], dtype=np.float64))
         actual = distgraph._arcs[1]
 
         for i in range(len(expected)):

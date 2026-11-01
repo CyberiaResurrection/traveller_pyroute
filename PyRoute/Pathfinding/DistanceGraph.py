@@ -37,6 +37,7 @@ class DistanceGraph(DistanceBase):
             node_edges = self._arcs[i][1]
             if 0 < len(node_edges):
                 self._min_cost[i] = min(node_edges)
+                self._sort_edges(i)
         for i in range(0, len(self._nodes)):
             node_neighbours = self._arcs[i][0]
             if 0 < len(node_neighbours):
@@ -65,6 +66,8 @@ class DistanceGraph(DistanceBase):
             assert False
         self._lighten_arc(u, v, weight)
         self._lighten_arc(v, u, weight)
+        self._sort_edges(u)
+        self._sort_edges(v)
         if weight < self._min_cost[u]:
             self._min_cost[u] = weight
         if weight < self._min_cost[v]:
@@ -72,3 +75,11 @@ class DistanceGraph(DistanceBase):
 
         self._min_indirect[self._arcs[u][0]] = np.fmin(self._min_indirect[self._arcs[u][0]], weight)
         self._min_indirect[self._arcs[v][0]] = np.fmin(self._min_indirect[self._arcs[v][0]], weight)
+
+    def _sort_edges(self, u: int) -> None:
+        args = np.argsort(self._arcs[u][1])
+        arcs_0 = self._arcs[u][0][args]
+        arcs_1 = self._arcs[u][1][args]
+        arcs_3 = self._arcs[u][3][args]
+        arcs_2 = {v: k for (k, v) in enumerate(arcs_0)}
+        self._arcs[u] = (arcs_0, arcs_1, arcs_2, arcs_3)
