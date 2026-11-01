@@ -3,6 +3,8 @@ Created on Mar 19, 2024
 
 @author: CyberiaResurrection
 """
+import numpy as np
+
 from PyRoute.DeltaDebug.DeltaDictionary import SectorDictionary, DeltaDictionary
 from PyRoute.DeltaDebug.DeltaGalaxy import DeltaGalaxy
 from PyRoute.Inputs.ParseStarInput import ParseStarInput
@@ -102,6 +104,33 @@ class testDistanceGraph(baseTest):
                     122, 50, 76, 94, 125, 97, 90, 52, 74, 108, 92, 84, 124, 129, 120, 90]
         actual = distgraph.min_cost(0, indirect=True)
         self.assertEqual(expected, list(actual), 'Unexpected indirect min-cost vector')
+
+    def test_ordering_of_node(self):
+        sourcefile = self.unpack_filename('DeltaFiles/Zarushagar.sec')
+        galaxy, graph, _, _ = self._setup_graph(sourcefile)
+        components = galaxy.trade.components
+        self.assertEqual(8, len(components))
+
+        distgraph = DistanceGraph(graph)
+        expected = (np.array([2, 6, 10, 11], dtype=np.int64), np.array([46.0, 48.0, 48, 48], dtype=np.float64), {2: 0, 6: 1, 10: 2, 11: 3}, np.array([2, 2, 2, 2], dtype=np.float64))
+        actual = distgraph._arcs[1]
+        self.assertEqual(len(expected), len(actual))
+
+        for i in range(len(expected)):
+            if isinstance(expected[i], np.ndarray):
+                self.assertEqual(list(expected[i]), list(actual[i]))
+            else:
+                self.assertEqual(expected[i], actual[i])
+
+        distgraph.lighten_edge(1, 10, 24)
+        expected = (np.array([2, 6, 10, 11], dtype=np.int64), np.array([46.0, 48.0, 24, 48], dtype=np.float64), {2: 0, 6: 1, 10: 2, 11: 3}, np.array([2, 2, 2, 2], dtype=np.float64))
+        actual = distgraph._arcs[1]
+
+        for i in range(len(expected)):
+            if isinstance(expected[i], np.ndarray):
+                self.assertEqual(list(expected[i]), list(actual[i]))
+            else:
+                self.assertEqual(expected[i], actual[i])
 
     def _setup_graph(self, sourcefile):
         sector = SectorDictionary.load_traveller_map_file(sourcefile)
