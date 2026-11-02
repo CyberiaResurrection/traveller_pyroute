@@ -5,6 +5,8 @@ Created on Aug 19, 2024
 
 @author: CyberiaResurrection
 """
+import bisect
+
 import cython
 from cython.cimports.numpy import numpy as cnp
 from cython.cimports.minmaxheap import MinMaxHeap, dijkstra_t
@@ -17,7 +19,7 @@ ROOT_NODE: cython.const[cython.int] = -1
 
 @cython.ccall
 @cython.boundscheck(False)
-@cython.initializedcheck(False)
+@cython.initializedcheck(True)
 @cython.nonecheck(False)
 @cython.wraparound(False)
 def dijkstra_core(arcs: cython.list[cython.ctuple[cnp.ndarray[cython.int], cnp.ndarray[cython.float]]],
@@ -86,30 +88,29 @@ def dijkstra_core(arcs: cython.list[cython.ctuple[cnp.ndarray[cython.int], cnp.n
         # when the sum of dist_tail and that edge's weight equals or exceeds the corresponding node's distance label.
         neighbours = arcs[tail]
         active_nodes_view = neighbours[0]
-        num_nodes = len(active_nodes_view)
-
         active_costs_view = neighbours[1]
-        max_label = 0
 
-        # update max_label while processing neighbours, as we've got the lid off anyway
+        # Since max_neighbour_label is an upper bound on the neighbour labels, the max label - dist tail is thus
+        # an upper bound on the weights that have a _prayer_ of not busting their respective distance labels.
+        # If max label - dist_tail would be inserted at index k, then existing costs at index k and above _WILL_
+        # bust their upper bound and don't have to be looked at in detail.
+        num_nodes = bisect.bisect_left(active_costs_view, max_neighbour_labels_view[tail] - dist_tail)
+
+        # process neighbours first, then update max_label at the end
         for index in range(0, num_nodes):
             act_nod = active_nodes_view[index]
             act_cost = active_costs_view[index]
             if dist_tail + act_cost >= distance_labels_view[act_nod]:
-                if distance_labels_view[act_nod] > max_label:
-                    max_label = distance_labels_view[act_nod]
                 nodes_tailed += 1
                 continue
             act_wt = dist_tail + divisor * act_cost
-            if act_wt > max_label:
-                max_label = act_wt
 
             distance_labels_view[act_nod] = act_wt
             parents_view[act_nod] = tail
             heap.insert({'act_wt': act_wt, 'act_nod': act_nod})
             nodes_queued += 1
 
-        max_neighbour_labels_view[tail] = max_label
+        max_neighbour_labels_view[tail] = max(distance_labels[active_nodes_view])
 
     diagnostics = {'nodes_processed': nodes_processed, 'nodes_queued': nodes_queued, 'nodes_exceeded': nodes_exceeded,
                    'nodes_min_exceeded': nodes_min_exceeded, 'nodes_tailed': nodes_tailed}
