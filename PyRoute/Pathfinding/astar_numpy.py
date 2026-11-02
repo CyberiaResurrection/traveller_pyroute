@@ -16,6 +16,8 @@ Compared to the ancestral networkx version of astar_path, this code:
 
 
 """
+import bisect
+
 import cython
 from cython.cimports.numpy import numpy as cnp
 from cython.cimports.minmaxheap import MinMaxHeap, astar_t
@@ -186,7 +188,11 @@ def astar_numpy_core(G_succ: cython.list[cython.tuple[cnp.ndarray[cython.int], c
         active_nodes_view = G_succ[curnode][0]
         active_costs_view = G_succ[curnode][1]
 
-        num_nodes = len(active_nodes_view)
+        # Since upbound is an upper bound on _all_ distances, (upbound - dist) is an upper bound on
+        # the node weights that have a _prayer_ of not busting current distances.  Because active_costs_view
+        # has costs sorted in ascending order, if (upbound - dist) would be inserted at index k, then
+        # existing costs at index k and above will bust upper bound and don't have to be explicitly looked at.
+        num_nodes = bisect.bisect_left(active_costs_view, upbound - dist)
 
         # Now unconditionally queue _all_ nodes that are still active, worrying about filtering out the bound-busting
         # neighbours later.
