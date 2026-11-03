@@ -378,9 +378,9 @@ class testXRouteCalculation(baseTest):
             'INFO:PyRoute.TradeCalculation:XRoute pass 2',
             'INFO:PyRoute.TradeCalculation:[Liasdi (Zarushagar 0928), Unchin (Zarushagar 0522)]',
             'INFO:PyRoute.TradeCalculation:XRoute pass 3',
-            'INFO:PyRoute.TradeCalculation:Important worlds: 10, jump stations: 96',
+            'INFO:PyRoute.TradeCalculation:Important worlds: 10, jump stations: 100',
             'INFO:PyRoute.TradeCalculation:No route for important world: Aashrikan (Zarushagar 1740)',
-            'INFO:PyRoute.TradeCalculation:Important worlds: 1, jump stations: 105'
+            'INFO:PyRoute.TradeCalculation:Important worlds: 1, jump stations: 109'
         ]
         calc.generate_routes()
         with self.assertLogs(logger, 'INFO') as logs:
@@ -450,7 +450,7 @@ class testXRouteCalculation(baseTest):
             ['Unchin', 'Glomar', 'Liasdi'],
             ['Unchin', 'Siam', 'Iimii', 'Resra', 'Tatsu', 'Mccandliss', 'Kiezupug', 'Lenashuuk', 'Shulasgu', 'Piileir',
              'Vipac', 'Shakhii', 'Medurma'],
-            ['Liasdi', 'Vogasphere', 'Ishag', 'Arneua', 'Stonie', 'Seeplis', 'Citenic', 'Hypaethral', 'Khii', 'Aalimru',
+            ['Liasdi', 'Vogasphere', 'Ishag', 'Arneua', 'Stonie', 'Cassionia', 'Citenic', 'Hypaethral', 'Khii', 'Aalimru',
              'Sabhaash', 'Piileir', 'Vipac', 'Shakhii', 'Medurma']
         ]
         exp_trade = calc.calc_trade(25)
@@ -920,8 +920,8 @@ class testXRouteCalculation(baseTest):
         galaxy.ranges.add_edge(capital, subcap, route=[])
 
         exp_logs = [
-            'INFO:PyRoute.TradeCalculation:Important worlds: 20, jump stations: 128',
-            'INFO:PyRoute.TradeCalculation:Important worlds: 0, jump stations: 148'
+            'INFO:PyRoute.TradeCalculation:Important worlds: 19, jump stations: 130',
+            'INFO:PyRoute.TradeCalculation:Important worlds: 0, jump stations: 149'
         ]
         calc.routes_pass_2()
         self.assertEqual(114, galaxy.ranges.number_of_edges())
@@ -930,7 +930,7 @@ class testXRouteCalculation(baseTest):
             calc.routes_pass_3()
             self.assertEqual(exp_logs, logs.output)
 
-        self.assertEqual(232, galaxy.ranges.number_of_edges())
+        self.assertEqual(226, galaxy.ranges.number_of_edges())
 
         trade_21 = calc.calc_trade(21)
         trade_23 = calc.calc_trade(23)

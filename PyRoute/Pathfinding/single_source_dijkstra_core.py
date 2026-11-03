@@ -109,7 +109,8 @@ def dijkstra_core(arcs: cython.list[cython.ctuple[cnp.ndarray[cython.int], cnp.n
             heap.insert({'act_wt': act_wt, 'act_nod': act_nod})
             nodes_queued += 1
 
-        max_neighbour_labels_view[tail] = max(distance_labels[active_nodes_view])
+        if 0 < num_nodes:
+            max_neighbour_labels_view[tail] = max(distance_labels[active_nodes_view])
 
     diagnostics = {'nodes_processed': nodes_processed, 'nodes_queued': nodes_queued, 'nodes_exceeded': nodes_exceeded,
                    'nodes_min_exceeded': nodes_min_exceeded, 'nodes_tailed': nodes_tailed}

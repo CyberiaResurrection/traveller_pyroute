@@ -634,7 +634,7 @@ class testApproximateShortestPathForestUnifiedFallback(baseTest):
         shortest_path_tree.lighten_edge(0, 5, nu_weight)
         nu_distances, nu_max, diagnostics = shortest_path_tree._dijkstra(nu_distances, nu_max, nu_min_cost, seeds)
         self.assertEqual({'nodes_exceeded': 1, 'nodes_min_exceeded': 0, 'nodes_processed': 6, 'nodes_queued': 7,
-                          'nodes_tailed': 146}, diagnostics)
+                          'nodes_tailed': 65}, diagnostics)
         raw_dist = [0.0, 142.72727966, 140.90908813, 140.90908813, 148.18182373, 40.90909195, 106.36363983, 130.0,
                     64.54545593, 108.18182373, 110, 104.54545593, 104.54545593, 130.0, 83.6363678, 86.36363983,
                     110.90909576, 80.90909576, 79.09091187, 155.45454407, 152.72727966, 111.8181839, 63.63636398,

@@ -427,9 +427,9 @@ class testStatCalculation(baseTest):
         exp_spa_people = sum([item.starportPop for item in galaxy.star_mapping.values()])
 
         exp_port_size = NoNoneDefaultDict(int)
-        exp_port_size[0] = 9
+        exp_port_size[0] = 8
         exp_port_size[2] = 3
-        exp_port_size[3] = 10
+        exp_port_size[3] = 11
         exp_port_size[4] = 9
         exp_port_size[5] = 6
         exp_port_size['A'] = 6
@@ -486,7 +486,11 @@ class testStatCalculation(baseTest):
         self.assertAlmostEqual(1135.98, galstat.im_be, 3)
         self.assertEqual(exp_pax, galstat.passengers)
         self.assertEqual(exp_spa_people, galstat.spa_people)
-        self.assertEqual(exp_port_size, galstat.port_size)
+        port_diff = {}
+        for item in exp_port_size:
+            if exp_port_size[item] != galstat.port_size[item]:
+                port_diff[item] = galstat.port_size[item] - exp_port_size[item]
+        self.assertEqual(exp_port_size, galstat.port_size, port_diff)
         self.assertEqual(exp_code_count, galstat.code_counts)
         self.assertEqual(35, galstat.gg_count)
         self.assertEqual(383, galstat.worlds)
@@ -503,12 +507,12 @@ class testStatCalculation(baseTest):
         self.assertEqual(galstat.__dict__, galaxy.sectors['Zarushagar'].subsectors['A'].stats.__dict__)
         self.assertEqual([high_pop_star], galaxy.sectors['Zarushagar'].subsectors['A'].stats.high_pop_worlds)
         expected_starport_budgets = {0: 35.0, 1: 0, 2: 91.0, 3: 102.0, 4: 14.0, 5: 118.0, 6: 20.0, 7: 6.0, 8: 209.0,
-                                     9: 281.0, 10: 0, 11: 219.0, 12: 5, 13: 0, 14: 5.0, 15: 53.0, 16: 0, 17: 1410.0,
+                                     9: 281.0, 10: 0, 11: 219.0, 12: 3, 13: 1, 14: 5.0, 15: 53.0, 16: 0, 17: 1410.0,
                                      18: 1433.0, 19: 0, 20: 26.0, 21: 0, 22: 93.0, 23: 20.0, 24: 781.0, 25: 0,
                                      26: 1854.0, 27: 8.0, 28: 0, 29: 0, 30: 0, 31: 1.0, 32: 13.0, 33: 13.0, 34: 1309.0,
                                      35: 773.0, 36: 0}
         expected_starport_sizes = {0: 4, 1: 2, 2: 4, 3: 4, 4: 3, 5: 4, 6: 3, 7: 3, 8: 4, 9: 4, 10: 0, 11: 4,
-                                   12: 3, 13: 0, 14: 3, 15: 4, 16: 0, 17: 5, 18: 5, 19: 0, 20: 3, 21: 0, 22: 4,
+                                   12: 3, 13: 3, 14: 3, 15: 4, 16: 0, 17: 5, 18: 5, 19: 0, 20: 3, 21: 0, 22: 4,
                                    23: 3, 24: 5, 25: 0, 26: 5, 27: 3, 28: 2, 29: 0, 30: 0, 31: 2, 32: 3, 33: 3,
                                    34: 5, 35: 5, 36: 0}
         for starnum in expected_starport_budgets:
