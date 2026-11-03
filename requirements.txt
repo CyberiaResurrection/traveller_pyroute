@@ -18,7 +18,7 @@ pytest-console-scripts
 pytest-randomly
 pytest-subtests
 pytest-timeout
-reportlab >= 4.1.0
+reportlab == 4.4.3
 requests
 requests_toolbelt
 responses

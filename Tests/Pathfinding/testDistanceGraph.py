@@ -105,7 +105,7 @@ class testDistanceGraph(baseTest):
         actual = distgraph.min_cost(0, indirect=True)
         self.assertEqual(expected, list(actual), 'Unexpected indirect min-cost vector')
 
-    def test_ordering_of_node(self):
+    def test_ordering_of_node(self) -> None:
         sourcefile = self.unpack_filename('DeltaFiles/Zarushagar.sec')
         galaxy, graph, _, _ = self._setup_graph(sourcefile)
         components = galaxy.trade.components

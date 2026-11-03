@@ -56,7 +56,6 @@ def dijkstra_core(arcs: cython.list[cython.ctuple[cnp.ndarray[cython.int], cnp.n
     nodes_exceeded: cython.int = 0
     nodes_min_exceeded: cython.int = 0
     nodes_tailed: cython.int = 0
-    max_label: cython.float
 
     heap = MinMaxHeap[dijkstra_t]()
     heap.reserve(len(seeds))
