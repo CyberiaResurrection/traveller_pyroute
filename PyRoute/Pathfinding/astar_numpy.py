@@ -108,11 +108,11 @@ def astar_path_numpy(G, source: cython.int, target: cython.int, bulk_heuristic,
 def astar_numpy_core(G_succ: cython.list[cython.tuple[cnp.ndarray[cython.int], cnp.ndarray[cython.double]]], diagnostics: cython.bint,
                      distances: cnp.ndarray[cython.double], potentials: cnp.ndarray[cython.double], source: cython.int,
                      target: cython.int, upbound: cython.double) -> tuple[list, dict]:
-    distances_view: cython.double[:] = distances
+    distances_view: cython.double[::1] = distances
     distances_view[source] = 0.0
-    potentials_view: cython.double[:] = potentials
-    active_nodes_view: cython.long[:]
-    active_costs_view: cython.double[:]
+    potentials_view: cython.double[::1] = potentials
+    active_nodes_view: cython.long[::1]
+    active_costs_view: cython.double[::1]
 
     node_counter: cython.int = 0
     queue_counter: cython.int = 0
@@ -133,6 +133,8 @@ def astar_numpy_core(G_succ: cython.list[cython.tuple[cnp.ndarray[cython.int], c
     curnode: cython.int
     parent: cython.int
     counter: cython.int
+    i: cython.ssize_t
+    num_nodes: cython.ssize_t
 
     # Maps explored nodes to parent closest to the source.
     explored: cython.dict[cython.int, cython.int] = {}
