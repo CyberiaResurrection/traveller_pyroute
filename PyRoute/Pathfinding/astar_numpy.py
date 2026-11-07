@@ -149,6 +149,9 @@ def astar_numpy_core(G_succ: cython.list[cython.tuple[cnp.ndarray[cython.int], c
         result: astar_t = queue.popmin()
         dist = result.dist
         curnode = result.curnode
+        if distances_view[curnode] < dist < upbound:
+            revisited += 1
+            continue
         parent = result.parent
         node_counter += 1
 
@@ -171,19 +174,20 @@ def astar_numpy_core(G_succ: cython.list[cython.tuple[cnp.ndarray[cython.int], c
                            'un_exhausted': un_exhausted, 'targ_exhausted': targ_exhausted}
             return path, diag
 
-        if curnode in explored:
-            revisited += 1
-            # Do not override the parent of starting node
-            if explored[curnode] == ROOT_NODE:
-                continue
-
-            # We've found a bad path, just move on
-            qcost = distances_view[curnode]
-            if qcost <= dist:
-                continue
-            # If we've found a better path, update
-            revis_continue += 1
-            distances_view[curnode] = dist
+        # Kept here despite the distances[curnode] check at top of loop, against a change to a non-consistent heuristic
+        # if curnode in explored:
+        #     revisited += 1
+        #     # Do not override the parent of starting node
+        #     if explored[curnode] == ROOT_NODE:
+        #         continue
+        #
+        #     # We've found a bad path, just move on
+        #     qcost = distances_view[curnode]
+        #     if qcost <= dist:
+        #         continue
+        #     # If we've found a better path, update
+        #     revis_continue += 1
+        #     distances_view[curnode] = dist
 
         explored[curnode] = parent
 
@@ -202,10 +206,19 @@ def astar_numpy_core(G_succ: cython.list[cython.tuple[cnp.ndarray[cython.int], c
         for i in range(num_nodes):
             act_nod = active_nodes_view[i]
             act_wt = dist + active_costs_view[i]
-            if act_wt > distances_view[act_nod]:
+            if act_wt >= distances_view[act_nod]:
                 continue
             aug_wt = act_wt + potentials_view[act_nod]
-            if aug_wt > upbound:
+            # Strictly greater than is no problem
+            # If aug_wt _equals_ upbound, then:
+            # 1.  act_nod == target.  This is a contradiction, because potentials[target] is zero and a second,
+            # or later, copy of target with act_wt _equal_ to upbound, aka distances[target], would have been filtered
+            # out in the act_wt check.
+            # 2.  act_nod != target.  As the heuristic embodied in potentials is consistent, the aug_wt of the target
+            # node from act_nod can _not_ be smaller than act_nod's aug_wt, and that runs into the getting-filtered
+            # check as in 1.  Testing indicated the number of new upper bounds over a run was insensitive to
+            # whether aug_wt == upbound was excluded or not.
+            if aug_wt >= upbound:
                 continue
             distances_view[act_nod] = act_wt
             queue.insert({'augment': aug_wt, 'dist': act_wt, 'curnode': act_nod, 'parent': curnode})
