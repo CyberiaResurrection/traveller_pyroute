@@ -40,14 +40,15 @@ def dijkstra_core(arcs: cython.list[cython.ctuple[cnp.ndarray[cython.int], cnp.n
     act_nod: cython.int
     num_nodes: cython.size_t
     index: cython.size_t
-    distance_labels_view: cython.double[:] = distance_labels
+    distance_labels_view: cython.double[::1] = distance_labels
+    # Max_neighbour_labels is passed in non-contiguous, so can't declare the view contiguous
     max_neighbour_labels_view: cython.double[:] = max_neighbour_labels
-    min_cost_view: cython.double[:] = min_cost
+    min_cost_view: cython.double[::1] = min_cost
     # Using -100 to track "not considered during processing"
     parents: cnp.ndarray[cython.int] = np.ones(len(arcs), dtype=np.int64) * -100
-    parents_view: cython.long[:] = parents
-    active_nodes_view: cython.long[:]
-    active_costs_view: cython.double[:]
+    parents_view: cython.long[::1] = parents
+    active_nodes_view: cython.long[::1]
+    active_costs_view: cython.double[::1]
     tail: cython.int
     dist_tail: cython.float
     heap: MinMaxHeap[dijkstra_t]
