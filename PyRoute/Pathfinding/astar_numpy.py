@@ -205,10 +205,13 @@ def astar_numpy_core(G_succ: cython.list[cython.tuple[cnp.ndarray[cython.int], c
         counter = 0
         for i in range(num_nodes):
             act_nod = active_nodes_view[i]
-            act_wt = dist + active_costs_view[i]
-            if act_wt >= distances_view[act_nod]:
+            # act_wt = dist + active_costs_view[i]
+            # if act_wt >= distances_view[act_nod]:
+            #     continue
+            if active_costs_view[i] >= distances_view[act_nod] - dist:
                 continue
-            aug_wt = act_wt + potentials_view[act_nod]
+            # aug_wt = act_wt + potentials_view[act_nod]
+
             # Strictly greater than is no problem
             # If aug_wt _equals_ upbound, then:
             # 1.  act_nod == target.  This is a contradiction, because potentials[target] is zero and a second,
@@ -218,8 +221,10 @@ def astar_numpy_core(G_succ: cython.list[cython.tuple[cnp.ndarray[cython.int], c
             # node from act_nod can _not_ be smaller than act_nod's aug_wt, and that runs into the getting-filtered
             # check as in 1.  Testing indicated the number of new upper bounds over a run was insensitive to
             # whether aug_wt == upbound was excluded or not.
-            if aug_wt >= upbound:
+            if active_costs_view[i] + potentials_view[act_nod] >= upbound - dist:
                 continue
+            act_wt = dist + active_costs_view[i]
+            aug_wt = act_wt + potentials_view[act_nod]
             distances_view[act_nod] = act_wt
             queue.insert({'augment': aug_wt, 'dist': act_wt, 'curnode': act_nod, 'parent': curnode})
             counter += 1
