@@ -204,11 +204,10 @@ def astar_numpy_core(G_succ: cython.list[cython.tuple[cnp.ndarray[cython.int], c
         # neighbours later.
         counter = 0
         for i in range(num_nodes):
-            act_nod = active_nodes_view[i]
             # act_wt = dist + active_costs_view[i]
             # if act_wt >= distances_view[act_nod]:
             #     continue
-            if active_costs_view[i] >= distances_view[act_nod] - dist:
+            if active_costs_view[i] >= distances_view[active_nodes_view[i]] - dist:
                 continue
             # aug_wt = act_wt + potentials_view[act_nod]
 
@@ -221,8 +220,9 @@ def astar_numpy_core(G_succ: cython.list[cython.tuple[cnp.ndarray[cython.int], c
             # node from act_nod can _not_ be smaller than act_nod's aug_wt, and that runs into the getting-filtered
             # check as in 1.  Testing indicated the number of new upper bounds over a run was insensitive to
             # whether aug_wt == upbound was excluded or not.
-            if active_costs_view[i] + potentials_view[act_nod] >= upbound - dist:
+            if active_costs_view[i] + potentials_view[active_nodes_view[i]] >= upbound - dist:
                 continue
+            act_nod = active_nodes_view[i]
             act_wt = dist + active_costs_view[i]
             aug_wt = act_wt + potentials_view[act_nod]
             distances_view[act_nod] = act_wt
