@@ -83,8 +83,9 @@ class DistanceGraph(DistanceBase):
 
     def _sort_edges(self, u: int) -> None:
         args = np.argsort(self._arcs[u][1])
+        n = len(args)
         arcs_0 = self._arcs[u][0][args]
         arcs_1 = self._arcs[u][1][args]
         arcs_3 = self._arcs[u][3][args]
-        arcs_2 = {v: k for (k, v) in enumerate(arcs_0)}
+        arcs_2 = dict(zip(arcs_0, range(n)))
         self._arcs[u] = (arcs_0, arcs_1, arcs_2, arcs_3)
