@@ -115,6 +115,8 @@ class testDistanceGraph(baseTest):
         expected = (np.array([2, 6, 10, 11], dtype=np.int64), np.array([46.0, 48.0, 48, 48], dtype=np.float64), {2: 0, 6: 1, 10: 2, 11: 3}, np.array([2, 2, 2, 2], dtype=np.float64))
         actual = distgraph._arcs[1]
         self.assertEqual(len(expected), len(actual))
+        min_cost = distgraph._min_cost[1]
+        self.assertEqual(46.0, min_cost)
 
         for i in range(len(expected)):
             if isinstance(expected[i], np.ndarray):
@@ -125,12 +127,27 @@ class testDistanceGraph(baseTest):
         distgraph.lighten_edge(1, 10, 24)
         expected = (np.array([10, 2, 6, 11], dtype=np.int64), np.array([24, 46.0, 48.0, 48], dtype=np.float64), {2: 1, 6: 2, 10: 0, 11: 3}, np.array([2, 2, 2, 2], dtype=np.float64))
         actual = distgraph._arcs[1]
+        min_cost = distgraph._min_cost[1]
+        self.assertEqual(24.0, min_cost)
 
         for i in range(len(expected)):
             if isinstance(expected[i], np.ndarray):
                 self.assertEqual(list(expected[i]), list(actual[i]))
             else:
                 self.assertEqual(expected[i], actual[i])
+
+        distgraph.lighten_edge(1, 10, 22)
+        expected = (np.array([10, 2, 6, 11], dtype=np.int64), np.array([22, 46.0, 48.0, 48], dtype=np.float64), {2: 1, 6: 2, 10: 0, 11: 3}, np.array([2, 2, 2, 2], dtype=np.float64))
+        actual = distgraph._arcs[1]
+        min_cost = distgraph._min_cost[1]
+        self.assertEqual(22.0, min_cost)
+
+        for i in range(len(expected)):
+            if isinstance(expected[i], np.ndarray):
+                self.assertEqual(list(expected[i]), list(actual[i]))
+            else:
+                self.assertEqual(expected[i], actual[i])
+
 
     def _setup_graph(self, sourcefile):
         sector = SectorDictionary.load_traveller_map_file(sourcefile)
