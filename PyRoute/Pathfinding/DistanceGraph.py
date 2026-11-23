@@ -65,7 +65,6 @@ class DistanceGraph(DistanceBase):
         if v not in self._arcs[u][2]:
             assert False
         self._lighten_arc(u, v, weight)
-        self._lighten_arc(v, u, weight)
         if 0 != self._arcs[u][2][v]:
             self._sort_edges(u)
         if 0 != self._arcs[v][2][u]:

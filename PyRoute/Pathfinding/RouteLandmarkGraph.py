@@ -50,4 +50,3 @@ class RouteLandmarkGraph(DistanceBase):
 
     def lighten_edge(self, u, v, weight) -> None:
         self._lighten_arc(u, v, weight)
-        self._lighten_arc(v, u, weight)

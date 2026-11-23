@@ -40,3 +40,4 @@ class DistanceBase:
 
     def _lighten_arc(self, u: int, v: int, weight: float) -> None:
         self._arcs[u][1][self._arcs[u][0] == v] = weight
+        self._arcs[v][1][self._arcs[v][0] == u] = weight
