@@ -66,8 +66,10 @@ class DistanceGraph(DistanceBase):
             assert False
         self._lighten_arc(u, v, weight)
         self._lighten_arc(v, u, weight)
-        self._sort_edges(u)
-        self._sort_edges(v)
+        if 0 != self._arcs[u][2][v]:
+            self._sort_edges(u)
+        if 0 != self._arcs[v][2][u]:
+            self._sort_edges(v)
         if weight < self._min_cost[u]:
             self._min_cost[u] = weight
         if weight < self._min_cost[v]:
