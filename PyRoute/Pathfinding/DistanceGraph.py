@@ -6,6 +6,7 @@ Created on Sep 23, 2023
 Thanks to @GamesByDavidE for original prototype and design discussions
 """
 import copy
+from bisect import bisect_right
 
 import numpy as np
 from networkx.classes import Graph
@@ -66,7 +67,12 @@ class DistanceGraph(DistanceBase):
             assert False
         self._lighten_arc(u, v, weight)
         if 0 != self._arcs[u][2][v]:
+            a0, a1, a2, a3 = self._reposition_decreased_edge(u, v)
             self._sort_edges(u)
+            assert np.array_equal(a0, self._arcs[u][0]), "Arcs_0 not equal: \n" + str(a0) + "\n vs \n" + str(self._arcs[u][0])
+            assert np.array_equal(a1, self._arcs[u][1]), "Arcs_1 not equal"
+            assert np.array_equal(a3, self._arcs[u][3]), "Arcs_3 not equal"
+            assert a2 == self._arcs[u][2], "Arcs_2 not equal"
         if 0 != self._arcs[v][2][u]:
             self._sort_edges(v)
         if weight < self._min_cost[u]:
@@ -90,3 +96,31 @@ class DistanceGraph(DistanceBase):
         arcs_3 = self._arcs[u][3][args]
         arcs_2 = dict(zip(arcs_0, range(n)))
         self._arcs[u] = (arcs_0, arcs_1, arcs_2, arcs_3)
+
+    def _reposition_decreased_edge(self, u: int, v: int):
+        arcs_0, arcs_1, arcs_2, arcs_3 = self._arcs[u]
+
+        old = arcs_2[v]
+        cost = arcs_1[old]
+
+        # Find the insertion position before the edge's current position.
+        new = bisect_right(arcs_1, cost, 0, old)
+
+        if new == old:
+            return arcs_0, arcs_1, arcs_2, arcs_3
+
+        # Remove the edge at old, then insert it at new.
+        def move_item(a):
+            item = a[old:old + 1]
+            remainder = np.concatenate((a[:old], a[old + 1:]))
+            return np.concatenate((remainder[:new], item, remainder[new:]))
+
+        arcs_0 = move_item(arcs_0)
+        arcs_1 = move_item(arcs_1)
+        arcs_3 = move_item(arcs_3)
+
+        # Only indices in the shifted range changed.
+        for i in range(new, old + 1):
+            arcs_2[arcs_0[i]] = i
+
+        return arcs_0, arcs_1, arcs_2, arcs_3
