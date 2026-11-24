@@ -67,12 +67,7 @@ class DistanceGraph(DistanceBase):
             assert False
         self._lighten_arc(u, v, weight)
         if 0 != self._arcs[u][2][v]:
-            a0, a1, a2, a3 = self._reposition_decreased_edge(u, v)
-            self._sort_edges(u)
-            assert np.array_equal(a0, self._arcs[u][0]), "Arcs_0 not equal: \n" + str(a0) + "\n vs \n" + str(self._arcs[u][0])
-            assert np.array_equal(a1, self._arcs[u][1]), "Arcs_1 not equal"
-            assert np.array_equal(a3, self._arcs[u][3]), "Arcs_3 not equal"
-            assert a2 == self._arcs[u][2], "Arcs_2 not equal"
+            self._reposition_decreased_edge(u, v)
         if 0 != self._arcs[v][2][u]:
             self._sort_edges(v)
         if weight < self._min_cost[u]:
@@ -123,4 +118,4 @@ class DistanceGraph(DistanceBase):
         for i in range(new, old + 1):
             arcs_2[arcs_0[i]] = i
 
-        return arcs_0, arcs_1, arcs_2, arcs_3
+        self._arcs[u] = (arcs_0, arcs_1, arcs_2, arcs_3)
