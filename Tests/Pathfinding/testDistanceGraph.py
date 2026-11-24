@@ -148,6 +148,20 @@ class testDistanceGraph(baseTest):
             else:
                 self.assertEqual(expected[i], actual[i])
 
+    def test_weight_reordering_during_lighten_edge(self) -> None:
+        sourcefile = self.unpack_filename('DeltaFiles/edge_argsort_ordering/Zarushagar.sec')
+        galaxy, graph, _, _ = self._setup_graph(sourcefile)
+
+        distgraph = DistanceGraph(graph)
+        distgraph.lighten_edge(0, 2, 67.7)
+        expected = (np.array([1, 2, 3, 4, 5], dtype=np.int64), np.array([57.0, 67.7, 74.0, 74.0, 74.0], dtype=np.float64), {1: 0, 2: 1, 3: 2, 4: 3, 5: 4}, np.array([1, 2, 2, 2, 2], dtype=np.float64))
+        actual = distgraph._arcs[0]
+
+        for i in range(len(expected)):
+            if isinstance(expected[i], np.ndarray):
+                self.assertEqual(list(expected[i]), list(actual[i]))
+            else:
+                self.assertEqual(expected[i], actual[i])
 
     def _setup_graph(self, sourcefile):
         sector = SectorDictionary.load_traveller_map_file(sourcefile)
