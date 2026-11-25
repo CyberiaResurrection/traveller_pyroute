@@ -69,7 +69,7 @@ class DistanceGraph(DistanceBase):
         if 0 != self._arcs[u][2][v]:
             self._reposition_decreased_edge(u, v)
         if 0 != self._arcs[v][2][u]:
-            self._sort_edges(v)
+            self._reposition_decreased_edge(v, u)
         if weight < self._min_cost[u]:
             self._min_cost[u] = weight
         if weight < self._min_cost[v]:
@@ -102,17 +102,18 @@ class DistanceGraph(DistanceBase):
         new = bisect_right(arcs_1, cost, 0, old)
 
         if new == old:
-            return arcs_0, arcs_1, arcs_2, arcs_3
+            return
 
         # Remove the edge at old, then insert it at new.
-        def move_item(a):
-            item = a[old:old + 1]
-            remainder = np.concatenate((a[:old], a[old + 1:]))
-            return np.concatenate((remainder[:new], item, remainder[new:]))
+        def move_item_left(a, old: int, new: int) -> None:
+            item = a[old]
+            if new < old:
+                a[new + 1: old + 1] = a[new:old].copy()
+                a[new] = item
 
-        arcs_0 = move_item(arcs_0)
-        arcs_1 = move_item(arcs_1)
-        arcs_3 = move_item(arcs_3)
+        move_item_left(arcs_0, old, new)
+        move_item_left(arcs_1, old, new)
+        move_item_left(arcs_3, old, new)
 
         # Only indices in the shifted range changed.
         for i in range(new, old + 1):
