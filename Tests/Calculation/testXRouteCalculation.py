@@ -931,11 +931,10 @@ class testXRouteCalculation(baseTest):
         galaxy.ranges.add_edge(capital, subcap, route=[])
 
         exp_logs = [
-            'INFO:PyRoute.TradeCalculation:Important worlds: 27, jump stations: 50',
-            'INFO:PyRoute.TradeCalculation:No route for important world: Khuir (Core 2513)',
+            'INFO:PyRoute.TradeCalculation:Important worlds: 26, jump stations: 51',
             'INFO:PyRoute.TradeCalculation:No route for important world: Dral (Core 0727)',
             'INFO:PyRoute.TradeCalculation:No route for important world: Dishadshii (Core 2640)',
-            'INFO:PyRoute.TradeCalculation:Important worlds: 3, jump stations: 74'
+            'INFO:PyRoute.TradeCalculation:Important worlds: 2, jump stations: 75'
         ]
         calc.routes_pass_2()
         self.assertEqual(114, galaxy.ranges.number_of_edges())
@@ -944,7 +943,7 @@ class testXRouteCalculation(baseTest):
             calc.routes_pass_3()
             self.assertEqual(exp_logs, logs.output)
 
-        self.assertEqual(195, galaxy.ranges.number_of_edges())
+        self.assertEqual(193, galaxy.ranges.number_of_edges())
 
         trade_21 = calc.calc_trade(21)
         trade_23 = calc.calc_trade(23)
