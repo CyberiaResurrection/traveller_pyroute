@@ -11,20 +11,17 @@ class UnpackFilename(object):
 
     @staticmethod
     def unpack_filename(filename: str) -> str:
+        prepend: list[str] = ['../', '../../', 'Tests/', '../Tests/', '../../Tests/', 'Tests/Tests/', '../Tests/Tests/',
+                              '../../Tests/Tests/']
+
         # try unpacked filename directly
         sourcefile = os.path.abspath(filename)
         if not os.path.isfile(sourcefile):
-            sourcefile = os.path.abspath('../' + filename)
-        if not os.path.isfile(sourcefile):
-            sourcefile = os.path.abspath('../../' + filename)
-        if not os.path.isfile(sourcefile):
-            sourcefile = os.path.abspath('Tests/' + filename)
-        if not os.path.isfile(sourcefile):
-            sourcefile = os.path.abspath('../Tests/' + filename)
-        if not os.path.isfile(sourcefile):
-            sourcefile = os.path.abspath('../../Tests/' + filename)
-        if not os.path.isfile(sourcefile):
-            sourcefile = os.path.abspath('Tests/Tests/' + filename)
+            for item in prepend:
+                sourcefile = os.path.abspath(item + filename)
+                if os.path.isfile(sourcefile):
+                    break
+
         if not os.path.isfile(sourcefile):
             raise BaseException(sourcefile + " not mapped to a file")
 
